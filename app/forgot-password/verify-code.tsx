@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   ScrollView,
   ActivityIndicator,
   Alert,
@@ -84,26 +83,32 @@ export default function VerifyCodeScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.iconContainer}>
-        <View style={styles.iconCircle}>
+    <ScrollView contentContainerClassName="flex-grow p-6 justify-center bg-white">
+      {/* Ícone */}
+      <View className="items-center mb-6">
+        <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
           <Ionicons name="mail" size={32} color="#fff" />
         </View>
       </View>
 
-      <Text style={styles.title}>Confirme seu email!</Text>
-      <Text style={styles.subtitle}>
+      {/* Título e Subtítulo */}
+      <Text className="text-2xl font-semibold text-center mb-3 text-gray-800">
+        Confirme seu email!
+      </Text>
+      <Text className="text-sm text-center text-gray-500 mb-8">
         Um código foi enviado para{' '}
-        <Text style={styles.emailText}>{email}</Text>. Insira-o abaixo:
+        <Text className="font-semibold italic text-gray-800">{email}</Text>. Insira-o abaixo:
       </Text>
 
       {/* OTP Inputs */}
-      <View style={styles.otpContainer}>
+      <View className="flex-row justify-center gap-2 mb-6">
         {code.map((digit, index) => (
           <TextInput
             key={index}
             ref={(ref) => {inputRefs.current[index] = ref;}}
-            style={[styles.otpInput, digit && styles.otpInputFilled]}
+            className={`w-12 h-14 border-2 rounded-lg text-center text-2xl font-semibold bg-white ${
+              digit ? 'border-[#22c55e]' : 'border-gray-300'
+            }`}
             value={digit}
             onChangeText={(text) => handleCodeChange(text, index)}
             onKeyPress={(e) => handleKeyPress(e, index)}
@@ -116,8 +121,8 @@ export default function VerifyCodeScreen() {
       </View>
 
       {/* Timer e Reenviar */}
-      <View style={styles.resendContainer}>
-        <Text style={styles.timerText}>
+      <View className="flex-row justify-between items-center mb-6">
+        <Text className="text-xs text-gray-500">
           {timer > 0
             ? `Reenviar código em ${String(timer).padStart(2, '0')}s`
             : 'Não recebeu o código?'}
@@ -125,13 +130,11 @@ export default function VerifyCodeScreen() {
         <TouchableOpacity
           onPress={handleResendCode}
           disabled={timer > 0 || loading}
+          activeOpacity={0.7}
         >
-          <Text
-            style={[
-              styles.resendButton,
-              (timer > 0 || loading) && styles.resendButtonDisabled,
-            ]}
-          >
+          <Text className={`text-sm font-medium ${
+            timer > 0 || loading ? 'text-gray-400' : 'text-[#22c55e]'
+          }`}>
             Reenviar código
           </Text>
         </TouchableOpacity>
@@ -139,107 +142,21 @@ export default function VerifyCodeScreen() {
 
       {/* Botão Confirmar */}
       <TouchableOpacity
-        style={[styles.button, loading && styles.buttonDisabled]}
+        className={`bg-[#22c55e] p-4 rounded-lg items-center ${
+          loading ? 'opacity-60' : ''
+        }`}
         onPress={() => handleVerifyCode(code.join(''))}
         disabled={loading || code.some((digit) => !digit)}
+        activeOpacity={0.8}
       >
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Confirmar código</Text>
+          <Text className="text-white text-base font-semibold">
+            Confirmar código
+          </Text>
         )}
       </TouchableOpacity>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 24,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  iconContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#22c55e',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 12,
-    color: '#1f2937',
-  },
-  subtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#6b7280',
-    marginBottom: 32,
-  },
-  emailText: {
-    fontWeight: '600',
-    fontStyle: 'italic',
-    color: '#1f2937',
-  },
-  otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 24,
-  },
-  otpInput: {
-    width: 48,
-    height: 56,
-    borderWidth: 2,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    textAlign: 'center',
-    fontSize: 24,
-    fontWeight: '600',
-    backgroundColor: '#fff',
-  },
-  otpInputFilled: {
-    borderColor: '#22c55e',
-  },
-  resendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  timerText: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-  resendButton: {
-    fontSize: 14,
-    color: '#22c55e',
-    fontWeight: '500',
-  },
-  resendButtonDisabled: {
-    color: '#9ca3af',
-  },
-  button: {
-    backgroundColor: '#22c55e',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

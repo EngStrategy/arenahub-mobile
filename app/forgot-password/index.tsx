@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -54,32 +53,37 @@ export default function ForgotPasswordScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      className="flex-1 bg-white"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerClassName="flex-grow p-6 justify-center"
         keyboardShouldPersistTaps="handled"
       >
         {/* Ícone */}
-        <View style={styles.iconContainer}>
-          <View style={styles.iconCircle}>
+        <View className="items-center mb-6">
+          <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
             <Ionicons name="lock-closed" size={32} color="#fff" />
           </View>
         </View>
 
         {/* Título e Subtítulo */}
-        <Text style={styles.title}>Esqueceu sua senha?</Text>
-        <Text style={styles.subtitle}>
+        <Text className="text-2xl font-semibold text-center mb-3 text-gray-800">
+          Esqueceu sua senha?
+        </Text>
+        <Text className="text-sm text-center text-gray-500 mb-8">
           Insira seu email abaixo para receber um código de verificação!
         </Text>
 
         {/* Input de Email */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
+        <View className="mb-6">
+          <Text className="text-sm font-medium mb-2 text-gray-700">
+            Email
+          </Text>
           <TextInput
-            style={styles.input}
+            className="border border-gray-300 rounded-lg p-4 text-base bg-white"
             placeholder="Insira seu email"
+            placeholderTextColor="#9ca3af"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -91,106 +95,33 @@ export default function ForgotPasswordScreen() {
 
         {/* Botão Confirmar */}
         <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
+          className={`bg-[#22c55e] p-4 rounded-lg items-center mb-4 ${loading ? 'opacity-60' : ''}`}
           onPress={handleSendEmail}
           disabled={loading}
+          activeOpacity={0.8}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Confirmar</Text>
+            <Text className="text-white text-base font-semibold">
+              Confirmar
+            </Text>
           )}
         </TouchableOpacity>
 
         {/* Link de Voltar */}
         <TouchableOpacity
-          style={styles.backLink}
+          className="flex-row items-center justify-center gap-1"
           onPress={() => router.back()}
           disabled={loading}
+          activeOpacity={0.7}
         >
           <Ionicons name="arrow-back" size={16} color="#22c55e" />
-          <Text style={styles.backLinkText}>Voltar para a página de login</Text>
+          <Text className="text-[#22c55e] text-sm">
+            Voltar para a página de login
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 24,
-    justifyContent: 'center',
-  },
-  iconContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#22c55e',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 12,
-    color: '#1f2937',
-  },
-  subtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#6b7280',
-    marginBottom: 32,
-  },
-  inputContainer: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 8,
-    color: '#374151',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  button: {
-    backgroundColor: '#22c55e',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  backLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  backLinkText: {
-    color: '#22c55e',
-    fontSize: 14,
-  },
-});

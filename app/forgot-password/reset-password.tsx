@@ -1,9 +1,9 @@
+// app/forgot-password/reset-password.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   Alert,
@@ -91,31 +91,33 @@ export default function ResetPasswordScreen() {
 
   if (isSuccess) {
     return (
-      <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.successContent}>
+      <View className="flex-1 bg-white">
+        <ScrollView contentContainerClassName="flex-grow p-6 justify-center items-center">
           {/* Ícone de Sucesso */}
-          <View style={styles.iconContainer}>
-            <View style={[styles.iconCircle, styles.successCircle]}>
+          <View className="items-center mb-6">
+            <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
               <Ionicons name="checkmark" size={48} color="#fff" />
             </View>
           </View>
 
           {/* Mensagem de Sucesso */}
-          <Text style={styles.successTitle}>Senha alterada com sucesso!</Text>
-          <Text style={styles.successSubtitle}>
+          <Text className="text-2xl font-semibold text-center mb-3 text-gray-800">
+            Senha alterada com sucesso!
+          </Text>
+          <Text className="text-sm text-center text-gray-500 mb-2 px-6">
             Lembre-se: senhas iguais em vários lugares podem ser um risco.
           </Text>
-          <Text style={styles.redirectText}>
-            Redirecionando em <Text style={styles.countdownText}>{countdown}</Text>{' '}
-            segundos.
+          <Text className="text-sm text-center text-gray-500 mb-8">
+            Redirecionando em <Text className="font-bold text-gray-800">{countdown}</Text> segundos.
           </Text>
 
           {/* Botão para ir direto ao Login */}
-          <Button
-            text="Continuar para o Login"
-            onPress={() => router.replace('/login')}
-            style={styles.button}
-          />
+          <View className="w-full mb-3">
+            <Button
+              text="Continuar para o Login"
+              onPress={() => router.replace('/login')}
+            />
+          </View>
         </ScrollView>
       </View>
     );
@@ -123,23 +125,27 @@ export default function ResetPasswordScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      className="flex-1 bg-white"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerClassName="flex-grow p-6 justify-center"
         keyboardShouldPersistTaps="handled"
       >
         {/* Ícone */}
-        <View style={styles.iconContainer}>
-          <View style={styles.iconCircle}>
+        <View className="items-center mb-6">
+          <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
             <Ionicons name="lock-closed" size={32} color="#fff" />
           </View>
         </View>
 
         {/* Título */}
-        <Text style={styles.title}>Redefinir Senha</Text>
-        <Text style={styles.subtitle}>Escolha uma nova senha para sua conta.</Text>
+        <Text className="text-2xl font-semibold text-center mb-2 text-gray-800">
+          Redefinir Senha
+        </Text>
+        <Text className="text-sm text-center text-gray-500 mb-8">
+          Escolha uma nova senha para sua conta.
+        </Text>
 
         {/* Input Nova Senha */}
         <Input
@@ -177,95 +183,14 @@ export default function ResetPasswordScreen() {
         />
 
         {/* Botão Confirmar */}
-        <Button
-          text="Confirmar e Salvar"
-          onPress={handleResetPassword}
-          loading={loading}
-          style={styles.button}
-        />
-
-        {/* Link de Voltar */}
-        <Button
-          text="← Voltar para o login"
-          onPress={() => router.replace('/login')}
-          variant="outline"
-          disabled={loading}
-        />
+        <View className="w-full mb-3">
+          <Button
+            text="Confirmar"
+            onPress={handleResetPassword}
+            loading={loading}
+          />
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 24,
-    justifyContent: 'center',
-  },
-  successContent: {
-    flexGrow: 1,
-    padding: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#22c55e',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  successCircle: {
-    backgroundColor: '#22c55e',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 8,
-    color: '#1f2937',
-  },
-  subtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#6b7280',
-    marginBottom: 32,
-  },
-  successTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 12,
-    color: '#1f2937',
-  },
-  successSubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#6b7280',
-    marginBottom: 8,
-    paddingHorizontal: 24,
-  },
-  redirectText: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#6b7280',
-    marginBottom: 32,
-  },
-  countdownText: {
-    fontWeight: '700',
-    color: '#1f2937',
-  },
-  button: {
-    width: '100%',
-    marginBottom: 12,
-  },
-});
