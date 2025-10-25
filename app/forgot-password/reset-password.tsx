@@ -4,7 +4,6 @@ import {
   View,
   Text,
   ScrollView,
-  KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
@@ -14,6 +13,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { PasswordStrength } from '@/components/ui/PasswordStrength';
 import { resetPassword } from '@/services/api/auth';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function ResetPasswordScreen() {
   const { email } = useLocalSearchParams<{ email: string }>();
@@ -124,73 +124,72 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    // Substitua <KeyboardAvoidingView> e <ScrollView> por <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView
+      className="flex-1 bg-white" // Estilo do KAV
+      contentContainerClassName="flex-grow p-6 justify-center" // Estilo do ScrollView
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid={true} // Importante para Android
+      extraScrollHeight={Platform.OS === 'ios' ? 20 : 0} // Um pequeno ajuste fino (opcional)
     >
-      <ScrollView
-        contentContainerClassName="flex-grow p-6 justify-center"
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Ícone */}
-        <View className="items-center mb-6">
-          <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
-            <Ionicons name="lock-closed" size={32} color="#fff" />
-          </View>
+      {/* Ícone */}
+      <View className="items-center mb-6">
+        <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
+          <Ionicons name="lock-closed" size={32} color="#fff" />
         </View>
+      </View>
 
-        {/* Título */}
-        <Text className="text-2xl font-semibold text-center mb-2 text-gray-800">
-          Redefinir Senha
-        </Text>
-        <Text className="text-sm text-center text-gray-500 mb-8">
-          Escolha uma nova senha para sua conta.
-        </Text>
+      {/* Título */}
+      <Text className="text-2xl font-semibold text-center mb-2 text-gray-800">
+        Redefinir Senha
+      </Text>
+      <Text className="text-sm text-center text-gray-500 mb-8">
+        Escolha uma nova senha para sua conta.
+      </Text>
 
-        {/* Input Nova Senha */}
-        <Input
-          label="Nova Senha"
-          placeholder="Digite a nova senha"
-          value={password}
-          onChangeText={(text) => {
-            setPassword(text);
-            setErrors({ ...errors, password: '' });
-          }}
-          secureTextEntry
-          showPasswordToggle
-          error={errors.password}
-          autoCapitalize="none"
-          autoCorrect={false}
+      {/* Input Nova Senha */}
+      <Input
+        label="Nova Senha"
+        placeholder="Digite a nova senha"
+        value={password}
+        onChangeText={(text) => {
+          setPassword(text);
+          setErrors({ ...errors, password: '' });
+        }}
+        secureTextEntry
+        showPasswordToggle
+        error={errors.password}
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+
+      {/* Indicador de Força da Senha */}
+      {password.length > 0 && <PasswordStrength password={password} />}
+
+      {/* Input Confirmar Senha */}
+      <Input
+        label="Confirmar Nova Senha"
+        placeholder="Confirme a nova senha"
+        value={confirmPassword}
+        onChangeText={(text) => {
+          setConfirmPassword(text);
+          setErrors({ ...errors, confirmPassword: '' });
+        }}
+        secureTextEntry
+        showPasswordToggle
+        error={errors.confirmPassword}
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+
+      {/* Botão Confirmar */}
+      <View className="w-full mb-3">
+        <Button
+          text="Confirmar"
+          onPress={handleResetPassword}
+          loading={loading}
         />
-
-        {/* Indicador de Força da Senha */}
-        {password.length > 0 && <PasswordStrength password={password} />}
-
-        {/* Input Confirmar Senha */}
-        <Input
-          label="Confirmar Nova Senha"
-          placeholder="Confirme a nova senha"
-          value={confirmPassword}
-          onChangeText={(text) => {
-            setConfirmPassword(text);
-            setErrors({ ...errors, confirmPassword: '' });
-          }}
-          secureTextEntry
-          showPasswordToggle
-          error={errors.confirmPassword}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        {/* Botão Confirmar */}
-        <View className="w-full mb-3">
-          <Button
-            text="Confirmar"
-            onPress={handleResetPassword}
-            loading={loading}
-          />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </View>
+    </KeyboardAwareScrollView>
   );
 }
