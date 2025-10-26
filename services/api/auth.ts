@@ -20,6 +20,24 @@ export interface ResetPasswordRequest {
 // ==================== FUNÇÕES DA API ====================
 
 /**
+ * Relizar cadastro de um atleta
+//  * Endpoint:
+ * @param 
+//  */
+// export const forgotPassword = async (email: string) => {
+//   try {
+//     const response = await api.post('/forgot-password', { email });
+//     return response.data;
+//   } catch (error: any) {
+//     const message = 
+//       error.response?.data?.message || 
+//       error.response?.data || 
+//       'Erro ao enviar email';
+//     throw new Error(message);
+//   }
+// };
+
+/**
  * Solicitar reset de senha
  * Endpoint: POST /api/v1/forgot-password
  * @param email Email do usuário

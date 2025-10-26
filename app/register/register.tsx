@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-// import { RegistroAtleta } from "../../components/RegistroAtleta";
-// import { RegistroArena } from "../../components/RegistroArena";
+import { RegistroAtleta } from "../../components/RegistroAtleta";
+import { RegistroArena } from "../../components/RegistroArena";
 
 export default function Register() {
   const [accountType, setAccountType] = useState<"atleta" | "arena">("atleta");
@@ -36,11 +36,11 @@ export default function Register() {
           </TouchableOpacity>
         </View>
 
-        {/* {accountType === "atleta" ? (
+        {accountType === "atleta" ? (
           <RegistroAtleta />
         ) : (
           <RegistroArena />
-        )} */}
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
