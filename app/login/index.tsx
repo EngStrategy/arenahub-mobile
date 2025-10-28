@@ -17,7 +17,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-
   TouchableOpacity,
   View,
 } from 'react-native';
