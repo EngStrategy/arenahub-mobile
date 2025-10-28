@@ -17,25 +17,21 @@ export interface ResetPasswordRequest {
   confirmation: string;
 }
 
-// ==================== FUNÇÕES DA API ====================
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
 
-/**
- * Relizar cadastro de um atleta
-//  * Endpoint:
- * @param 
-//  */
-// export const forgotPassword = async (email: string) => {
-//   try {
-//     const response = await api.post('/forgot-password', { email });
-//     return response.data;
-//   } catch (error: any) {
-//     const message = 
-//       error.response?.data?.message || 
-//       error.response?.data || 
-//       'Erro ao enviar email';
-//     throw new Error(message);
-//   }
-// };
+export interface LoginResponse {
+  token: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+// ==================== FUNÇÕES DA API ====================
 
 /**
  * Solicitar reset de senha
@@ -112,6 +108,28 @@ export const resendVerificationCode = async (email: string) => {
       error.response?.data?.message || 
       error.response?.data || 
       'Erro ao reenviar código';
+    throw new Error(message);
+  }
+};
+
+/**
+ * Autenticar usuário
+ * Endpoint: POST /api/v1/usuarios/auth
+ * @param email Email do usuário
+ * @param password Senha do usuário
+ */
+export const login = async ({ email, password }: LoginRequest): Promise<LoginResponse> => {
+  try {
+    const response = await api.post<LoginResponse>('/usuarios/auth', { 
+      email, 
+      password 
+    });
+    return response.data;
+  } catch (error: any) {
+    const message = 
+      error.response?.data?.message || 
+      error.response?.data || 
+      'Email ou senha inválidos';
     throw new Error(message);
   }
 };
