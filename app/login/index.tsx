@@ -1,25 +1,34 @@
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { login } from '@/services/api/auth';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import { FormControl } from '@/components/ui/form-control';
+import { VStack } from '@/components/ui/vstack';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
+import { Button, ButtonText } from '@/components/ui/button';
+import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
 import React, { useState } from 'react';
+import { useRouter } from 'expo-router';
+
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 
 export default function LoginScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = React.useState(false);
+  const toggleShowPassword = () => setShowPassword(prev => !prev);
 
   const handleLogin = async () => {
     setErrors({ email: '', password: '' });
@@ -43,13 +52,14 @@ export default function LoginScreen() {
 
       // 2. Salvar o token e os dados do usuário no AsyncStorage
       await AsyncStorage.setItem('userToken', response.token);
-      
+
       // Salve outros dados do usuário se a API retornar
       const userData = JSON.stringify(response.user);
       await AsyncStorage.setItem('userData', userData);
 
       // 3. Redirecionar para a área logada do app
-      router.replace('/(tabs)/'); // (Ou qualquer que seja sua rota "Home")
+      // router.replace('/(tabs)/'); // (Ou qualquer que seja sua rota "Home")
+      router.push('/(tabs)');
 
     } catch (error: any) {
       Alert.alert('Erro no Login', error.message);
@@ -71,11 +81,11 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Ícone */}
-        <View 
+        <View
           // styles.iconContainer
           className="items-center mb-6"
         >
-          <View 
+          <View
             // styles.iconCircle
             className="w-20 h-20 rounded-full bg-green-500 items-center justify-center"
           >
@@ -84,13 +94,13 @@ export default function LoginScreen() {
         </View>
 
         {/* Título e Subtítulo */}
-        <Text 
+        <Text
           // styles.title
           className="text-2xl font-semibold text-center mb-2 text-gray-800"
         >
           Bem-vindo!
         </Text>
-        <Text 
+        <Text
           // styles.subtitle
           className="text-sm text-center text-gray-500 mb-8"
         >
@@ -98,35 +108,44 @@ export default function LoginScreen() {
         </Text>
 
         {/* Input de Email */}
-        <Input
-          label="Email"
-          placeholder="Insira seu email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          error={errors.email}
-          disabled={loading}
-          // O NativeWind funciona bem com componentes customizados
-          // desde que eles passem a prop 'className' internamente.
-          // Adicionei um mb-4 aqui para espaçamento.
-          className="mb-4"
-        />
+
+        <VStack space="xs">
+          <Text className="text-typography-500">Email</Text>
+          <Input size="xl" className="border border-gray-300 rounded-lg" >
+            <InputField
+              className="text-base"
+              type="text"
+              placeholder="Insira seu email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+            />
+          </Input>
+        </VStack>
 
         {/* Input de Senha */}
-        <Input
-          label="Senha"
-          placeholder="Insira sua senha"
-          value={password}
-          onChangeText={setPassword}
-          autoCapitalize="none"
-          autoCorrect={false}
-          secureTextEntry
-          showPasswordToggle // Ativa o ícone de olho
-          error={errors.password}
-          disabled={loading}
-        />
+        <VStack space="xs">
+          <Text className="text-typography-500">Senha</Text>
+          <Input size="xl" className="border border-gray-300 rounded-lg">
+            <InputField
+              className="text-base"
+              type={showPassword ? "text" : "password"}
+              placeholder="Insira sua senha"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <InputSlot className="pr-3" onPress={toggleShowPassword}>
+              <InputIcon
+                as={showPassword ? EyeIcon : EyeOffIcon}
+                fill="none"
+              />
+            </InputSlot>
+          </Input>
+        </VStack>
+
+
+
 
         {/* Link de Esqueci Senha */}
         <TouchableOpacity
@@ -135,7 +154,7 @@ export default function LoginScreen() {
           onPress={() => router.push('/forgot-password')}
           disabled={loading}
         >
-          <Text 
+          <Text
             // styles.forgotPasswordText
             className="text-sm text-green-500 font-medium"
           >
@@ -144,31 +163,33 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         {/* Botão Entrar */}
-        <Button
-          text="Entrar"
+
+
+        <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
           onPress={handleLogin}
-          loading={loading}
-          // styles.button
-          // Dei 'w-full' para o botão, o mb-4 agora está no container de cadastro
-          className="w-full"
-        />
+          disabled={loading}
+        >
+          <ButtonText className="text-base text-white">
+            Entrar
+          </ButtonText>
+        </Button>
 
         {/* Link de Cadastro */}
-        <View 
+        <View
           // styles.registerContainer
           className="flex-row justify-center items-center mt-4"
         >
-          <Text 
+          <Text
             // styles.registerText
             className="text-sm text-gray-500"
           >
             Não tem uma conta?
           </Text>
           <TouchableOpacity
-            onPress={() => router.push('/register')} // Mude para sua rota de cadastro
+            // onPress={() => router.push('/register')} // Mude para sua rota de cadastro
             disabled={loading}
           >
-            <Text 
+            <Text
               // styles.registerLink
               className="text-sm text-green-500 font-semibold ml-1"
             >
@@ -181,5 +202,3 @@ export default function LoginScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-
