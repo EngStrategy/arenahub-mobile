@@ -2,6 +2,23 @@ import { api } from '../api';
 
 // ==================== INTERFACES ====================
 
+export interface RegisterAthleteRequest {
+  nome: string;
+  email: string;
+  telefone: string;
+  senha: string;
+}
+
+export interface RegisterAthleteResponse {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  urlFoto?: string;
+  dataCriacao: string;
+  role: string; // geralmente "ATLETA"
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }
@@ -32,6 +49,27 @@ export interface LoginResponse {
 }
 
 // ==================== FUNÇÕES DA API ====================
+
+/**
+ * Cadastrar novo atleta
+ * Endpoint: POST /api/v1/atletas
+ * @param data Dados do atleta (nome, email, telefone, senha)
+ */
+export const registerAthlete = async (data: RegisterAthleteRequest): Promise<RegisterAthleteResponse> => {
+  try {
+    const response = await api.post<RegisterAthleteResponse>('/atletas', data);
+    return response.data; // 201
+  } catch (error: any) {
+    if (error.response?.status === 400) {
+      throw new Error('Dados inválidos fornecidos');
+    } 
+    if (error.response?.status === 409) {
+      throw new Error('Email ou telefone já cadastrado');
+    }
+    const message = error.response?.data?.message || error.response?.data || 'Erro ao cadastrar atleta';
+    throw new Error(message);
+  }
+};
 
 /**
  * Solicitar reset de senha

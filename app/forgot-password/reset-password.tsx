@@ -11,7 +11,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, ButtonText } from '@/components/ui/button';  
 import { Input } from '@/components/ui/input';
-import { PasswordStrength } from '@/components/ui/password-strength';
+// import { PasswordStrength } from '@/components/ui/password-strength';
 import { resetPassword } from '@/services/api/auth';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 

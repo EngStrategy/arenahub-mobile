@@ -1,5 +1,8 @@
 // components/RegistroAtleta.tsx
 import React, { useState } from "react";
+import { useRouter } from 'expo-router';
+import { registerAthlete } from '@/services/api/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { FormControl } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
@@ -7,43 +10,15 @@ import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
 import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
+import { PasswordStrengthIndicator } from "@/components/forms/passwordStrengthIndicador";
 import { View, TextInput, TouchableOpacity, ScrollView } from "react-native";
-// import { createAtleta } from '@/app/api/entities/atleta';
-// -> Função que provavelmente chama sua API, ainda não traduzida
+import { formatarTelefone } from "@/context/functions/formatarTelefone";
 
-const PasswordStrengthIndicator = ({ password = "" }: { password?: string }) => {
-  const evaluatePassword = () => {
-    let score = 0;
-    if (password.length >= 8) score += 25;
-    if (/\d/.test(password)) score += 25;
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 25;
-    if (/[^A-Za-z0-9]/.test(password)) score += 25;
-    return score;
-  };
 
-  const score = evaluatePassword();
-  let color = 'red';
-  let text = 'Fraca';
-  if (score >= 75) { color = 'green'; text = 'Forte'; }
-  else if (score >= 50) { color = 'orange'; text = 'Média'; }
 
-  return (
-    <View className="w-full mb-2">
-      <Text className="font-medium mb-1">Força da senha: {text}</Text>
-      <View className="h-2 w-full rounded bg-gray-300">
-        <View style={{ width: `${score}%`, backgroundColor: color, height: '100%', borderRadius: 4 }} />
-      </View>
-      <View className="mt-2">
-        <Text className={password.length >= 8 ? "text-green-600" : ""}>• Pelo menos 8 caracteres</Text>
-        <Text className={/\d/.test(password) ? "text-green-600" : ""}>• Pelo menos um número</Text>
-        <Text className={/[a-z]/.test(password) && /[A-Z]/.test(password) ? "text-green-600" : ""}>• Letras maiúsculas e minúsculas</Text>
-        <Text className={/[^A-Za-z0-9]/.test(password) ? "text-green-600" : ""}>• Pelo menos um caractere especial</Text>
-      </View>
-    </View>
-  );
-};
 
 export const RegistroAtleta = ({ className }: { className?: string }) => {
+  const router = useRouter();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
@@ -59,6 +34,7 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
 
   const handleRegister = async () => {
     setLoading(true);
+
     if (senha !== confirmSenha) {
       alert("As senhas não coincidem!");
       setLoading(false);
@@ -66,20 +42,22 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
     }
 
     try {
-      // TODO: Chamar sua função createAtleta(values)
-      // Exemplo: await createAtleta({ nome, email, telefone, senha });
-      console.log("Registrar usuário:", { nome, email, telefone, senha });
+      const response = await registerAthlete({ nome, email, telefone, senha });
+
+      await AsyncStorage.setItem('userData', JSON.stringify(response));
+
       alert("Conta criada com sucesso!");
-    } catch (error) {
-      alert("Erro ao criar conta");
+
+
+      router.push('/(tabs)');
+
+    } catch (error: any) {
+      alert(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatarTelefone = (value: string) => {
-    return value.replace(/\D/g, "").replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-  };
 
   return (
     <ScrollView className={`flex-1 bg-white ${className ?? ""}`}>
