@@ -6,15 +6,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { FormControl } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
-import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
 import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
 import { PasswordStrengthIndicator } from "@/components/forms/passwordStrengthIndicador";
 import { View, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { formatarTelefone } from "@/context/functions/formatarTelefone";
-
-
+import { validatePassword } from "@/context/functions/validatePassword";
+import { validateConfirmPassword } from "@/context/functions/validateConfirmPassword";
 
 
 export const RegistroAtleta = ({ className }: { className?: string }) => {
@@ -28,18 +27,24 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [showPasswordConfirmed, setShowPasswordConfirmed] = React.useState(false);
+  const [errors, setErrors] = useState({
+    password: '',
+    confirmPassword: '',
+  });
 
   const toggleShowPassword = () => setShowPassword(prev => !prev);
   const toggleShowPasswordConfirmed = () => setShowPasswordConfirmed(prev => !prev);
 
   const handleRegister = async () => {
-    setLoading(true);
+    const passwordError = validatePassword(senha);
+    const confirmPasswordError = validateConfirmPassword(senha, confirmSenha);
 
-    if (senha !== confirmSenha) {
-      alert("As senhas não coincidem!");
-      setLoading(false);
-      return;
-    }
+    setErrors({
+      password: passwordError,
+      confirmPassword: confirmPasswordError,
+    });
+
+    setLoading(true);
 
     try {
       const response = await registerAthlete({ nome, email, telefone, senha });
@@ -47,7 +52,6 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
       await AsyncStorage.setItem('userData', JSON.stringify(response));
 
       alert("Conta criada com sucesso!");
-
 
       router.push('/(tabs)');
 

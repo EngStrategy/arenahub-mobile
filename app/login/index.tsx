@@ -186,7 +186,7 @@ export default function LoginScreen() {
             Não tem uma conta?
           </Text>
           <TouchableOpacity
-            // onPress={() => router.push('/register')} // Mude para sua rota de cadastro
+            onPress={() => router.push('/(tabs)')} // Mude para sua rota de cadastro
             disabled={loading}
           >
             <Text

@@ -5,6 +5,7 @@ import { RegistroArena } from "../../components/forms/RegistroArena";
 
 export default function Register() {
   const [accountType, setAccountType] = useState<"atleta" | "arena">("atleta");
+  const [isFull, setIsFull] = useState(false);
 
   return (
     <KeyboardAvoidingView className="flex-1"
