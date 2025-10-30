@@ -8,12 +8,15 @@ import { FormControl } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
-import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
+import { EyeIcon, EyeOffIcon, InfoIcon } from '@/components/ui/icon';
 import { PasswordStrengthIndicator } from "@/components/forms/passwordStrengthIndicador";
 import { View, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { formatarTelefone } from "@/context/functions/formatarTelefone";
 import { validatePassword } from "@/context/functions/validatePassword";
 import { validateConfirmPassword } from "@/context/functions/validateConfirmPassword";
+import { validarTelefone } from "@/context/functions/validarTelefone";
+import { validarNome } from "@/context/functions/validarNome";
+import { validateEmail } from "@/context/functions/validateEmail";
 
 
 export const RegistroAtleta = ({ className }: { className?: string }) => {
@@ -28,6 +31,9 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const [showPasswordConfirmed, setShowPasswordConfirmed] = React.useState(false);
   const [errors, setErrors] = useState({
+    nome: '',
+    email: '',
+    telefone: '',
     password: '',
     confirmPassword: '',
   });
@@ -36,13 +42,20 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
   const toggleShowPasswordConfirmed = () => setShowPasswordConfirmed(prev => !prev);
 
   const handleRegister = async () => {
+    const nomeError = validarNome(nome);
+    const emailError = validateEmail(email) ? '' : 'Email inválido.';
     const passwordError = validatePassword(senha);
     const confirmPasswordError = validateConfirmPassword(senha, confirmSenha);
+    const telefoneError = validarTelefone(telefone);
 
-    setErrors({
+    setErrors(prev => ({
+      ...prev,
+      nome: nomeError,
+      email: emailError,
+      telefone: telefoneError,
       password: passwordError,
       confirmPassword: confirmPasswordError,
-    });
+    }));
 
     setLoading(true);
 
@@ -76,8 +89,14 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
                 placeholder="Insira seu nome"
                 value={nome}
                 onChangeText={setNome}
+                onBlur={() => {
+                  const nomeError = validarNome(nome);
+                  setErrors(prev => ({ ...prev, nome: nomeError }));
+                }}
+                maxLength={100}
               />
             </Input>
+            {errors.nome && <Text className="text-sm text-red-500">{errors.nome}</Text>}
           </VStack>
 
           <VStack space="xs">
@@ -90,8 +109,13 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
+                onBlur={() => {
+                  const emailError = validateEmail(email) ? '' : 'Email inválido.';
+                  setErrors(prev => ({ ...prev, email: emailError }));
+                }}
               />
             </Input>
+            {errors.email && <Text className="text-sm text-red-500">{errors.email}</Text>}
           </VStack>
 
           <VStack space="xs">
@@ -104,8 +128,14 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
                 value={telefone}
                 onChangeText={(text) => setTelefone(formatarTelefone(text))}
                 keyboardType="phone-pad"
+                maxLength={15}
+                onBlur={() => {
+                  const telefoneError = validarTelefone(telefone);
+                  setErrors(prev => ({ ...prev, telefone: telefoneError }));
+                }}
               />
             </Input>
+            {errors.telefone && <Text className="text-sm text-red-500">{errors.telefone}</Text>}
           </VStack>
 
           <VStack space="xs">
@@ -119,7 +149,11 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
                 onChangeText={setSenha}
                 secureTextEntry={!showPassword}
                 onFocus={() => setIsPasswordFocused(true)}
-                onBlur={() => setIsPasswordFocused(false)}
+                onBlur={() => {
+                  setIsPasswordFocused(false);
+                  const passwordError = validatePassword(senha);
+                  setErrors(prev => ({ ...prev, password: passwordError }));
+                }}
               />
               <InputSlot className="pr-3" onPress={toggleShowPassword}>
                 <InputIcon
@@ -128,6 +162,7 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
                 />
               </InputSlot>
             </Input>
+            {errors.password && <Text className="text-sm text-red-500">{errors.password}</Text>}
 
             {isPasswordFocused && (
               <View className="pb-4">
@@ -146,6 +181,10 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
                 value={confirmSenha}
                 onChangeText={setConfirmSenha}
                 secureTextEntry={!showPasswordConfirmed}
+                onBlur={() => {
+                  const confirmPasswordError = validateConfirmPassword(confirmSenha, senha);
+                  setErrors(prev => ({ ...prev, confirmPassword: confirmPasswordError }));
+                }}
               />
               <InputSlot className="pr-3" onPress={toggleShowPasswordConfirmed}>
                 <InputIcon
@@ -155,6 +194,7 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
               </InputSlot>
 
             </Input>
+            {errors.confirmPassword && <Text className="text-sm text-red-500">{errors.confirmPassword}</Text>}
           </VStack>
 
           <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
@@ -169,13 +209,11 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
       </FormControl>
 
       <Button size="xl" className="justify-start p-0"
-        onPress={handleRegister}
-        disabled={loading}
+        onPress={() => router.push('/login')}
       >
-        <ButtonText className="text-base text-black p-0">
-          Já possui uma conta?
-        </ButtonText>
-        <ButtonText className="text-base text-green-primary p-0 underline">
+        <Text className="text-sm text-gray-500">Já possui uma conta?</Text>
+        <ButtonText className="text-base text-green-primary p-0 underline"
+        >
           Entrar
         </ButtonText>
       </Button>

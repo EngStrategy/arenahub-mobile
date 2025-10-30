@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { FormControl } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
+import { HStack } from '@/components/ui/hstack';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
@@ -87,7 +88,7 @@ export default function LoginScreen() {
         >
           <View
             // styles.iconCircle
-            className="w-20 h-20 rounded-full bg-green-500 items-center justify-center"
+            className="w-20 h-20 rounded-full bg-green-primary items-center justify-center"
           >
             <Ionicons name="person" size={32} color="#fff" />
           </View>
@@ -144,23 +145,14 @@ export default function LoginScreen() {
           </Input>
         </VStack>
 
-
-
-
-        {/* Link de Esqueci Senha */}
-        <TouchableOpacity
-          // styles.forgotPasswordButton
-          className="self-end mb-6 mt-2" // Adicionei um mt-2
+        <Button size="xl" className="justify-end p-0"
           onPress={() => router.push('/forgot-password')}
-          disabled={loading}
         >
-          <Text
-            // styles.forgotPasswordText
-            className="text-sm text-green-500 font-medium"
+          <ButtonText className="text-base text-green-primary p-0"
           >
-            Esqueceu sua senha?
-          </Text>
-        </TouchableOpacity>
+            Esqueceu sua senha??
+          </ButtonText>
+        </Button>
 
         {/* Botão Entrar */}
 
@@ -177,25 +169,18 @@ export default function LoginScreen() {
         {/* Link de Cadastro */}
         <View
           // styles.registerContainer
-          className="flex-row justify-center items-center mt-4"
+          className="flex-row items-center mt-4"
         >
-          <Text
-            // styles.registerText
-            className="text-sm text-gray-500"
+
+          <Button size="xl" className="justify-start p-0"
+            onPress={() => router.push('/register/register')}
           >
-            Não tem uma conta?
-          </Text>
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)')} // Mude para sua rota de cadastro
-            disabled={loading}
-          >
-            <Text
-              // styles.registerLink
-              className="text-sm text-green-500 font-semibold ml-1"
+            <Text className="text-sm text-gray-500">Não tem uma conta?</Text>
+            <ButtonText className="text-base text-green-primary p-0 underline"
             >
               Cadastre-se
-            </Text>
-          </TouchableOpacity>
+            </ButtonText>
+          </Button>
         </View>
 
       </ScrollView>

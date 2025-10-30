@@ -1,23 +1,29 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, TextInput } from "react-native";
 import { RegistroAtleta } from "../../components/forms/RegistroAtleta";
 import { RegistroArena } from "../../components/forms/RegistroArena";
 
 export default function Register() {
   const [accountType, setAccountType] = useState<"atleta" | "arena">("atleta");
-  const [isFull, setIsFull] = useState(false);
 
   return (
-    <KeyboardAvoidingView className="flex-1"
+    <KeyboardAvoidingView
+      className="flex-1 bg-white pt-12"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
     >
-      <ScrollView className="flex-1 bg-white px-6 pt-12">
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40, paddingHorizontal: 24, paddingTop: 12 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Título */}
         <Text className="text-center text-gray-600 font-medium text-lg mb-4">
           Cadastre-se abaixo
         </Text>
 
         {/* Botões Atleta / Arena */}
-        <View className="flex-row mb- w-full">
+        <View className="flex-row mb-4 w-full">
           <TouchableOpacity
             className={`flex-1 py-2 border-b-2 ${accountType === "atleta" ? "border-green-primary" : "border-gray-not-selected"}`}
             onPress={() => setAccountType("atleta")}
@@ -37,11 +43,8 @@ export default function Register() {
           </TouchableOpacity>
         </View>
 
-        {accountType === "atleta" ? (
-          <RegistroAtleta />
-        ) : (
-          <RegistroArena />
-        )}
+        {/* Formulário */}
+        {accountType === "atleta" ? <RegistroAtleta /> : <RegistroArena />}
       </ScrollView>
     </KeyboardAvoidingView>
   );
