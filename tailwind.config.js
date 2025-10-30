@@ -176,6 +176,7 @@ module.exports = {
         'green-primary': '#15A01A',
         'gray-not-selected': '#CCCCCC',
         'gray-voltar': 'rgba(64,64,64,0.15)',
+        'gray-input-background': '#8B8B8C',
       },
       fontFamily: {
         heading: undefined,

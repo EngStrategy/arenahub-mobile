@@ -11,9 +11,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, ButtonText } from '@/components/ui/button';  
 import { Input } from '@/components/ui/input';
-// import { PasswordStrength } from '@/components/ui/password-strength';
 import { resetPassword } from '@/services/api/auth';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { PasswordStrengthIndicator } from '@/components/forms/passwordStrengthIndicador';
+import { validatePassword } from "@/context/functions/validatePassword";
+import { validateConfirmPassword } from "@/context/functions/validateConfirmPassword";
 
 export default function ResetPasswordScreen() {
   const { email } = useLocalSearchParams<{ email: string }>();
@@ -39,25 +41,6 @@ export default function ResetPasswordScreen() {
     }
   }, [isSuccess, countdown]);
 
-  const validatePassword = (pwd: string) => {
-    if (!pwd) {
-      return 'Por favor, insira sua nova senha';
-    }
-    if (pwd.length < 8) {
-      return 'A senha deve ter no mínimo 8 caracteres';
-    }
-    return '';
-  };
-
-  const validateConfirmPassword = (pwd: string, confirmPwd: string) => {
-    if (!confirmPwd) {
-      return 'Por favor, confirme sua nova senha';
-    }
-    if (pwd !== confirmPwd) {
-      return 'As senhas não coincidem';
-    }
-    return '';
-  };
 
   const handleResetPassword = async () => {
     // Validações
@@ -164,7 +147,7 @@ export default function ResetPasswordScreen() {
       />
 
       {/* Indicador de Força da Senha */}
-      {password.length > 0 && <PasswordStrength password={password} />}
+      {password.length > 0 && <PasswordStrengthIndicator password={password} />}
 
       {/* Input Confirmar Senha */}
       <Input
