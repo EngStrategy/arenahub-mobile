@@ -1,9 +1,11 @@
 // components/RegistroAtleta.tsx
 import React, { useState, useEffect } from "react";
+import { registerArena } from '@/services/api/auth';
 import axios from "axios";
 import { useRouter } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView, View, Alert } from "react-native";
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FormControl } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
 import { Switch } from '@/components/ui/switch';
@@ -30,15 +32,17 @@ import { validarRua } from "@/context/functions/validarRua";
 import { validarNumero } from "@/context/functions/validarNumero";
 import { validateEmail } from "@/context/functions/validateEmail";
 import { validarComplemento } from "@/context/functions/validarComplemento";
+import { validarHorasCancelarAgendamento } from "@/context/functions/validarHorasCancelarAgendamento";
 import apiCNPJ from "@/services/apiCNPJ";
 import apiCEP from "@/services/apiCEP";
 import apiCidades from "@/services/apiCidades";
+import apiLatitudeLongitude from "@/services/apiLatitudeLongitude";
 import { estados } from "@/data/estados";
 
-type CITYResponse = {
-  id: number;
-  nome: string;
-};
+// type CITYResponse = {
+//   id: number;
+//   nome: string;
+// };
 
 interface CnpjValues {
   setNome: (value: string) => void;
@@ -84,10 +88,12 @@ export const RegistroArena = ({ className }: { className?: string }) => {
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [senha, setSenha] = useState("");
+  const [horasCancelarAgendamento, setHorasCancelarAgendamento] = useState("");
   const [confirmSenha, setConfirmSenha] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [showPasswordConfirmed, setShowPasswordConfirmed] = React.useState(false);
   const [errors, setErrors] = useState<{
@@ -104,10 +110,12 @@ export const RegistroArena = ({ className }: { className?: string }) => {
     numero?: string;
     complemento?: string;
     descricao?: string;
+    horasCancelarAgendamento?: string;
   }>({
     password: '',
     confirmPassword: '',
     cpfProprietario: '',
+    horasCancelarAgendamento: '',
     telefone: '',
     cnpj: '',
     cep: '',
@@ -122,40 +130,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
 
   const toggleShowPassword = () => setShowPassword(prev => !prev);
   const toggleShowPasswordConfirmed = () => setShowPasswordConfirmed(prev => !prev);
-  const changeComplete = (value: boolean) => () => {
-    // // const passwordError = validatePassword(senha);
-    // // const confirmPasswordError = validateConfirmPassword(senha, confirmSenha);
-    // // const cpfProprietarioError = validarCPF(cpfProprietario);
-    // // const telefoneError = validarTelefone(telefone);
-    // // const emailError = validateEmail(email) ? '' : 'Email inválido.';
-
-    // // const newErrors = {
-    // //   password: passwordError,
-    // //   confirmPassword: confirmPasswordError,
-    // //   cpfProprietario: cpfProprietarioError,
-    // //   telefone: telefoneError,
-    // //   email: emailError,
-    // // };
-
-    // // setErrors(prev => ({ ...prev, ...newErrors }));
-
-    // // if (value) {
-    // //   const hasErrors = Boolean(
-    // //     newErrors.password ||
-    // //     newErrors.confirmPassword ||
-    // //     newErrors.cpfProprietario ||
-    // //     newErrors.telefone ||
-    // //     newErrors.email
-    // //   );
-    // //   if (hasErrors) {
-    // //     Alert.alert("Verifique os erros do formulário antes de avançar.");
-    //     setIsCompleted(false);
-    //     // return;
-    //   }
-    // }
-
-    setIsCompleted(value);
-  };
 
   useEffect(() => {
     if (!estado) return;
@@ -253,440 +227,499 @@ export const RegistroArena = ({ className }: { className?: string }) => {
     }
   };
 
+  const atualizarLatitudeLongitude = async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, "");
+    const { data } = await apiLatitudeLongitude.get(`${cleanCep}`);
+
+    return {
+      latitude: data.lat,
+      longitude: data.lng,
+    };
+  };
+
   // LEMBRAR DE SÓ OLHAR O CNPJ SE A PESSOA TIVERCNPJ
 
   const handleRegister = async () => {
-    // setLoading(true);
-    // if (senha !== confirmSenha) {
-    //   alert("As senhas não coincidem!");
-    //   setLoading(false);
-    //   return;
-    // }
+    const nomeArenaError = validarNomeArena(nomeArena);
+    const emailError = validateEmail(email) ? '' : 'Email inválido.';
+    const cpfProprietarioError = validarCPF(cpfProprietario);
+    const passwordError = validatePassword(senha);
+    const confirmPasswordError = validateConfirmPassword(senha, confirmSenha);
+    const telefoneError = validarTelefone(telefone);
+    const cnpjError = haveCnpj ? validarCNPJ(cnpj) : '';
+    const cepError = validarCEP(cep);
+    const bairroError = validarBairro(bairro);
+    const ruaError = validarRua(rua);
+    const numeroError = validarNumero(numero);
+    const complementoError = validarComplemento(complemento);
 
-    // try {
-    //   // TODO: Chamar sua função createAtleta(values)
-    //   // Exemplo: await createAtleta({ cpfProprietario, email, telefone, senha });
-    //   console.log("Registrar usuário:", { cpfProprietario, email, telefone, senha });
-    //   alert("Conta criada com sucesso!");
-    // } catch (error) {
-    //   alert("Erro ao criar conta");
-    // } finally {
-    //   setLoading(false);
-    // }
+    setErrors(prev => ({
+      ...prev,
+      cpfProprietario: cpfProprietarioError,
+      nomeArena: nomeArenaError,
+      email: emailError,
+      telefone: telefoneError,
+      password: passwordError,
+      confirmPassword: confirmPasswordError,
+      cnpj: cnpjError,
+      cep: cepError,
+      bairro: bairroError,
+      rua: ruaError,
+      numero: numeroError,
+      complemento: complementoError,
+    }));
+
+    setLoading(true);
+
+    const { latitude, longitude } = await atualizarLatitudeLongitude(cep);
+
+    try {
+      const response = await registerArena({
+        nome: nomeArena,
+        email,
+        telefone,
+        senha,
+        cpfProprietario,
+        cnpj: haveCnpj ? cnpj : undefined,
+        descricao,
+        urlFoto: undefined,
+        horasCancelarAgendamento: horasCancelarAgendamento ? Number(horasCancelarAgendamento) : 0,
+        endereco: {
+          cep,
+          estado,
+          cidade,
+          bairro,
+          rua,
+          numero,
+          complemento,
+          latitude: latitude ? Number(latitude) : undefined,
+          longitude: longitude ? Number(longitude) : undefined,
+        },
+      });
+
+      await AsyncStorage.setItem('userData', JSON.stringify(response));
+
+      alert('Conta criada com sucesso!');
+      router.push({
+              pathname: '/register/ativarConta',
+              params: { email },
+            });
+    } catch (error: any) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <View>
-        <FormControl className="pt-5 rounded-lg w-full">
-          {!isCompleted ? (
-            <VStack className="w-full gap-4">
-              <VStack space="xs">
-                <Text className="text-typography-500">CPF do proprietário</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg" >
-                  <InputField
-                    className="text-base"
-                    type="text"
-                    placeholder="Insira seu CPF"
-                    value={cpfProprietario}
-                    onChangeText={(text) => setCpfProprietario(formatarCPF(text))}
-                    maxLength={14}
-                    keyboardType="phone-pad"
-                    onBlur={() => {
-                      const cpfError = validarCPF(cpfProprietario);
-                      setErrors(prev => ({ ...prev, cpfProprietario: cpfError }));
-                    }}
-                  />
-                </Input>
-                {errors.cpfProprietario && <Text className="text-sm text-red-500">{errors.cpfProprietario}</Text>}
-              </VStack>
+      <FormControl className="pt-5 rounded-lg w-full">
+        <VStack className="w-full gap-4">
+          <VStack space="xs">
+            <Text className="text-typography-500">CPF do proprietário</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg" >
+              <InputField
+                className="text-base"
+                type="text"
+                placeholder="Insira seu CPF"
+                value={cpfProprietario}
+                onChangeText={(text) => setCpfProprietario(formatarCPF(text))}
+                maxLength={14}
+                keyboardType="phone-pad"
+                onBlur={() => {
+                  const cpfError = validarCPF(cpfProprietario);
+                  setErrors(prev => ({ ...prev, cpfProprietario: cpfError }));
+                }}
+              />
+            </Input>
+            {errors.cpfProprietario && <Text className="text-sm text-red-500">{errors.cpfProprietario}</Text>}
+          </VStack>
 
-              <VStack space="xs">
-                <Text className="text-typography-500">Email</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg" >
-                  <InputField
-                    className="text-base"
-                    type="text"
-                    placeholder="Insira seu email"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    onBlur={() => {
-                      const emailError = validateEmail(email) ? '' : 'Email inválido.';
-                      setErrors(prev => ({ ...prev, email: emailError }));
-                    }}
-                  />
-                </Input>
-                {errors.email && <Text className="text-sm text-red-500">{errors.email}</Text>}
-              </VStack>
+          <VStack space="xs">
+            <Text className="text-typography-500">Email</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg" >
+              <InputField
+                className="text-base"
+                type="text"
+                placeholder="Insira seu email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                onBlur={() => {
+                  const emailError = validateEmail(email) ? '' : 'Email inválido.';
+                  setErrors(prev => ({ ...prev, email: emailError }));
+                }}
+              />
+            </Input>
+            {errors.email && <Text className="text-sm text-red-500">{errors.email}</Text>}
+          </VStack>
 
-              <VStack space="xs">
-                <Text className="text-typography-500">Telefone</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg" >
-                  <InputField
-                    className="text-base"
-                    type="text"
-                    placeholder="(99) 99999-9999"
-                    value={telefone}
-                    onChangeText={(text) => setTelefone(formatarTelefone(text))}
-                    keyboardType="phone-pad"
-                    maxLength={15}
-                    onBlur={() => {
-                      const telefoneError = validarTelefone(telefone);
-                      setErrors(prev => ({ ...prev, telefone: telefoneError }));
-                    }}
-                  />
-                </Input>
-                {errors.telefone && <Text className="text-sm text-red-500">{errors.telefone}</Text>}
-              </VStack>
+          <VStack space="xs">
+            <Text className="text-typography-500">Telefone</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg" >
+              <InputField
+                className="text-base"
+                type="text"
+                placeholder="(99) 99999-9999"
+                value={telefone}
+                onChangeText={(text) => setTelefone(formatarTelefone(text))}
+                keyboardType="phone-pad"
+                maxLength={15}
+                onBlur={() => {
+                  const telefoneError = validarTelefone(telefone);
+                  setErrors(prev => ({ ...prev, telefone: telefoneError }));
+                }}
+              />
+            </Input>
+            {errors.telefone && <Text className="text-sm text-red-500">{errors.telefone}</Text>}
+          </VStack>
 
-              <VStack space="xs">
-                <Text className="text-typography-500">Senha</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg">
-                  <InputField
-                    className="text-base"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Insira sua senha"
-                    value={senha}
-                    onChangeText={setSenha}
-                    secureTextEntry={!showPassword}
-                    onFocus={() => setIsPasswordFocused(true)}
-                    onBlur={() => {
-                      setIsPasswordFocused(false);
-                      const passwordError = validatePassword(senha);
-                      setErrors(prev => ({ ...prev, password: passwordError }));
-                    }}
-                  />
-                  <InputSlot className="pr-3" onPress={toggleShowPassword}>
-                    <InputIcon
-                      as={showPassword ? EyeIcon : EyeOffIcon}
-                      fill="none"
-                    />
-                  </InputSlot>
-                </Input>
-                {errors.password && <Text className="text-sm text-red-500">{errors.password}</Text>}
+          <VStack space="xs">
+            <Text className="text-typography-500">Senha</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg">
+              <InputField
+                className="text-base"
+                type={showPassword ? "text" : "password"}
+                placeholder="Insira sua senha"
+                value={senha}
+                onChangeText={setSenha}
+                secureTextEntry={!showPassword}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => {
+                  setIsPasswordFocused(false);
+                  const passwordError = validatePassword(senha);
+                  setErrors(prev => ({ ...prev, password: passwordError }));
+                }}
+              />
+              <InputSlot className="pr-3" onPress={toggleShowPassword}>
+                <InputIcon
+                  as={showPassword ? EyeIcon : EyeOffIcon}
+                  fill="none"
+                />
+              </InputSlot>
+            </Input>
+            {errors.password && <Text className="text-sm text-red-500">{errors.password}</Text>}
 
-                {isPasswordFocused && (
-                  <View className="pb-4">
-                    <PasswordStrengthIndicator password={senha} />
-                  </View>
-                )}
-              </VStack>
-
-              <VStack space="xs">
-                <Text className="text-typography-500">Confirme sua senha</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg">
-                  <InputField
-                    className="text-base"
-                    type={showPasswordConfirmed ? "text" : "password"}
-                    placeholder="Confirme sua senha"
-                    value={confirmSenha}
-                    onChangeText={setConfirmSenha}
-                    secureTextEntry={!showPasswordConfirmed}
-                    onBlur={() => {
-                      const confirmPasswordError = validateConfirmPassword(confirmSenha, senha);
-                      setErrors(prev => ({ ...prev, confirmPassword: confirmPasswordError }));
-                    }}
-                  />
-                  <InputSlot className="pr-3" onPress={toggleShowPasswordConfirmed}>
-                    <InputIcon
-                      as={showPasswordConfirmed ? EyeIcon : EyeOffIcon}
-                      fill="none"
-                    />
-                  </InputSlot>
-
-                </Input>
-                {errors.confirmPassword && <Text className="text-sm text-red-500">{errors.confirmPassword}</Text>}
-              </VStack>
-
-              <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
-                onPress={changeComplete(true)}
-                disabled={loading}
-              >
-                <ButtonText className="text-base text-white">
-                  Avançar
-                </ButtonText>
-              </Button>
-            </VStack>
-          ) : (
-
-            // SEGUNDA PARTE DO FORMULÁRIO AQUI
-            <VStack className="w-full gap-4">
-              <VStack space="xs">
-                <Text className="text-typography-500">CNPJ</Text>
-
-                <Input
-                  size="xl"
-                  className="border border-gray-300 rounded-lg"
-                  isDisabled={!haveCnpj}
-                >
-                  <InputField
-                    className="text-base"
-                    type="text"
-                    placeholder="99.999.999/9999-99"
-                    value={cnpj}
-                    onChangeText={(text) => {
-                      if (!haveCnpj) return;
-
-                      const formatted = formatarCNPJ(text);
-                      setCnpj(formatted);
-
-                      if (formatted.replace(/\D/g, "").length === 14) {
-                        consultarCnpj(formatted, {
-                          setNome: setNomeArena,
-                          setEstado,
-                          setCidade,
-                          setRua,
-                          setBairro,
-                          setNumero,
-                          setCep,
-                          setComplemento,
-                        });
-                      }
-                    }}
-                    keyboardType="phone-pad"
-                    maxLength={18}
-                    editable={!!haveCnpj}
-                    onBlur={() => {
-                      if (!haveCnpj) return;
-                      const cnpjError = validarCNPJ(cnpj);
-                      setErrors((prev) => ({ ...prev, cnpj: cnpjError }));
-                    }}
-                  />
-                </Input>
-
-                {/* 🔹 Só mostra o erro se o usuário tiver CNPJ */}
-                {haveCnpj && errors.cnpj && (
-                  <Text className="text-sm text-red-500">{errors.cnpj}</Text>
-                )}
-              </VStack>
-
-              <VStack>
-                <HStack className="justify-between items-center mt-2 mb-1 px-3 border border-gray-300 rounded-lg bg-gray-300">
-                  <Text size="sm">Minha arena não tem CNPJ</Text>
-                  <Switch
-                    value={!haveCnpj}
-                    onValueChange={(val) => setHaveCnpj(!val)}
-                    trackColor={{ false: '#525252', true: '#15A01A' }}
-                    thumbColor="#fafafa"
-                    ios_backgroundColor="#34D399"
-                  />
-
-
-                </HStack>
-                <Text size="sm">Utilizaremos seu CPF em vez do CNPJ caso selecione esta opção</Text>
-              </VStack>
-
-              <VStack space="xs">
-                <Text className="text-typography-500">Nome da arena</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg" >
-                  <InputField
-                    className="text-base"
-                    type="text"
-                    placeholder="Insira o nome da arena"
-                    value={nomeArena}
-                    onChangeText={setNomeArena}
-                    onBlur={() => {
-                      const nomeArenaError = validarNomeArena(nomeArena);
-                      setErrors(prev => ({ ...prev, nomeArena: nomeArenaError }));
-                    }}
-                  />
-                </Input>
-                {errors.nomeArena && <Text className="text-sm text-red-500">{errors.nomeArena}</Text>}
-              </VStack>
-
-              <VStack space="xs">
-                <Text className="text-typography-500">CEP</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg" >
-                  <InputField
-                    className="text-base"
-                    type="text"
-                    placeholder="Insira seu CEP"
-                    value={cep}
-                    onChangeText={(text) => {
-                      const formatted = formatarCEP(text);
-                      setCep(formatted);
-                      if (formatted.replace(/\D/g, '').length === 8) {
-                        consultarCep(formatted, {
-                          setLogradouro: setRua,
-                          setBairro: setBairro,
-                          setCidade: setCidade,
-                          setEstado: setEstado,
-                          setComplemento: setComplemento,
-                        });
-                      }
-                    }}
-                    onBlur={() => {
-                      const cepError = validarCEP(cep);
-                      setErrors(prev => ({ ...prev, cep: cepError }));
-                    }}
-                    keyboardType="phone-pad"
-                  />
-                </Input>
-                {errors.cep && <Text className="text-sm text-red-500">{errors.cep}</Text>}
-              </VStack>
-
-              <View className="flex-row w-full gap-x-4">
-                {/* ESTADO */}
-                <View className="flex-1">
-                  <Text className="text-typography-500 mb-1">Estado</Text>
-                  <View className="border border-gray-300 rounded-lg h-10 justify-center">
-                    <Picker
-                      selectedValue={estado}
-                      onValueChange={(value) => {
-                        setEstado(value);
-                        setCidade("");
-                      }}
-                      className="w-full"
-                    >
-                      <Picker.Item label="Estado" value="" />
-                      {estados.map((uf) => (
-                        <Picker.Item key={uf.sigla} label={uf.nome} value={uf.sigla} />
-                      ))}
-                    </Picker>
-                  </View>
-                </View>
-
-                {/* CIDADE */}
-                <View className="flex-1">
-                  <Text className="text-typography-500 mb-1">Cidade</Text>
-                  <View className="border border-gray-300 rounded-lg h-10 justify-center">
-                    <Picker
-                      selectedValue={cidade}
-                      enabled={!!estado && !loading}
-                      onValueChange={(value) => setCidade(value)}
-                      className="w-full"
-                    >
-                      <Picker.Item label="Cidade" value="" />
-                      {cidades.map((c) => (
-                        <Picker.Item key={c.id} label={c.nome} value={c.nome} />
-                      ))}
-                    </Picker>
-                  </View>
-                </View>
+            {isPasswordFocused && (
+              <View className="pb-4">
+                <PasswordStrengthIndicator password={senha} />
               </View>
+            )}
+          </VStack>
+
+          <VStack space="xs">
+            <Text className="text-typography-500">Confirme sua senha</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg">
+              <InputField
+                className="text-base"
+                type={showPasswordConfirmed ? "text" : "password"}
+                placeholder="Confirme sua senha"
+                value={confirmSenha}
+                onChangeText={setConfirmSenha}
+                secureTextEntry={!showPasswordConfirmed}
+                onBlur={() => {
+                  const confirmPasswordError = validateConfirmPassword(confirmSenha, senha);
+                  setErrors(prev => ({ ...prev, confirmPassword: confirmPasswordError }));
+                }}
+              />
+              <InputSlot className="pr-3" onPress={toggleShowPasswordConfirmed}>
+                <InputIcon
+                  as={showPasswordConfirmed ? EyeIcon : EyeOffIcon}
+                  fill="none"
+                />
+              </InputSlot>
+
+            </Input>
+            {errors.confirmPassword && <Text className="text-sm text-red-500">{errors.confirmPassword}</Text>}
+          </VStack>
+
+          <VStack space="xs">
+            <Text className="text-typography-500">CNPJ</Text>
+
+            <Input
+              size="xl"
+              className="border border-gray-300 rounded-lg"
+              isDisabled={!haveCnpj}
+            >
+              <InputField
+                className="text-base"
+                type="text"
+                placeholder="99.999.999/9999-99"
+                value={cnpj}
+                onChangeText={(text) => {
+                  if (!haveCnpj) return;
+
+                  const formatted = formatarCNPJ(text);
+                  setCnpj(formatted);
+
+                  if (formatted.replace(/\D/g, "").length === 14) {
+                    consultarCnpj(formatted, {
+                      setNome: setNomeArena,
+                      setEstado,
+                      setCidade,
+                      setRua,
+                      setBairro,
+                      setNumero,
+                      setCep,
+                      setComplemento,
+                    });
+                  }
+                }}
+                keyboardType="phone-pad"
+                maxLength={18}
+                editable={!!haveCnpj}
+                onBlur={() => {
+                  if (!haveCnpj) return;
+                  const cnpjError = validarCNPJ(cnpj);
+                  setErrors((prev) => ({ ...prev, cnpj: cnpjError }));
+                }}
+              />
+            </Input>
+
+            {/* 🔹 Só mostra o erro se o usuário tiver CNPJ */}
+            {haveCnpj && errors.cnpj && (
+              <Text className="text-sm text-red-500">{errors.cnpj}</Text>
+            )}
+          </VStack>
+
+          <VStack>
+            <HStack className="justify-between items-center mt-2 mb-1 px-3 border border-gray-300 rounded-lg bg-gray-300">
+              <Text size="sm">Minha arena não tem CNPJ</Text>
+              <Switch
+                value={!haveCnpj}
+                onValueChange={(val) => setHaveCnpj(!val)}
+                trackColor={{ false: '#525252', true: '#15A01A' }}
+                thumbColor="#fafafa"
+                ios_backgroundColor="#34D399"
+              />
 
 
-              <VStack space="xs">
-                <Text className="text-typography-500">Bairro</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg" >
-                  <InputField
-                    className="text-base"
-                    type="text"
-                    placeholder="Digite seu bairro"
-                    value={bairro}
-                    onChangeText={setBairro}
-                    onBlur={() => {
-                      const bairroError = validarBairro(bairro);
-                      setErrors(prev => ({ ...prev, bairro: bairroError }));
-                    }}
-                  />
-                </Input>
-                {errors.bairro && <Text className="text-sm text-red-500">{errors.bairro}</Text>}
-              </VStack>
+            </HStack>
+            <Text size="sm">Utilizaremos seu CPF em vez do CNPJ caso selecione esta opção</Text>
+          </VStack>
 
-              <VStack space="xs">
-                <Text className="text-typography-500">Rua</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg" >
-                  <InputField
-                    className="text-base"
-                    type="text"
-                    placeholder="Digite sua Rua"
-                    value={rua}
-                    onChangeText={setRua}
-                    onBlur={() => {
-                      const ruaError = validarRua(rua);
-                      setErrors(prev => ({ ...prev, rua: ruaError }));
-                    }}
-                  />
-                </Input>
-                {errors.rua && <Text className="text-sm text-red-500">{errors.rua}</Text>}
-              </VStack>
+          <VStack space="xs">
+            <Text className="text-typography-500">Nome da arena</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg" >
+              <InputField
+                className="text-base"
+                type="text"
+                placeholder="Insira o nome da arena"
+                value={nomeArena}
+                onChangeText={setNomeArena}
+                onBlur={() => {
+                  const nomeArenaError = validarNomeArena(nomeArena);
+                  setErrors(prev => ({ ...prev, nomeArena: nomeArenaError }));
+                }}
+              />
+            </Input>
+            {errors.nomeArena && <Text className="text-sm text-red-500">{errors.nomeArena}</Text>}
+          </VStack>
 
-              <VStack space="xs">
-                <Text className="text-typography-500">Número</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg" >
-                  <InputField
-                    className="text-base"
-                    type="text"
-                    placeholder="Digite seu número"
-                    value={numero}
-                    onChangeText={setNumero}
-                    keyboardType="phone-pad"
-                    onBlur={() => {
-                      const numeroError = validarNumero(numero);
-                      setErrors(prev => ({ ...prev, numero: numeroError }));
-                    }}
-                  />
-                </Input>
-                {errors.numero && <Text className="text-sm text-red-500">{errors.numero}</Text>}
-              </VStack>
+          <VStack space="xs">
+            <Text className="text-typography-500">CEP</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg" >
+              <InputField
+                className="text-base"
+                type="text"
+                placeholder="Insira seu CEP"
+                value={cep}
+                onChangeText={(text) => {
+                  const formatted = formatarCEP(text);
+                  setCep(formatted);
+                  if (formatted.replace(/\D/g, '').length === 8) {
+                    consultarCep(formatted, {
+                      setLogradouro: setRua,
+                      setBairro: setBairro,
+                      setCidade: setCidade,
+                      setEstado: setEstado,
+                      setComplemento: setComplemento,
+                    });
+                  }
+                }}
+                onBlur={() => {
+                  const cepError = validarCEP(cep);
+                  setErrors(prev => ({ ...prev, cep: cepError }));
+                }}
+                keyboardType="phone-pad"
+              />
+            </Input>
+            {errors.cep && <Text className="text-sm text-red-500">{errors.cep}</Text>}
+          </VStack>
 
-              <VStack space="xs">
-                <Text className="text-typography-500">Complemento</Text>
-                <Input size="xl" className="border border-gray-300 rounded-lg" >
-                  <InputField
-                    className="text-base"
-                    type="text"
-                    placeholder="Digite o complemento"
-                    value={complemento}
-                    onChangeText={setComplemento}
-                    onBlur={() => {
-                      const complementoError = validarComplemento(complemento);
-                      setErrors(prev => ({ ...prev, complemento: complementoError }));
-                    }}
-                  />
-                </Input>
-                {errors.complemento && <Text className="text-sm text-red-500">{errors.complemento}</Text>}
-              </VStack>
-
-              <VStack space="xs">
-                <Text className="text-typography-500">Descrição </Text>
-                <Textarea size="xl" className="border border-gray-300 rounded-lg" >
-                  <TextareaInput
-                    className="text-base"
-                    placeholder="Digite algo que descreva sua arena e ajude a atrair mais reservas"
-                    value={descricao}
-                    onChangeText={setDescricao}
-                  />
-                </Textarea>
-              </VStack>
-
-
-              <View className="flex-row justify-between items-center gap-x-4 mt-4">
-                <Button
-                  size="xl"
-                  className="flex-1 bg-gray-voltar rounded-lg py-3"
-                  onPress={() => changeComplete(false)}
-                  disabled={loading}
+          <View className="flex-row w-full gap-x-4">
+            {/* ESTADO */}
+            <View className="flex-1">
+              <Text className="text-typography-500 mb-1">Estado</Text>
+              <View className="border border-gray-300 rounded-lg h-10 justify-center">
+                <Picker
+                  selectedValue={estado}
+                  onValueChange={(value) => {
+                    setEstado(value);
+                    setCidade("");
+                  }}
+                  className="w-full"
                 >
-                  <ButtonText className="text-base text-black">Voltar</ButtonText>
-                </Button>
-
-                <Button
-                  size="xl"
-                  className="flex-1 bg-green-primary rounded-lg py-3"
-                  onPress={handleRegister}
-                  disabled={loading}
-                >
-                  <ButtonText className="text-base text-white">
-                    Cadastrar arena
-                  </ButtonText>
-                </Button>
+                  <Picker.Item label="Estado" value="" />
+                  {estados.map((uf) => (
+                    <Picker.Item key={uf.sigla} label={uf.nome} value={uf.sigla} />
+                  ))}
+                </Picker>
               </View>
+            </View>
 
-            </VStack>
-          )}
-        </FormControl>
+            {/* CIDADE */}
+            <View className="flex-1">
+              <Text className="text-typography-500 mb-1">Cidade</Text>
+              <View className="border border-gray-300 rounded-lg h-10 justify-center">
+                <Picker
+                  selectedValue={cidade}
+                  enabled={!!estado && !loading}
+                  onValueChange={(value) => setCidade(value)}
+                  className="w-full"
+                >
+                  <Picker.Item label="Cidade" value="" />
+                  {cidades.map((c) => (
+                    <Picker.Item key={c.id} label={c.nome} value={c.nome} />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+          </View>
 
-        <Button size="xl" className="justify-start p-0"
-          onPress={() => router.push('/login')}
-        >
-          <Text className="text-sm text-gray-500">Já possui uma conta?</Text>
-          <ButtonText className="text-base text-green-primary p-0 underline"
+
+          <VStack space="xs">
+            <Text className="text-typography-500">Bairro</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg" >
+              <InputField
+                className="text-base"
+                type="text"
+                placeholder="Digite seu bairro"
+                value={bairro}
+                onChangeText={setBairro}
+                onBlur={() => {
+                  const bairroError = validarBairro(bairro);
+                  setErrors(prev => ({ ...prev, bairro: bairroError }));
+                }}
+              />
+            </Input>
+            {errors.bairro && <Text className="text-sm text-red-500">{errors.bairro}</Text>}
+          </VStack>
+
+          <VStack space="xs">
+            <Text className="text-typography-500">Rua</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg" >
+              <InputField
+                className="text-base"
+                type="text"
+                placeholder="Digite sua rua"
+                value={rua}
+                onChangeText={setRua}
+                onBlur={() => {
+                  const ruaError = validarRua(rua);
+                  setErrors(prev => ({ ...prev, rua: ruaError }));
+                }}
+              />
+            </Input>
+            {errors.rua && <Text className="text-sm text-red-500">{errors.rua}</Text>}
+          </VStack>
+
+          <VStack space="xs">
+            <Text className="text-typography-500">Número</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg" >
+              <InputField
+                className="text-base"
+                type="text"
+                placeholder="Digite seu número"
+                value={numero}
+                onChangeText={setNumero}
+                keyboardType="phone-pad"
+                onBlur={() => {
+                  const numeroError = validarNumero(numero);
+                  setErrors(prev => ({ ...prev, numero: numeroError }));
+                }}
+              />
+            </Input>
+            {errors.numero && <Text className="text-sm text-red-500">{errors.numero}</Text>}
+          </VStack>
+
+          <VStack space="xs">
+            <Text className="text-typography-500">Complemento</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg" >
+              <InputField
+                className="text-base"
+                type="text"
+                placeholder="Digite o complemento"
+                value={complemento}
+                onChangeText={setComplemento}
+                onBlur={() => {
+                  const complementoError = validarComplemento(complemento);
+                  setErrors(prev => ({ ...prev, complemento: complementoError }));
+                }}
+              />
+            </Input>
+            {errors.complemento && <Text className="text-sm text-red-500">{errors.complemento}</Text>}
+          </VStack>
+
+          <VStack space="xs">
+            <Text className="text-typography-500">Política de Cancelamento</Text>
+            <Input size="xl" className="border border-gray-300 rounded-lg" >
+              <InputField
+                className="text-sm"
+                type="text"
+                placeholder="Defina o prazo mínimo, em horas, que um atleta pode cancelar um agendamento sem custos. (Máximo 168 horas = 7 dias)"
+                value={horasCancelarAgendamento}
+                onChangeText={setHorasCancelarAgendamento}
+                keyboardType="phone-pad"
+                maxLength={3}
+                onBlur={() => {
+                  const horasError = validarHorasCancelarAgendamento(horasCancelarAgendamento);
+                  setErrors(prev => ({ ...prev, horasCancelarAgendamento: horasError }));
+                }}
+              />
+            </Input>
+            {errors.horasCancelarAgendamento && <Text className="text-sm text-red-500">{errors.horasCancelarAgendamento}</Text>}
+          </VStack>
+
+          <VStack space="xs">
+            <HStack className="gap-1 items-center">
+              <Text className="text-typography-500">Descrição </Text>
+              <Text className="text-typography-500 text-xs">(Opcional)</Text>
+            </HStack>
+
+            <Textarea size="xl" className="border border-gray-300 rounded-lg" >
+              <TextareaInput
+                className="text-base"
+                placeholder="Digite algo que descreva sua arena e ajude a atrair mais reservas"
+                value={descricao}
+                onChangeText={setDescricao}
+              />
+            </Textarea>
+          </VStack>
+
+          <Button
+            size="xl"
+            className="flex-1 bg-green-primary rounded-lg py-3"
+            onPress={handleRegister}
+            disabled={loading}
           >
-            Entrar
-          </ButtonText>
-        </Button>
+            <ButtonText className="text-base text-white">
+              Cadastrar arena
+            </ButtonText>
+          </Button>
+        </VStack>
+      </FormControl>
+
+      <Button size="xl" className="justify-start p-0"
+        onPress={() => router.push('/login')}
+      >
+        <Text className="text-sm text-gray-500">Já possui uma conta?</Text>
+        <ButtonText className="text-base text-green-primary p-0 underline"
+        >
+          Entrar
+        </ButtonText>
+      </Button>
     </View>
   );
 };

@@ -16,17 +16,68 @@ export interface RegisterAthleteResponse {
   telefone: string;
   urlFoto?: string;
   dataCriacao: string;
-  role: string; // geralmente "ATLETA"
+  role: string;
+}
+
+export interface RegisterArenaRequest {
+  nome: string;
+  email: string;
+  telefone: string;
+  senha: string;
+  cpfProprietario: string;
+  cnpj?: string;
+  descricao?: string;
+  urlFoto?: string;
+  horasCancelarAgendamento?: number;
+  endereco: {
+    cep: string;
+    estado: string;
+    cidade: string;
+    bairro: string;
+    rua: string;
+    numero: string;
+    complemento?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+}
+
+export interface RegisterArenaResponse {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  endereco: {
+    cep: string;
+    estado: string;
+    cidade: string;
+    bairro: string;
+    rua: string;
+    numero: string;
+    complemento?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  descricao?: string;
+  urlFoto?: string;
+  dataCriacao: string;
+  role: string;
+  horasCancelarAgendamento?: number;
+  notaMedia?: number;
+  quantidadeAvaliacoes?: number;
+  statusAssinatura?: string;
 }
 
 export interface ForgotPasswordRequest {
   email: string;
 }
 
-export interface VerifyResetCodeRequest {
+export interface VerifyCodeRequest {
   email: string;
   code: string;
 }
+
+
 
 export interface ResetPasswordRequest {
   email: string;
@@ -72,6 +123,46 @@ export const registerAthlete = async (data: RegisterAthleteRequest): Promise<Reg
 };
 
 /**
+ * Cadastrar nova arena
+ * Endpoint: POST /api/v1/arenas
+ * @param data Dados da arena (nome, email, telefone, senha, cpfProprietario, endereço, etc)
+ */
+export const registerArena = async (data: RegisterArenaRequest): Promise<RegisterArenaResponse> => {
+  try {
+    const response = await api.post<RegisterArenaResponse>('/arenas', data);
+    return response.data; // 201
+  } catch (error: any) {
+    if (error.response?.status === 400) {
+      throw new Error('Dados inválidos fornecidos');
+    }
+    if (error.response?.status === 409) {
+      throw new Error('Email, telefone, CPF ou CNPJ já cadastrado');
+    }
+    const message = error.response?.data?.message || error.response?.data || 'Erro ao cadastrar arena';
+    throw new Error(message);
+  }
+};
+
+/**
+ * Verificar código de reset
+ * Endpoint: POST /api/v1/verify-reset-code
+ * @param email Email do usuário
+ * @param code Código de 6 dígitos
+ */
+export const verifyCode = async ({ email, code }: VerifyCodeRequest) => {
+  try {
+    const response = await api.post('/verify', { email, code });
+    return response.data;
+  } catch (error: any) {
+    const message = 
+      error.response?.data?.message || 
+      error.response?.data || 
+      'Código inválido ou expirado';
+    throw new Error(message);
+  }
+};
+
+/**
  * Solicitar reset de senha
  * Endpoint: POST /api/v1/forgot-password
  * @param email Email do usuário
@@ -95,7 +186,7 @@ export const forgotPassword = async (email: string) => {
  * @param email Email do usuário
  * @param code Código de 6 dígitos
  */
-export const verifyResetCode = async ({ email, code }: VerifyResetCodeRequest) => {
+export const verifyResetCode = async ({ email, code }: VerifyCodeRequest) => {
   try {
     const response = await api.post('/verify-reset-code', { email, code });
     return response.data;

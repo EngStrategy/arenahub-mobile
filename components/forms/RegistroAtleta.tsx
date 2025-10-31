@@ -64,9 +64,10 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
 
       await AsyncStorage.setItem('userData', JSON.stringify(response));
 
-      alert("Conta criada com sucesso!");
-
-      router.push('/(tabs)');
+      router.push({
+        pathname: '/register/ativarConta',
+        params: { email },
+      });
 
     } catch (error: any) {
       alert(error.message);
