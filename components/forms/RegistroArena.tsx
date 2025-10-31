@@ -445,7 +445,7 @@ export const RegistroArena = ({ className }: { className?: string }) => {
               <InputField
                 className="text-base"
                 type="text"
-                placeholder="99.999.999/9999-99"
+                placeholder ="00.000.000/0000-00"
                 value={cnpj}
                 onChangeText={(text) => {
                   if (!haveCnpj) return;
@@ -523,8 +523,9 @@ export const RegistroArena = ({ className }: { className?: string }) => {
               <InputField
                 className="text-base"
                 type="text"
-                placeholder="Insira seu CEP"
+                placeholder="00000-000"
                 value={cep}
+                maxLength={9}
                 onChangeText={(text) => {
                   const formatted = formatarCEP(text);
                   setCep(formatted);

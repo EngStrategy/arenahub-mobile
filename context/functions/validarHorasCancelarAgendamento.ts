@@ -4,6 +4,10 @@ const horasTrimmed = horas.trim();
     return "A quantidade de horas é obrigatória.";
   }
 
+  if (!/^\d+$/.test(horasTrimmed)) {
+    return "A política de cancelamento deve conter apenas dígitos.";
+  }
+
 const horasNumber = Number(horasTrimmed);
 
 if (horasNumber > 168) {

@@ -1,3 +1,12 @@
-export function formatarCEP (cep: string): string {
-    return cep.replace(/\D/g, "").replace(/(\d{5})(\d{3})/, "$1-$2");
+export function formatarCEP(value: string): string {
+  const digits = value.replace(/\D/g, '');
+
+  if (digits.length === 0) return '';
+
+  if (digits.length <= 5) {
+    return digits;
+  }
+
+  // Acima de 5 → adiciona o hífen
+  return `${digits.slice(0, 5)}-${digits.slice(5, 8)}`;
 }
