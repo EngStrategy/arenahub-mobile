@@ -173,7 +173,7 @@ export default function LoginScreen() {
         >
 
           <Button size="xl" className="justify-start p-0"
-            onPress={() => router.push('/register/register')}
+            onPress={() => router.push('/register')}
           >
             <Text className="text-sm text-gray-500">Não tem uma conta?</Text>
             <ButtonText className="text-base text-green-primary p-0 underline"
