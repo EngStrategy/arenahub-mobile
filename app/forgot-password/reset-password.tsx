@@ -14,8 +14,7 @@ import { Input } from '@/components/ui/input';
 import { resetPassword } from '@/services/api/auth';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { PasswordStrengthIndicator } from '@/components/forms/passwordStrengthIndicador';
-import { validatePassword } from "@/context/functions/validatePassword";
-import { validateConfirmPassword } from "@/context/functions/validateConfirmPassword";
+import { validarPassword, validarConfirmPassword } from "@/context/functions/validators";
 
 export default function ResetPasswordScreen() {
   const { email } = useLocalSearchParams<{ email: string }>();
@@ -43,9 +42,9 @@ export default function ResetPasswordScreen() {
 
 
   const handleResetPassword = async () => {
-    // Validações
-    const passwordError = validatePassword(password);
-    const confirmPasswordError = validateConfirmPassword(password, confirmPassword);
+    // validarções
+    const passwordError = validarPassword(password);
+    const confirmPasswordError = validarConfirmPassword(password, confirmPassword);
 
     setErrors({
       password: passwordError,

@@ -11,13 +11,16 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { EyeIcon, EyeOffIcon, InfoIcon } from '@/components/ui/icon';
 import { PasswordStrengthIndicator } from "@/components/forms/passwordStrengthIndicador";
 import { View, TextInput, TouchableOpacity, ScrollView } from "react-native";
-import { formatarTelefone } from "@/context/functions/formatarTelefone";
-import { validatePassword } from "@/context/functions/validatePassword";
-import { validateConfirmPassword } from "@/context/functions/validateConfirmPassword";
+import { formatarTelefone } from "@/context/functions/formatters";
+import { validarPassword } from "@/context/functions/validarPassword";
+import { validarConfirmPassword } from "@/context/functions/validarConfirmPassword";
 import { validarTelefone } from "@/context/functions/validarTelefone";
 import { validarNome } from "@/context/functions/validarNome";
-import { validateEmail } from "@/context/functions/validateEmail";
+import { validarEmail } from "@/context/functions/validarEmail";
 import { InputTexto } from "./formInputs/InputTexto";
+import { InputNumero } from "./formInputs/InputNumero";
+import { InputSenha } from "./formInputs/InputSenha";
+
 
 export const RegistroAtleta = ({ className }: { className?: string }) => {
   const router = useRouter();
@@ -43,9 +46,9 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
 
   const handleRegister = async () => {
     const nomeError = validarNome(nome);
-    const emailError = validateEmail(email) ? '' : 'Email inválido.';
-    const passwordError = validatePassword(senha);
-    const confirmPasswordError = validateConfirmPassword(senha, confirmSenha);
+    const emailError = validarEmail(email) ? '' : 'Email inválido.';
+    const passwordError = validarPassword(senha);
+    const confirmPasswordError = validarConfirmPassword(senha, confirmSenha);
     const telefoneError = validarTelefone(telefone);
 
     setErrors(prev => ({
@@ -87,7 +90,7 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
             value={nome}
             onChangeText={setNome}
             onBlur={() => {
-            const nomeError = validarNome(nome);
+              const nomeError = validarNome(nome);
               setErrors(prev => ({ ...prev, nome: nomeError }));
             }}
             error={errors.nome}
@@ -100,90 +103,52 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
             onChangeText={setEmail}
             keyboardType="email-address"
             onBlur={() => {
-              const emailError = validateEmail(email) ? '' : 'Email inválido.';
+              const emailError = validarEmail(email) ? '' : 'Email inválido.';
               setErrors(prev => ({ ...prev, email: emailError }));
             }}
             error={errors.email}
           />
 
-          <VStack space="xs">
-            <Text className="text-typography-500">Telefone</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg" >
-              <InputField
-                className="text-base"
-                type="text"
-                placeholder="(99) 99999-9999"
-                value={telefone}
-                onChangeText={(text) => setTelefone(formatarTelefone(text))}
-                keyboardType="phone-pad"
-                maxLength={15}
-                onBlur={() => {
-                  const telefoneError = validarTelefone(telefone);
-                  setErrors(prev => ({ ...prev, telefone: telefoneError }));
-                }}
-              />
-            </Input>
-            {errors.telefone && <Text className="text-sm text-red-500">{errors.telefone}</Text>}
-          </VStack>
+          <InputNumero
+            label="Telefone"
+            placeholder="(99) 99999-9999"
+            value={telefone}
+            onChangeText={(text) => setTelefone(formatarTelefone(text))}
+            keyboardType="phone-pad"
+            maxLength={15}
+            onBlur={() => {
+              const telefoneError = validarTelefone(telefone);
+              setErrors((prev) => ({ ...prev, telefone: telefoneError }));
+            }}
+            error={errors.telefone}
+          />
 
-          <VStack space="xs">
-            <Text className="text-typography-500">Senha</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg">
-              <InputField
-                className="text-base"
-                type={showPassword ? "text" : "password"}
-                placeholder="Insira sua senha"
-                value={senha}
-                onChangeText={setSenha}
-                secureTextEntry={!showPassword}
-                onFocus={() => setIsPasswordFocused(true)}
-                onBlur={() => {
-                  setIsPasswordFocused(false);
-                  const passwordError = validatePassword(senha);
-                  setErrors(prev => ({ ...prev, password: passwordError }));
-                }}
-              />
-              <InputSlot className="pr-3" onPress={toggleShowPassword}>
-                <InputIcon
-                  as={showPassword ? EyeIcon : EyeOffIcon}
-                  fill="none"
-                />
-              </InputSlot>
-            </Input>
-            {errors.password && <Text className="text-sm text-red-500">{errors.password}</Text>}
+          <InputSenha
+            label="Senha"
+            value={senha}
+            onChangeText={setSenha}
+            onBlur={() => {
+              const passwordError = validarPassword(senha);
+              setErrors((prev) => ({ ...prev, password: passwordError }));
+            }}
+            error={errors.password}
+            showStrengthIndicator
+            StrengthIndicatorComponent={<PasswordStrengthIndicator password={senha} />}
+          />
 
-            {isPasswordFocused && (
-              <View className="pb-4">
-                <PasswordStrengthIndicator password={senha} />
-              </View>
-            )}
-          </VStack>
 
-          <VStack space="xs">
-            <Text className="text-typography-500">Confirme sua senha</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg">
-              <InputField
-                className="text-base"
-                type={showPasswordConfirmed ? "text" : "password"}
-                placeholder="Confirme sua senha"
-                value={confirmSenha}
-                onChangeText={setConfirmSenha}
-                secureTextEntry={!showPasswordConfirmed}
-                onBlur={() => {
-                  const confirmPasswordError = validateConfirmPassword(confirmSenha, senha);
-                  setErrors(prev => ({ ...prev, confirmPassword: confirmPasswordError }));
-                }}
-              />
-              <InputSlot className="pr-3" onPress={toggleShowPasswordConfirmed}>
-                <InputIcon
-                  as={showPasswordConfirmed ? EyeIcon : EyeOffIcon}
-                  fill="none"
-                />
-              </InputSlot>
+          <InputSenha
+            label="Confirme sua senha"
+            placeholder="Confirme sua senha"
+            value={confirmSenha}
+            onChangeText={setConfirmSenha}
+            onBlur={() => {
+              const confirmPasswordError = validarConfirmPassword(confirmSenha, senha);
+              setErrors((prev) => ({ ...prev, confirmPassword: confirmPasswordError }));
+            }}
+            error={errors.confirmPassword}
+          />
 
-            </Input>
-            {errors.confirmPassword && <Text className="text-sm text-red-500">{errors.confirmPassword}</Text>}
-          </VStack>
 
           <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
             onPress={handleRegister}
