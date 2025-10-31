@@ -17,7 +17,7 @@ import { validateConfirmPassword } from "@/context/functions/validateConfirmPass
 import { validarTelefone } from "@/context/functions/validarTelefone";
 import { validarNome } from "@/context/functions/validarNome";
 import { validateEmail } from "@/context/functions/validateEmail";
-
+import { InputTexto } from "./formInputs/InputTexto";
 
 export const RegistroAtleta = ({ className }: { className?: string }) => {
   const router = useRouter();
@@ -81,43 +81,30 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
     <ScrollView className={`flex-1 bg-white ${className ?? ""}`}>
       <FormControl className="pt-5 rounded-lg w-full">
         <VStack className="w-full gap-4">
-          <VStack space="xs">
-            <Text className="text-typography-500">Nome</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg" >
-              <InputField
-                className="text-base"
-                type="text"
-                placeholder="Insira seu nome"
-                value={nome}
-                onChangeText={setNome}
-                onBlur={() => {
-                  const nomeError = validarNome(nome);
-                  setErrors(prev => ({ ...prev, nome: nomeError }));
-                }}
-                maxLength={100}
-              />
-            </Input>
-            {errors.nome && <Text className="text-sm text-red-500">{errors.nome}</Text>}
-          </VStack>
+          <InputTexto
+            label="Nome"
+            placeholder="Insira seu nome"
+            value={nome}
+            onChangeText={setNome}
+            onBlur={() => {
+            const nomeError = validarNome(nome);
+              setErrors(prev => ({ ...prev, nome: nomeError }));
+            }}
+            error={errors.nome}
+          />
 
-          <VStack space="xs">
-            <Text className="text-typography-500">Email</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg" >
-              <InputField
-                className="text-base"
-                type="text"
-                placeholder="Insira seu email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                onBlur={() => {
-                  const emailError = validateEmail(email) ? '' : 'Email inválido.';
-                  setErrors(prev => ({ ...prev, email: emailError }));
-                }}
-              />
-            </Input>
-            {errors.email && <Text className="text-sm text-red-500">{errors.email}</Text>}
-          </VStack>
+          <InputTexto
+            label="Email"
+            placeholder="Insira seu email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            onBlur={() => {
+              const emailError = validateEmail(email) ? '' : 'Email inválido.';
+              setErrors(prev => ({ ...prev, email: emailError }));
+            }}
+            error={errors.email}
+          />
 
           <VStack space="xs">
             <Text className="text-typography-500">Telefone</Text>

@@ -11,7 +11,6 @@ import { VStack } from '@/components/ui/vstack';
 import { Switch } from '@/components/ui/switch';
 import { Text } from '@/components/ui/text';
 import { Picker } from "@react-native-picker/picker";
-import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonText } from '@/components/ui/button';
 import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
@@ -38,6 +37,8 @@ import apiCEP from "@/services/apiCEP";
 import apiCidades from "@/services/apiCidades";
 import apiLatitudeLongitude from "@/services/apiLatitudeLongitude";
 import { estados } from "@/data/estados";
+import { InputTexto } from "./formInputs/InputTexto";
+import { InputTextArea } from "./formInputs/InputTextArea";
 
 // type CITYResponse = {
 //   id: number;
@@ -322,7 +323,7 @@ export const RegistroArena = ({ className }: { className?: string }) => {
               <InputField
                 className="text-base"
                 type="text"
-                placeholder="Insira seu CPF"
+                placeholder="000.000.000-00"
                 value={cpfProprietario}
                 onChangeText={(text) => setCpfProprietario(formatarCPF(text))}
                 maxLength={14}
@@ -336,24 +337,18 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             {errors.cpfProprietario && <Text className="text-sm text-red-500">{errors.cpfProprietario}</Text>}
           </VStack>
 
-          <VStack space="xs">
-            <Text className="text-typography-500">Email</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg" >
-              <InputField
-                className="text-base"
-                type="text"
-                placeholder="Insira seu email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                onBlur={() => {
-                  const emailError = validateEmail(email) ? '' : 'Email inválido.';
-                  setErrors(prev => ({ ...prev, email: emailError }));
-                }}
-              />
-            </Input>
-            {errors.email && <Text className="text-sm text-red-500">{errors.email}</Text>}
-          </VStack>
+          <InputTexto
+            label="Email"
+            placeholder="Insira seu email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            onBlur={() => {
+              const emailError = validateEmail(email) ? '' : 'Email inválido.';
+              setErrors(prev => ({ ...prev, email: emailError }));
+            }}
+            error={errors.email}
+          />
 
           <VStack space="xs">
             <Text className="text-typography-500">Telefone</Text>
@@ -499,23 +494,18 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             <Text size="sm">Utilizaremos seu CPF em vez do CNPJ caso selecione esta opção</Text>
           </VStack>
 
-          <VStack space="xs">
-            <Text className="text-typography-500">Nome da arena</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg" >
-              <InputField
-                className="text-base"
-                type="text"
-                placeholder="Insira o nome da arena"
-                value={nomeArena}
-                onChangeText={setNomeArena}
-                onBlur={() => {
-                  const nomeArenaError = validarNomeArena(nomeArena);
-                  setErrors(prev => ({ ...prev, nomeArena: nomeArenaError }));
-                }}
-              />
-            </Input>
-            {errors.nomeArena && <Text className="text-sm text-red-500">{errors.nomeArena}</Text>}
-          </VStack>
+          <InputTexto
+            label="Nome da arena"
+            placeholder="Insira o nome da arena"
+            value={nomeArena}
+            onChangeText={setNomeArena}
+            onBlur={() => {
+              const nomeArenaError = validarNomeArena(nomeArena);
+              setErrors(prev => ({ ...prev, nomeArena: nomeArenaError }));
+            }}
+            error={errors.nomeArena}
+          />
+
 
           <VStack space="xs">
             <Text className="text-typography-500">CEP</Text>
@@ -590,41 +580,30 @@ export const RegistroArena = ({ className }: { className?: string }) => {
           </View>
 
 
-          <VStack space="xs">
-            <Text className="text-typography-500">Bairro</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg" >
-              <InputField
-                className="text-base"
-                type="text"
-                placeholder="Digite seu bairro"
-                value={bairro}
-                onChangeText={setBairro}
-                onBlur={() => {
-                  const bairroError = validarBairro(bairro);
-                  setErrors(prev => ({ ...prev, bairro: bairroError }));
-                }}
-              />
-            </Input>
-            {errors.bairro && <Text className="text-sm text-red-500">{errors.bairro}</Text>}
-          </VStack>
+          <InputTexto
+            label="Bairro"
+            placeholder="Digite seu bairro"
+            value={bairro}
+            onChangeText={setBairro}
+            onBlur={() => {
+              const bairroError = validarBairro(bairro);
+              setErrors(prev => ({ ...prev, bairro: bairroError }));
+            }}
+            error={errors.bairro}
+          />
 
-          <VStack space="xs">
-            <Text className="text-typography-500">Rua</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg" >
-              <InputField
-                className="text-base"
-                type="text"
-                placeholder="Digite sua rua"
-                value={rua}
-                onChangeText={setRua}
-                onBlur={() => {
-                  const ruaError = validarRua(rua);
-                  setErrors(prev => ({ ...prev, rua: ruaError }));
-                }}
-              />
-            </Input>
-            {errors.rua && <Text className="text-sm text-red-500">{errors.rua}</Text>}
-          </VStack>
+
+          <InputTexto
+            label="Rua"
+            placeholder="Digite sua rua"
+            value={rua}
+            onChangeText={setRua}
+            onBlur={() => {
+              const ruaError = validarRua(rua);
+              setErrors(prev => ({ ...prev, rua: ruaError }));
+            }}
+            error={errors.rua}
+          />
 
           <VStack space="xs">
             <Text className="text-typography-500">Número</Text>
@@ -645,23 +624,18 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             {errors.numero && <Text className="text-sm text-red-500">{errors.numero}</Text>}
           </VStack>
 
-          <VStack space="xs">
-            <Text className="text-typography-500">Complemento</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg" >
-              <InputField
-                className="text-base"
-                type="text"
-                placeholder="Digite o complemento"
-                value={complemento}
-                onChangeText={setComplemento}
-                onBlur={() => {
-                  const complementoError = validarComplemento(complemento);
-                  setErrors(prev => ({ ...prev, complemento: complementoError }));
-                }}
-              />
-            </Input>
-            {errors.complemento && <Text className="text-sm text-red-500">{errors.complemento}</Text>}
-          </VStack>
+          <InputTexto
+            label="Complemento"
+            placeholder="Digite o complemento"
+            value={complemento}
+            onChangeText={setComplemento}
+            onBlur={() => {
+              const complementoError = validarComplemento(complemento);
+              setErrors(prev => ({ ...prev, complemento: complementoError }));
+            }}
+            error={errors.complemento}
+          />
+
 
           <VStack space="xs">
             <Text className="text-typography-500">Política de Cancelamento</Text>
@@ -683,21 +657,13 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             {errors.horasCancelarAgendamento && <Text className="text-sm text-red-500">{errors.horasCancelarAgendamento}</Text>}
           </VStack>
 
-          <VStack space="xs">
-            <HStack className="gap-1 items-center">
-              <Text className="text-typography-500">Descrição </Text>
-              <Text className="text-typography-500 text-xs">(Opcional)</Text>
-            </HStack>
-
-            <Textarea size="xl" className="border border-gray-300 rounded-lg" >
-              <TextareaInput
-                className="text-base"
-                placeholder="Digite algo que descreva sua arena e ajude a atrair mais reservas"
-                value={descricao}
-                onChangeText={setDescricao}
-              />
-            </Textarea>
-          </VStack>
+          <InputTextArea
+            label="Descrição"
+            placeholder="Digite algo que descreva sua arena e ajude a atrair mais reservas"
+            value={descricao}
+            onChangeText={setDescricao}
+            optional
+          />
 
           <Button
             size="xl"
