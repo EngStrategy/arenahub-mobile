@@ -25,7 +25,7 @@ import { InputTextArea } from "./formInputs/InputTextArea";
 import { InputNumero } from "./formInputs/InputNumero";
 import { InputSenha } from "./formInputs/InputSenha";
 import { formatarCNPJ, formatarCEP, formatarCPF, formatarTelefone } from "@/context/functions/formatters";
-import { 
+import {
   validarBairro,
   validarCEP,
   validarCNPJ,
@@ -301,7 +301,7 @@ export const RegistroArena = ({ className }: { className?: string }) => {
           longitude: longitude ? Number(longitude) : undefined,
         },
       });
-
+      console.log('Resposta do backend:', response);
       await AsyncStorage.setItem('userData', JSON.stringify(response));
 
       alert('Conta criada com sucesso!');

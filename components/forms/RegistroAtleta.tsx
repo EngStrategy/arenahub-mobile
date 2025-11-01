@@ -1,5 +1,5 @@
-// components/RegistroAtleta.tsx
 import React, { useState } from "react";
+import axios from "axios";
 import { useRouter } from 'expo-router';
 import { registerAthlete } from '@/services/api/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,14 +12,16 @@ import { EyeIcon, EyeOffIcon, InfoIcon } from '@/components/ui/icon';
 import { PasswordStrengthIndicator } from "@/components/forms/passwordStrengthIndicador";
 import { View, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { formatarTelefone } from "@/context/functions/formatters";
-import { validarPassword } from "@/context/functions/validarPassword";
-import { validarConfirmPassword } from "@/context/functions/validarConfirmPassword";
-import { validarTelefone } from "@/context/functions/validarTelefone";
-import { validarNome } from "@/context/functions/validarNome";
-import { validarEmail } from "@/context/functions/validarEmail";
 import { InputTexto } from "./formInputs/InputTexto";
 import { InputNumero } from "./formInputs/InputNumero";
 import { InputSenha } from "./formInputs/InputSenha";
+import { 
+  validarNome,
+  validarTelefone,
+  validarConfirmPassword,
+  validarEmail,
+  validarPassword
+} from "@/context/functions/validators";
 
 
 export const RegistroAtleta = ({ className }: { className?: string }) => {
@@ -64,7 +66,7 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
 
     try {
       const response = await registerAthlete({ nome, email, telefone, senha });
-
+      console.log('Resposta do backend:', response);
       await AsyncStorage.setItem('userData', JSON.stringify(response));
 
       router.push({
