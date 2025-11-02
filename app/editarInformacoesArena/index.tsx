@@ -182,7 +182,7 @@ export const RegistroArena = ({ className }: { className?: string }) => {
 
   const consultarCep = async (cep: string, setters: CepValues) => {
     if (!cep) {
-      Alert.alert("Erro", "Por favor, insira um CEP!");s
+      Alert.alert("Erro", "Por favor, insira um CEP!");
       return;
     }
 
