@@ -41,14 +41,6 @@ import {
   validarEmail,
   validarPassword
 } from "@/context/functions/validators";
-
-
-
-// type CITYResponse = {
-//   id: number;
-//   nome: string;
-// };
-
 interface CnpjValues {
   setNome: (value: string) => void;
   setEstado: (value: string) => void;
@@ -67,13 +59,6 @@ interface CepValues {
   setEstado: (value: string) => void;
   setComplemento: (value: string) => void;
 }
-
-
-// import { createAtleta } from '@/app/api/entities/atleta';
-// -> Função que provavelmente chama sua API, ainda não traduzida
-// -> Função externa, você pode implementar ou comentar
-// -> Hook externo ainda não traduzido
-
 
 export const RegistroArena = ({ className }: { className?: string }) => {
   const router = useRouter();
@@ -183,7 +168,7 @@ export const RegistroArena = ({ className }: { className?: string }) => {
       setters.setRua(est.logradouro || "");
       setters.setBairro(est.bairro || "");
       setters.setNumero(est.numero || "");
-      setters.setCep(est.cep || "");
+      setters.setCep(formatarCEP(est.cep || ""));
       setters.setComplemento(est.complemento || "");
 
       Alert.alert("Sucesso", "CNPJ consultado com sucesso!");
@@ -304,7 +289,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
       console.log('Resposta do backend:', response);
       await AsyncStorage.setItem('userData', JSON.stringify(response));
 
-      alert('Conta criada com sucesso!');
       router.push({
         pathname: '/register/ativarConta',
         params: { email },
@@ -315,7 +299,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
       setLoading(false);
     }
   };
-
 
   return (
     <View>
@@ -334,7 +317,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             }}
             error={errors.cpfProprietario}
           />
-
 
           <InputTexto
             label="Email"
@@ -363,7 +345,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             error={errors.telefone}
           />
 
-
           <InputSenha
             label="Senha"
             value={senha}
@@ -377,7 +358,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             StrengthIndicatorComponent={<PasswordStrengthIndicator password={senha} />}
           />
 
-
           <InputSenha
             label="Confirme sua senha"
             placeholder="Confirme sua senha"
@@ -389,7 +369,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             }}
             error={errors.confirmPassword}
           />
-
 
           <InputNumero
             label="CNPJ"
@@ -434,7 +413,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
                 ios_backgroundColor="#34D399"
               />
 
-
             </HStack>
             <Text size="sm">Utilizaremos seu CPF em vez do CNPJ caso selecione esta opção</Text>
           </VStack>
@@ -450,7 +428,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             }}
             error={errors.nomeArena}
           />
-
 
           <InputNumero
             label="CEP"
@@ -476,7 +453,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             }}
             error={errors.cep}
           />
-
 
           <View className="flex-row w-full gap-x-4">
             {/* ESTADO */}
@@ -518,7 +494,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             </View>
           </View>
 
-
           <InputTexto
             label="Bairro"
             placeholder="Digite seu bairro"
@@ -530,7 +505,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             }}
             error={errors.bairro}
           />
-
 
           <InputTexto
             label="Rua"
@@ -557,7 +531,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             error={errors.numero}
           />
 
-
           <InputTexto
             label="Complemento"
             placeholder="Digite o complemento"
@@ -569,7 +542,6 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             }}
             error={errors.complemento}
           />
-
 
           <VStack space="xs">
             <Text className="text-typography-500">Política de Cancelamento</Text>

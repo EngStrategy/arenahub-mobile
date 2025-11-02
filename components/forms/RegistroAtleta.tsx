@@ -23,7 +23,6 @@ import {
   validarPassword
 } from "@/context/functions/validators";
 
-
 export const RegistroAtleta = ({ className }: { className?: string }) => {
   const router = useRouter();
   const [nome, setNome] = useState("");
@@ -81,7 +80,6 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
     }
   };
 
-
   return (
     <ScrollView className={`flex-1 bg-white ${className ?? ""}`}>
       <FormControl className="pt-5 rounded-lg w-full">
@@ -138,7 +136,6 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
             StrengthIndicatorComponent={<PasswordStrengthIndicator password={senha} />}
           />
 
-
           <InputSenha
             label="Confirme sua senha"
             placeholder="Confirme sua senha"
@@ -150,7 +147,6 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
             }}
             error={errors.confirmPassword}
           />
-
 
           <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
             onPress={handleRegister}
