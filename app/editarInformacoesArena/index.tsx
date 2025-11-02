@@ -13,17 +13,16 @@ import { Text } from '@/components/ui/text';
 import { Picker } from "@react-native-picker/picker";
 import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonText } from '@/components/ui/button';
-import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
 import { PasswordStrengthIndicator } from "@/components/forms/passwordStrengthIndicador";
 import apiCNPJ from "@/services/apiCNPJ";
 import apiCEP from "@/services/apiCEP";
 import apiCidades from "@/services/apiCidades";
 import apiLatitudeLongitude from "@/services/apiLatitudeLongitude";
 import { estados } from "@/data/estados";
-import { InputTexto } from "./formInputs/InputTexto";
-import { InputTextArea } from "./formInputs/InputTextArea";
-import { InputNumero } from "./formInputs/InputNumero";
-import { InputSenha } from "./formInputs/InputSenha";
+import { InputTexto } from "@/components/forms/formInputs/InputTexto";
+import { InputTextArea } from "@/components/forms/formInputs/InputTextArea";
+import { InputNumero } from "@/components/forms/formInputs/InputNumero";
+import { InputSenha } from "@/components/forms/formInputs/InputSenha";
 import { formatarCNPJ, formatarCEP, formatarCPF, formatarTelefone } from "@/context/functions/formatters";
 import {
   validarBairro,

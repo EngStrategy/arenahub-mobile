@@ -1,12 +1,8 @@
 import { login } from '@/services/api/auth';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
-import { FormControl } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
-import { HStack } from '@/components/ui/hstack';
-import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
 import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
@@ -173,7 +169,7 @@ export default function LoginScreen() {
         >
 
           <Button size="xl" className="justify-start p-0"
-            onPress={() => router.push('/register/register')}
+            onPress={() => router.push('/register')}
           >
             <Text className="text-sm text-gray-500">Não tem uma conta?</Text>
             <ButtonText className="text-base text-green-primary p-0 underline"

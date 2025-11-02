@@ -14,7 +14,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { forgotPassword } from '@/services/api/auth';
 import { Button, ButtonText } from '@/components/ui/button';
-import { validateEmail } from '@/context/functions/validateEmail';
+import { validarEmail } from '@/context/functions/validators';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
@@ -26,7 +26,7 @@ export default function ForgotPasswordScreen() {
       return;
     }
 
-    if (!validateEmail(email)) {
+    if (!validarEmail(email)) {
       Alert.alert('Atenção', 'Por favor, insira um email válido');
       return;
     }
