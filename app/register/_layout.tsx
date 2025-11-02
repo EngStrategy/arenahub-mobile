@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
-export default function LoginLayout() {
+export default function RegisterLayout() {
   return (
     <View style={styles.container}>
       <Stack
