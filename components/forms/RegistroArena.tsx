@@ -32,7 +32,6 @@ import {
   validarComplemento,
   validarCPF,
   validarHorasCancelarAgendamento,
-  validarNome,
   validarNomeArena,
   validarNumero,
   validarRua,
@@ -543,25 +542,19 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             error={errors.complemento}
           />
 
-          <VStack space="xs">
-            <Text className="text-typography-500">Política de Cancelamento</Text>
-            <Input size="xl" className="border border-gray-300 rounded-lg" >
-              <InputField
-                className="text-sm"
-                type="text"
-                placeholder="Defina o prazo mínimo, em horas, que um atleta pode cancelar um agendamento sem custos. (Máximo 168 horas = 7 dias)"
-                value={horasCancelarAgendamento}
-                onChangeText={setHorasCancelarAgendamento}
-                keyboardType="phone-pad"
-                maxLength={3}
-                onBlur={() => {
-                  const horasError = validarHorasCancelarAgendamento(horasCancelarAgendamento);
-                  setErrors(prev => ({ ...prev, horasCancelarAgendamento: horasError }));
-                }}
-              />
-            </Input>
-            {errors.horasCancelarAgendamento && <Text className="text-sm text-red-500">{errors.horasCancelarAgendamento}</Text>}
-          </VStack>
+          <InputNumero
+            label="Política de Cancelamento"
+            estilo="text-sm"
+            placeholder="Defina o prazo mínimo, em horas, que um atleta pode cancelar um agendamento sem custos. (Máximo 168 horas = 7 dias)"
+            value={horasCancelarAgendamento}
+            onChangeText={setHorasCancelarAgendamento}
+            keyboardType="phone-pad"
+            onBlur={() => {
+              const horasError = validarHorasCancelarAgendamento(horasCancelarAgendamento);
+              setErrors(prev => ({ ...prev, horasCancelarAgendamento: horasError }));
+            }}
+            error={errors.horasCancelarAgendamento}
+          />
 
           <InputTextArea
             label="Descrição"
@@ -585,7 +578,9 @@ export const RegistroArena = ({ className }: { className?: string }) => {
       </FormControl>
 
       <Button size="xl" className="justify-start p-0"
-        onPress={() => router.push('/login')}
+        // onPress={() => router.push('/login')}
+        onPress={() => router.push('/editar-arena')}
+
       >
         <Text className="text-sm text-gray-500">Já possui uma conta?</Text>
         <ButtonText className="text-base text-green-primary p-0 underline"

@@ -16,6 +16,7 @@ interface InputNumeroProps {
   isDisabled?: boolean;
   editable?: boolean;
   onMaxLengthReached?: (formatted: string) => void;
+  estilo?: string;
 }
 
 export const InputNumero = ({
@@ -32,6 +33,7 @@ export const InputNumero = ({
   isDisabled,
   editable,
   onMaxLengthReached,
+  estilo,
 }: InputNumeroProps) => {
   const handleChange = (text: string) => {
     const formatted = formatar ? formatar(text) : text;
@@ -56,7 +58,7 @@ export const InputNumero = ({
         isDisabled={isDisabled}
       >
         <InputField
-          className="text-base"
+          className={estilo ?? "text-base"} 
           type="text"
           placeholder={placeholder}
           value={value}
