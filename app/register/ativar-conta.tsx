@@ -87,7 +87,7 @@ export default function VerifyCodeScreen() {
     <ScrollView contentContainerClassName="flex-grow p-6 justify-center bg-white">
       {/* Ícone */}
       <View className="items-center mb-6">
-        <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
+        <View className="w-20 h-20 rounded-full bg-green-primary items-center justify-center">
           <Ionicons name="mail" size={32} color="#fff" />
         </View>
       </View>
@@ -134,7 +134,7 @@ export default function VerifyCodeScreen() {
           activeOpacity={0.7}
         >
           <Text className={`text-sm font-medium ${
-            timer > 0 || loading ? 'text-gray-400' : 'text-[#22c55e]'
+            timer > 0 || loading ? 'text-gray-400' : 'text-green-primary'
           }`}>
             Reenviar código
           </Text>
@@ -143,7 +143,7 @@ export default function VerifyCodeScreen() {
 
       {/* Botão Confirmar */}
       <TouchableOpacity
-        className={`bg-[#22c55e] p-4 rounded-lg items-center ${
+        className={`bg-green-primary p-4 rounded-lg items-center ${
           loading ? 'opacity-60' : ''
         }`}
         onPress={() => handleVerifyCode(code.join(''))}

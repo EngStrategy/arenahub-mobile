@@ -123,7 +123,7 @@ export default function ResetPasswordScreen() {
         <VStack className="w-full gap-4">
           {/* Ícone */}
           <View className="items-center mb-6">
-            <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
+            <View className="w-20 h-20 rounded-full bg-green-primary items-center justify-center">
               <Ionicons name="lock-closed" size={32} color="#fff" />
             </View>
           </View>
