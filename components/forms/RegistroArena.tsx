@@ -289,7 +289,7 @@ export const RegistroArena = ({ className }: { className?: string }) => {
       await AsyncStorage.setItem('userData', JSON.stringify(response));
 
       router.push({
-        pathname: '/register/ativarConta',
+        pathname: '/register/ativar-conta',
         params: { email },
       });
     } catch (error: any) {
