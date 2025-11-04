@@ -23,12 +23,12 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  accessToken: string;
+  userId: string;
+  name: string;
+  role: string;
+  imageUrl?: string;
+  statusAssinatura?: string;
 }
 
 // ==================== FUNÇÕES DA API ====================
