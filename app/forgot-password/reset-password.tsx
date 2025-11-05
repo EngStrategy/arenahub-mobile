@@ -9,11 +9,14 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { PasswordStrength } from '@/components/ui/PasswordStrength';
+import { Button, ButtonText } from '@/components/ui/button';
 import { resetPassword } from '@/services/api/auth';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { PasswordStrengthIndicator } from '@/components/forms/passwordStrengthIndicador';
+import { validarPassword, validarConfirmPassword } from "@/context/functions/validators";
+import { VStack } from '@/components/ui/vstack';
+import { FormControl } from '@/components/ui/form-control';
+import { InputSenha } from '@/components/forms/formInputs/InputSenha';
 
 export default function ResetPasswordScreen() {
   const { email } = useLocalSearchParams<{ email: string }>();
@@ -39,30 +42,11 @@ export default function ResetPasswordScreen() {
     }
   }, [isSuccess, countdown]);
 
-  const validatePassword = (pwd: string) => {
-    if (!pwd) {
-      return 'Por favor, insira sua nova senha';
-    }
-    if (pwd.length < 8) {
-      return 'A senha deve ter no mínimo 8 caracteres';
-    }
-    return '';
-  };
-
-  const validateConfirmPassword = (pwd: string, confirmPwd: string) => {
-    if (!confirmPwd) {
-      return 'Por favor, confirme sua nova senha';
-    }
-    if (pwd !== confirmPwd) {
-      return 'As senhas não coincidem';
-    }
-    return '';
-  };
 
   const handleResetPassword = async () => {
-    // Validações
-    const passwordError = validatePassword(password);
-    const confirmPasswordError = validateConfirmPassword(password, confirmPassword);
+    // validarções
+    const passwordError = validarPassword(password);
+    const confirmPasswordError = validarConfirmPassword(password, confirmPassword);
 
     setErrors({
       password: passwordError,
@@ -113,10 +97,14 @@ export default function ResetPasswordScreen() {
 
           {/* Botão para ir direto ao Login */}
           <View className="w-full mb-3">
-            <Button
-              text="Continuar para o Login"
+            <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
               onPress={() => router.replace('/login')}
-            />
+              disabled={loading}
+            >
+              <ButtonText className="text-base text-white">
+                Continuar para o Login
+              </ButtonText>
+            </Button>
           </View>
         </ScrollView>
       </View>
@@ -124,7 +112,6 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    // Substitua <KeyboardAvoidingView> e <ScrollView> por <KeyboardAwareScrollView>
     <KeyboardAwareScrollView
       className="flex-1 bg-white" // Estilo do KAV
       contentContainerClassName="flex-grow p-6 justify-center" // Estilo do ScrollView
@@ -132,64 +119,63 @@ export default function ResetPasswordScreen() {
       enableOnAndroid={true} // Importante para Android
       extraScrollHeight={Platform.OS === 'ios' ? 20 : 0} // Um pequeno ajuste fino (opcional)
     >
-      {/* Ícone */}
-      <View className="items-center mb-6">
-        <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
-          <Ionicons name="lock-closed" size={32} color="#fff" />
-        </View>
-      </View>
+      <FormControl className="pt-5 rounded-lg w-full">
+        <VStack className="w-full gap-4">
+          {/* Ícone */}
+          <View className="items-center mb-6">
+            <View className="w-20 h-20 rounded-full bg-green-primary items-center justify-center">
+              <Ionicons name="lock-closed" size={32} color="#fff" />
+            </View>
+          </View>
 
-      {/* Título */}
-      <Text className="text-2xl font-semibold text-center mb-2 text-gray-800">
-        Redefinir Senha
-      </Text>
-      <Text className="text-sm text-center text-gray-500 mb-8">
-        Escolha uma nova senha para sua conta.
-      </Text>
+          {/* Título */}
+          <Text className="text-2xl font-semibold text-center mb-2 text-gray-800">
+            Redefinir Senha
+          </Text>
+          <Text className="text-sm text-center text-gray-500 mb-8">
+            Escolha uma nova senha para sua conta.
+          </Text>
 
-      {/* Input Nova Senha */}
-      <Input
-        label="Nova Senha"
-        placeholder="Digite a nova senha"
-        value={password}
-        onChangeText={(text) => {
-          setPassword(text);
-          setErrors({ ...errors, password: '' });
-        }}
-        secureTextEntry
-        showPasswordToggle
-        error={errors.password}
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
+          {/* Input Nova Senha */}
+          <InputSenha
+            label="Senha"
+            value={password}
+            onChangeText={setPassword}
+            onBlur={() => {
+              const passwordError = validarPassword(password);
+              setErrors((prev) => ({ ...prev, password: passwordError }));
+            }}
+            error={errors.password}
+            showStrengthIndicator
+            StrengthIndicatorComponent={<PasswordStrengthIndicator password={password} />}
+          />
 
-      {/* Indicador de Força da Senha */}
-      {password.length > 0 && <PasswordStrength password={password} />}
+          {/* Input Confirmar Senha */}
+          <InputSenha
+            label="Confirme sua senha"
+            placeholder="Confirme sua senha"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            onBlur={() => {
+              const confirmPasswordError = validarConfirmPassword(confirmPassword, password);
+              setErrors((prev) => ({ ...prev, confirmPassword: confirmPasswordError }));
+            }}
+            error={errors.confirmPassword}
+          />
 
-      {/* Input Confirmar Senha */}
-      <Input
-        label="Confirmar Nova Senha"
-        placeholder="Confirme a nova senha"
-        value={confirmPassword}
-        onChangeText={(text) => {
-          setConfirmPassword(text);
-          setErrors({ ...errors, confirmPassword: '' });
-        }}
-        secureTextEntry
-        showPasswordToggle
-        error={errors.confirmPassword}
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-
-      {/* Botão Confirmar */}
-      <View className="w-full mb-3">
-        <Button
-          text="Confirmar"
-          onPress={handleResetPassword}
-          loading={loading}
-        />
-      </View>
+          {/* Botão Confirmar */}
+          <View className="w-full mb-3">
+            <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
+              onPress={handleResetPassword}
+              disabled={loading}
+            >
+              <ButtonText className="text-base text-white">
+                Confirmar
+              </ButtonText>
+            </Button>
+          </View>
+        </VStack>
+      </FormControl>
     </KeyboardAwareScrollView>
   );
 }

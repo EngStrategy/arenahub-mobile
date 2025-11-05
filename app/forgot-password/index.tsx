@@ -13,15 +13,12 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { forgotPassword } from '@/services/api/auth';
+import { Button, ButtonText } from '@/components/ui/button';
+import { validarEmail } from '@/context/functions/validators';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
 
   const handleSendEmail = async () => {
     if (!email.trim()) {
@@ -29,7 +26,7 @@ export default function ForgotPasswordScreen() {
       return;
     }
 
-    if (!validateEmail(email)) {
+    if (!validarEmail(email)) {
       Alert.alert('Atenção', 'Por favor, insira um email válido');
       return;
     }
@@ -38,7 +35,7 @@ export default function ForgotPasswordScreen() {
     try {
       await forgotPassword(email);
       Alert.alert('Sucesso', 'Código enviado para seu email!');
-      
+
       // Navegar para tela de verificação passando o email
       router.push({
         pathname: '/forgot-password/verify-code',
@@ -62,7 +59,7 @@ export default function ForgotPasswordScreen() {
       >
         {/* Ícone */}
         <View className="items-center mb-6">
-          <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
+          <View className="w-20 h-20 rounded-full bg-green-primary items-center justify-center">
             <Ionicons name="lock-closed" size={32} color="#fff" />
           </View>
         </View>
@@ -94,20 +91,18 @@ export default function ForgotPasswordScreen() {
         </View>
 
         {/* Botão Confirmar */}
-        <TouchableOpacity
-          className={`bg-[#22c55e] p-4 rounded-lg items-center mb-4 ${loading ? 'opacity-60' : ''}`}
+        <Button size="xl" className="w-50% flex-0.5 bg-green-primary rounded-lg py-3 mt-4"
           onPress={handleSendEmail}
           disabled={loading}
-          activeOpacity={0.8}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text className="text-white text-base font-semibold">
+            <ButtonText className="text-base text-white">
               Confirmar
-            </Text>
+            </ButtonText>
           )}
-        </TouchableOpacity>
+        </Button>
 
         {/* Link de Voltar */}
         <TouchableOpacity
@@ -117,9 +112,14 @@ export default function ForgotPasswordScreen() {
           activeOpacity={0.7}
         >
           <Ionicons name="arrow-back" size={16} color="#22c55e" />
-          <Text className="text-[#22c55e] text-sm">
-            Voltar para a página de login
-          </Text>
+          <Button size="xl" className="justify-start p-0"
+            onPress={() => router.push('/login')}
+          >
+            <ButtonText className="text-base text-green-primary p-0"
+            >
+              Voltar para a página de login
+            </ButtonText>
+          </Button>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

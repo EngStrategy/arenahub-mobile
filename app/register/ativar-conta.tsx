@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { verifyResetCode, forgotPassword } from '@/services/api/auth';
+import { verifyCode, resendVerificationCode } from '@/services/api/auth';
 import { useTimer } from '@/hooks/useTimer';
 
 export default function VerifyCodeScreen() {
@@ -54,13 +54,10 @@ export default function VerifyCodeScreen() {
 
     setLoading(true);
     try {
-      await verifyResetCode({ email: email!, code: fullCode });
+      await verifyCode({ email: email!, code: fullCode });
       Alert.alert('Sucesso', 'Código verificado!');
       
-      router.push({
-        pathname: '/forgot-password/reset-password',
-        params: { email },
-      });
+      router.push('/(tabs)');
     } catch (error: any) {
       Alert.alert('Erro', error.message);
       setCode(['', '', '', '', '', '']);
@@ -71,8 +68,12 @@ export default function VerifyCodeScreen() {
   };
 
   const handleResendCode = async () => {
+    if (!email) {
+      Alert.alert('Erro', 'Email não fornecido');
+      return;
+    }
     try {
-      await forgotPassword(email!);
+      await resendVerificationCode(email);
       Alert.alert('Sucesso', 'Novo código enviado!');
       startTimer(45);
       setCode(['', '', '', '', '', '']);

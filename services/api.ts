@@ -3,8 +3,8 @@ import axios from 'axios';
 
 // ⚠️ ALTERE AQUI PARA SEU IP LOCAL
 const API_BASE_URL = __DEV__ 
-  ? 'http://172.25.183.158:8080/api/v1'  // Desenvolvimento
-  : 'https://sua-api.com/api/v1';     // Produção
+  ? 'http://192.168.0.7:8080/api/v1'  // Desenvolvimento (IP do seu PC)
+  : 'https://api.arenahub.app/api/v1'; // Produção
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
