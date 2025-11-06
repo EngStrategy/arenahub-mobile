@@ -1,5 +1,5 @@
 
-import { api } from '../api';
+import { api } from '@/services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ==================== INTERFACES ====================
