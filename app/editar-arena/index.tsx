@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getArenaById, updateArena } from "@/services/api/edits";
+import { getArenaById, updateArena } from "@/services/api//entities/arena";
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Picker } from "@react-native-picker/picker";
 // import {Trash2, Upload} from 'lucide-react-native';
@@ -162,44 +162,6 @@ export default function EditarArena() {
     return userData.id;
   };
 
-  // useEffect(() => {
-  //   const fetchArena = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const userDataString = await AsyncStorage.getItem('userData');
-  //       if (!userDataString) throw new Error('Usuário não encontrado');
-  //       const userData = JSON.parse(userDataString);
-  //       const id = userData.id;
-
-
-
-  //       const data = await getArenaById(`/arenas/${id}`);
-
-
-  //       // setNome(data.nome);
-  //       // setTelefone(data.telefone);
-  //       // setCep(data.endereco.cep);
-  //       // setRua(data.endereco.rua);
-  //       // setBairro(data.endereco.bairro);
-  //       // setNumero(data.endereco.numero);
-  //       // setEstado(data.endereco.estado);
-  //       // setCidade(data.endereco.cidade);
-  //       // setComplemento(data.endereco.complemento || "");
-  //       // setHorasCancelarAgendamento(String(data.horasCancelarAgendamento ?? ""));
-  //       // setDescricao(data.descricao || "");
-  //       // setUrlFoto(data.urlFoto || null);
-
-  //     } catch (error) {
-  //       console.error(error);
-  //       // Alert.alert("Erro", "Não foi possível carregar os dados da arena.");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchArena();
-  // }, []);
-
   useEffect(() => {
     const fetchArena = async () => {
       try {
@@ -289,7 +251,7 @@ export default function EditarArena() {
       router.back();
 
     } catch (error: any) {
-      console.error(error);
+      console.error(error); 
       Alert.alert("Erro", error.response?.data?.message || "Erro ao atualizar arena");
     } finally {
       setLoading(false);
