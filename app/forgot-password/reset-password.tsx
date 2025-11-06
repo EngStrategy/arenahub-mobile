@@ -79,7 +79,7 @@ export default function ResetPasswordScreen() {
         <ScrollView contentContainerClassName="flex-grow p-6 justify-center items-center">
           {/* Ícone de Sucesso */}
           <View className="items-center mb-6">
-            <View className="w-20 h-20 rounded-full bg-[#22c55e] items-center justify-center">
+            <View className="w-20 h-20 rounded-full bg-green-primary items-center justify-center">
               <Ionicons name="checkmark" size={48} color="#fff" />
             </View>
           </View>
