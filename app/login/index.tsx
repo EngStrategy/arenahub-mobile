@@ -48,11 +48,20 @@ export default function LoginScreen() {
       const response = await login({ email, password });
 
       // 2. Salvar o token e os dados do usuário no AsyncStorage
-      await AsyncStorage.setItem('userToken', response.token);
+      await AsyncStorage.setItem('userToken', response.accessToken);
 
       // Salve outros dados do usuário se a API retornar
-      const userData = JSON.stringify(response.user);
+      const userData = JSON.stringify({
+        id: response.userId,
+        name: response.name,
+        role:response.role,
+        imageUrl: response.imageUrl,
+        statusAssinatura: response.statusAssinatura,
+      });
+
       await AsyncStorage.setItem('userData', userData);
+
+      Alert.alert('ID do usuário', String(response.userId));
 
       // 3. Redirecionar para a área logada do app
       // router.replace('/(tabs)/'); // (Ou qualquer que seja sua rota "Home")

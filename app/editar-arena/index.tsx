@@ -8,6 +8,7 @@ import apiCidades from "@/services/apiCidades";
 import apiLatitudeLongitude from "@/services/apiLatitudeLongitude";
 import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { estados } from "@/data/estados";
 import { View, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ScrollView } from "react-native";
 import { InputTexto } from "@/components/forms/formInputs/InputTexto";
@@ -41,7 +42,6 @@ const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png";
 
 export default function EditarArena() {
   const router = useRouter();
-  const { id } = useLocalSearchParams(); // id da arena
   const [loading, setLoading] = useState(false);
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
@@ -55,7 +55,7 @@ export default function EditarArena() {
   const [complemento, setComplemento] = useState("");
   const [horasCancelarAgendamento, setHorasCancelarAgendamento] = useState("");
   const [cidades, setCidades] = useState<{ id: number; nome: string }[]>([]);
-  const [imageUrl, setImageUrl] = useState<string | null>(DEFAULT_AVATAR_URL);
+  const [urlFoto, setUrlFoto] = useState<string | null>(DEFAULT_AVATAR_URL);
   const [errors, setErrors] = useState<{
     telefone?: string;
     cep?: string;
@@ -79,35 +79,6 @@ export default function EditarArena() {
     descricao: '',
     horasCancelarAgendamento: '',
   });
-
-  // Modo de teste manual: popula o formulário com dados fictícios sem precisar configurar serviços
-  const manualTestMode = true;
-
-  useEffect(() => {
-    if (!manualTestMode) return;
-
-    // Mock básico para facilitar testes manuais
-    setNome("Arena de Teste");
-    setTelefone(formatarTelefone("11987654321"));
-    setCep(formatarCEP("01234567"));
-    setRua("Rua Exemplo");
-    setBairro("Bairro Teste");
-    setNumero("123");
-    setEstado("SP");
-    setCidade("São Paulo");
-    setComplemento("Próximo ao parque");
-    setDescricao("Descrição de teste para validação manual.");
-    setHorasCancelarAgendamento("24");
-    setImageUrl("https://imgur.com/gallery/same-picture-of-steve-buscemi-every-day-day-2192-isk94gf");
-
-    // Mock de cidades para o estado selecionado (evita chamadas à API durante testes manuais)
-    setCidades([
-      { id: 3550308, nome: "São Paulo" },
-      { id: 3509502, nome: "Campinas" },
-      { id: 3548708, nome: "Santos" },
-    ]);
-  }, [id]);
-
 
   const consultarCep = async (cep: string, setters: CepValues) => {
     if (!cep) {
@@ -156,7 +127,7 @@ export default function EditarArena() {
   };
 
   const handleRemoveImage = () => {
-    setImageUrl(DEFAULT_AVATAR_URL);
+    setUrlFoto(DEFAULT_AVATAR_URL);
     Alert.alert('Sucesso', 'Foto removida.');
   };
 
@@ -183,35 +154,89 @@ export default function EditarArena() {
     fetchCidades();
   }, [estado]);
 
-  // Buscar arena pelo id
+
+  const getUserId = async () => {
+    const userDataString = await AsyncStorage.getItem('userData');
+    if (!userDataString) throw new Error('Usuário não encontrado');
+    const userData = JSON.parse(userDataString);
+    return userData.id;
+  };
+
   // useEffect(() => {
   //   const fetchArena = async () => {
   //     try {
   //       setLoading(true);
+  //       const userDataString = await AsyncStorage.getItem('userData');
+  //       if (!userDataString) throw new Error('Usuário não encontrado');
+  //       const userData = JSON.parse(userDataString);
+  //       const id = userData.id;
+
+
+
   //       const data = await getArenaById(`/arenas/${id}`);
-  //       setNome(data.nome);
-  //       setTelefone(data.telefone);
-  //       setCep(data.endereco.cep);
-  //       setRua(data.endereco.rua);
-  //       setBairro(data.endereco.bairro);
-  //       setNumero(data.endereco.numero);
-  //       setEstado(data.endereco.estado);
-  //       setCidade(data.endereco.cidade);
-  //       setComplemento(data.endereco.complemento || "");
-  //       setHorasCancelarAgendamento(String(data.horasCancelarAgendamento ?? ""));
-  //       setDescricao(data.descricao || "");
-  //       setImageUrl(data.imageUrl || null);
+
+
+  //       // setNome(data.nome);
+  //       // setTelefone(data.telefone);
+  //       // setCep(data.endereco.cep);
+  //       // setRua(data.endereco.rua);
+  //       // setBairro(data.endereco.bairro);
+  //       // setNumero(data.endereco.numero);
+  //       // setEstado(data.endereco.estado);
+  //       // setCidade(data.endereco.cidade);
+  //       // setComplemento(data.endereco.complemento || "");
+  //       // setHorasCancelarAgendamento(String(data.horasCancelarAgendamento ?? ""));
+  //       // setDescricao(data.descricao || "");
+  //       // setUrlFoto(data.urlFoto || null);
+
   //     } catch (error) {
   //       console.error(error);
-  //       Alert.alert("Erro", "Não foi possível carregar os dados da arena.");
+  //       // Alert.alert("Erro", "Não foi possível carregar os dados da arena.");
   //     } finally {
   //       setLoading(false);
   //     }
   //   };
-  //   fetchArena();
-  // }, [id]);
 
-  // Atualizar arena, lembrar da longitude e latitude
+  //   fetchArena();
+  // }, []);
+
+  useEffect(() => {
+    const fetchArena = async () => {
+      try {
+        setLoading(true);
+
+        const userDataString = await AsyncStorage.getItem('userData');
+        if (!userDataString) throw new Error('Usuário não encontrado');
+        const userData = JSON.parse(userDataString);
+        const id = userData.id;
+
+        const data = await getArenaById(id); // agora passa só o id, sem "/arenas/" aqui
+        setNome(data.nome);
+        setTelefone(data.telefone);
+        setCep(data.endereco.cep);
+        setRua(data.endereco.rua);
+        setBairro(data.endereco.bairro);
+        setNumero(data.endereco.numero);
+        setEstado(data.endereco.estado);
+        setCidade(data.endereco.cidade);
+        setComplemento(data.endereco.complemento || "");
+        setHorasCancelarAgendamento(String(data.horasCancelarAgendamento ?? ""));
+        setDescricao(data.descricao || "");
+        setUrlFoto(data.urlFoto || null);
+
+        // preencher os campos com os dados da arena...
+      } catch (error) {
+        console.error(error);
+        Alert.alert("Erro", "Não foi possível carregar os dados da arena.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArena();
+  }, []);
+
+
   const handleUpdateArena = async () => {
     const nomeError = validarNomeArena(nome);
     const telefoneError = validarTelefone(telefone);
@@ -236,39 +261,100 @@ export default function EditarArena() {
 
     const { latitude, longitude } = await atualizarLatitudeLongitude(cep);
 
-    alert("Dados da arena atualizados com sucesso!");
+    try {
+      const userDataString = await AsyncStorage.getItem('userData');
+      const userData = JSON.parse(userDataString!);
+      const id = userData.id;
 
-    // try {
-    //   setLoading(true);
-    //   await updateArena(`/arenas/${id}`, {
-    //     nome,
-    //     telefone,
-    //     endereco: {
-    //       cep,
-    //       estado,
-    //       cidade,
-    //       bairro,
-    //       rua,
-    //       numero,
-    //       complemento,
-    //       latitude,
-    //       longitude,
-    //     },
-    //     imageUrl,
-    //     descricao,
-    //     horasCancelarAgendamento: Number(horasCancelarAgendamento),
-    //   });
-    //   Alert.alert("Sucesso", "Arena atualizada!");
-    //   router.back();
-    // } catch (error: any) {
-    //   console.error(error);
-    //   Alert.alert("Erro", error.response?.data?.message || "Erro ao atualizar arena");
-    // } finally {
-    //   setLoading(false);
-    // }
+      await updateArena(id, {
+        nome,
+        telefone,
+        endereco: {
+          cep,
+          estado,
+          cidade,
+          bairro,
+          rua,
+          numero,
+          complemento,
+          latitude,
+          longitude,
+        },
+        descricao,
+        horasCancelarAgendamento: Number(horasCancelarAgendamento),
+        urlFoto: urlFoto === DEFAULT_AVATAR_URL ? "" : urlFoto || "",
+      });
+
+      Alert.alert("Sucesso", "Arena atualizada!");
+      router.back();
+
+    } catch (error: any) {
+      console.error(error);
+      Alert.alert("Erro", error.response?.data?.message || "Erro ao atualizar arena");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Fetch cidades quando estado mudar
+
+  // // Atualizar arena, lembrar da longitude e latitude
+  // const handleUpdateArena = async () => {
+  //   const nomeError = validarNomeArena(nome);
+  //   const telefoneError = validarTelefone(telefone);
+  //   const cepError = validarCEP(cep);
+  //   const bairroError = validarBairro(bairro);
+  //   const ruaError = validarRua(rua);
+  //   const numeroError = validarNumero(numero);
+  //   const complementoError = validarComplemento(complemento);
+
+  //   setErrors(prev => ({
+  //     ...prev,
+  //     nome: nomeError,
+  //     telefone: telefoneError,
+  //     cep: cepError,
+  //     bairro: bairroError,
+  //     rua: ruaError,
+  //     numero: numeroError,
+  //     complemento: complementoError,
+  //   }));
+
+  //   setLoading(true);
+
+  //   const { latitude, longitude } = await atualizarLatitudeLongitude(cep);
+
+  //   alert("Dados da arena atualizados com sucesso!");
+
+  //   // try {
+  //   //   setLoading(true);
+  //   //   await updateArena(`/ arenas / ${ id }`, {
+  //   //     nome,
+  //   //     telefone,
+  //   //     endereco: {
+  //   //       cep,
+  //   //       estado,
+  //   //       cidade,
+  //   //       bairro,
+  //   //       rua,
+  //   //       numero,
+  //   //       complemento,
+  //   //       latitude,
+  //   //       longitude,
+  //   //     },
+  //   //     imageUrl,
+  //   //     descricao,
+  //   //     horasCancelarAgendamento: Number(horasCancelarAgendamento),
+  //   //   });
+  //   //   Alert.alert("Sucesso", "Arena atualizada!");
+  //   //   router.back();
+  //   // } catch (error: any) {
+  //   //   console.error(error);
+  //   //   Alert.alert("Erro", error.response?.data?.message || "Erro ao atualizar arena");
+  //   // } finally {
+  //   //   setLoading(false);
+  //   // }
+  // };
+
+  // // Fetch cidades quando estado mudar
 
   return (
     <KeyboardAvoidingView

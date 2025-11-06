@@ -57,7 +57,7 @@ export default function VerifyCodeScreen() {
       await verifyCode({ email: email!, code: fullCode });
       Alert.alert('Sucesso', 'Código verificado!');
       
-      router.push('/(tabs)');
+      router.push('/login');
     } catch (error: any) {
       Alert.alert('Erro', error.message);
       setCode(['', '', '', '', '', '']);
