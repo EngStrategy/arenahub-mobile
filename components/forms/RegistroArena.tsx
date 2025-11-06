@@ -544,7 +544,7 @@ export const RegistroArena = ({ className }: { className?: string }) => {
 
           <InputNumero
             label="Política de Cancelamento"
-            estilo="text-sm"
+            className="text-sm"
             placeholder="Defina o prazo mínimo, em horas, que um atleta pode cancelar um agendamento sem custos. (Máximo 168 horas = 7 dias)"
             value={horasCancelarAgendamento}
             onChangeText={setHorasCancelarAgendamento}
