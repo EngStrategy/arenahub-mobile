@@ -43,11 +43,8 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      // 1. Chamar a API real
-      // (Ajuste a resposta da API conforme o que você definiu)
       const response = await login({ email, password });
 
-      // 2. Salvar o token e os dados do usuário no AsyncStorage
       await AsyncStorage.setItem('userToken', response.accessToken);
 
       // Salve outros dados do usuário se a API retornar

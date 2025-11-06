@@ -88,15 +88,7 @@ export interface UpdateArenaResponse {
  */
 export const getArenaById = async (id: string): Promise<GetArenaResponse> => {
   try {
-    const token = await AsyncStorage.getItem('userToken');
-    if (!token) throw new Error('Token não encontrado. Faça login novamente.');
-
-    const response = await api.get(`/arenas/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
+    const response = await api.get(`/arenas/${id}`);
     return response.data;
   } catch (error: any) {
     console.error('📄 Erro ao buscar arena:', error.response?.data || error.message);
@@ -110,15 +102,7 @@ export const getArenaById = async (id: string): Promise<GetArenaResponse> => {
  */
 export const updateArena = async (id: string, data: UpdateArenaRequest) => {
   try {
-    const token = await AsyncStorage.getItem('userToken');
-    if (!token) throw new Error('Token não encontrado. Faça login novamente.');
-
-    const response = await api.put(`/arenas/${id}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
+    const response = await api.put(`/arenas/${id}`, data);
     return response.data;
   } catch (error: any) {
     console.error('📄 Erro ao atualizar arena:', error.response?.data || error.message);

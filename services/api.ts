@@ -1,5 +1,6 @@
 // services/api.ts
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ⚠️ ALTERE AQUI PARA SEU IP LOCAL
 const API_BASE_URL = __DEV__ 
@@ -14,11 +15,17 @@ export const api = axios.create({
   },
 });
 
-// Interceptor para debug de requisições
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    const token = await AsyncStorage.getItem('userToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
     console.log('📦 Data:', config.data);
+    console.log('🔑 Token:', token ? 'Presente ✅' : 'Ausente ❌');
+
     return config;
   },
   (error) => {
@@ -27,7 +34,7 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para debug de respostas
+// 💬 Interceptor para debug de respostas
 api.interceptors.response.use(
   (response) => {
     console.log('✅ Response:', response.status, response.config.url);
@@ -36,13 +43,12 @@ api.interceptors.response.use(
   (error) => {
     console.error('❌ Response Error:', error.response?.status, error.message);
     console.error('📄 Error Data:', error.response?.data);
-    
-    // Tratar erro e retornar mensagem apropriada
-    const message = 
-      error.response?.data?.message || 
-      error.response?.data || 
+
+    const message =
+      error.response?.data?.message ||
+      error.response?.data ||
       'Erro ao processar requisição';
-    
+
     return Promise.reject(new Error(message));
   }
 );
