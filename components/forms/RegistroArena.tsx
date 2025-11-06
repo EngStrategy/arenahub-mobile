@@ -579,7 +579,7 @@ export const RegistroArena = ({ className }: { className?: string }) => {
 
       <Button size="xl" className="justify-start p-0"
         // onPress={() => router.push('/login')}
-        onPress={() => router.push('/editar-arena')}
+        onPress={() => router.push('/login')}
 
       >
         <Text className="text-sm text-gray-500">Já possui uma conta?</Text>

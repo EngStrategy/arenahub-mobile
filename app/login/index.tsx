@@ -61,10 +61,6 @@ export default function LoginScreen() {
 
       await AsyncStorage.setItem('userData', userData);
 
-      Alert.alert('ID do usuário', String(response.userId));
-
-      // 3. Redirecionar para a área logada do app
-      // router.replace('/(tabs)/'); // (Ou qualquer que seja sua rota "Home")
       router.push('/(tabs)');
 
     } catch (error: any) {
