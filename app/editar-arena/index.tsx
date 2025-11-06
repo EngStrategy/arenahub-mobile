@@ -258,66 +258,6 @@ export default function EditarArena() {
     }
   };
 
-
-  // // Atualizar arena, lembrar da longitude e latitude
-  // const handleUpdateArena = async () => {
-  //   const nomeError = validarNomeArena(nome);
-  //   const telefoneError = validarTelefone(telefone);
-  //   const cepError = validarCEP(cep);
-  //   const bairroError = validarBairro(bairro);
-  //   const ruaError = validarRua(rua);
-  //   const numeroError = validarNumero(numero);
-  //   const complementoError = validarComplemento(complemento);
-
-  //   setErrors(prev => ({
-  //     ...prev,
-  //     nome: nomeError,
-  //     telefone: telefoneError,
-  //     cep: cepError,
-  //     bairro: bairroError,
-  //     rua: ruaError,
-  //     numero: numeroError,
-  //     complemento: complementoError,
-  //   }));
-
-  //   setLoading(true);
-
-  //   const { latitude, longitude } = await atualizarLatitudeLongitude(cep);
-
-  //   alert("Dados da arena atualizados com sucesso!");
-
-  //   // try {
-  //   //   setLoading(true);
-  //   //   await updateArena(`/ arenas / ${ id }`, {
-  //   //     nome,
-  //   //     telefone,
-  //   //     endereco: {
-  //   //       cep,
-  //   //       estado,
-  //   //       cidade,
-  //   //       bairro,
-  //   //       rua,
-  //   //       numero,
-  //   //       complemento,
-  //   //       latitude,
-  //   //       longitude,
-  //   //     },
-  //   //     imageUrl,
-  //   //     descricao,
-  //   //     horasCancelarAgendamento: Number(horasCancelarAgendamento),
-  //   //   });
-  //   //   Alert.alert("Sucesso", "Arena atualizada!");
-  //   //   router.back();
-  //   // } catch (error: any) {
-  //   //   console.error(error);
-  //   //   Alert.alert("Erro", error.response?.data?.message || "Erro ao atualizar arena");
-  //   // } finally {
-  //   //   setLoading(false);
-  //   // }
-  // };
-
-  // // Fetch cidades quando estado mudar
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -518,7 +458,7 @@ export default function EditarArena() {
 
             <InputNumero
               label="Política de Cancelamento"
-              estilo="text-sm"
+              className="text-sm"
               placeholder="Defina o prazo mínimo, em horas, que um atleta pode cancelar um agendamento sem custos. (Máximo 168 horas = 7 dias)"
               value={horasCancelarAgendamento}
               onChangeText={setHorasCancelarAgendamento}

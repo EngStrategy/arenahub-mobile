@@ -23,7 +23,6 @@ export const validarCNPJ = (cnpj: string): string => {
     if (cnpjTrimmed.length !== 14) {
         return 'CNPJ inválido.';
     }
-    // rejeita sequências repetidas (ex: '00000000000000', '11111111111111', ...)
     if (/^(\d)\1{13}$/.test(cnpjTrimmed)) {
         return 'CNPJ inválido.';
     }
