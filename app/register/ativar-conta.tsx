@@ -134,7 +134,7 @@ export default function VerifyCodeScreen() {
           activeOpacity={0.7}
         >
           <Text className={`text-sm font-medium ${
-            timer > 0 || loading ? 'text-gray-400' : 'text-green-primary'
+            timer > 0 || loading ? 'text-gray-400' : 'text-grenn-primary'
           }`}>
             Reenviar código
           </Text>

@@ -28,9 +28,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Esqueci Senha',
+          title: 'Editar Arena',
           tabBarIcon: ({ color }) => <TabBarIcon name="lock" color={color} />,
-          href: '/forgot-password',
+          href: '/editar-arena',
         }}
       />
       <Tabs.Screen
