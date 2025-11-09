@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getArenaById, updateArena } from "@/services/api//entities/arena";
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import {Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { Picker } from "@react-native-picker/picker";
 // import {Trash2, Upload} from 'lucide-react-native';
 import apiCEP from "@/services/apiCEP";

@@ -210,7 +210,7 @@ export default function InformacoesPessoais() {
                             className="bg-gray-100" // Estilo para parecer desabilitado
                         />
 
-                        <Link href="/editar-atleta/alterar-senha" asChild>
+                        {/* <Link href="/editar-atleta/alterar-senha" asChild>
                             <Button
                                 variant="outline" // Estilo de "borda"
                                 action="secondary" // Cor secundária
@@ -218,7 +218,7 @@ export default function InformacoesPessoais() {
                             >
                                 <ButtonText>Alterar Senha</ButtonText>
                             </Button>
-                        </Link>
+                        </Link> */}
 
                         {/* --- Botões (igual ao EditarArena.js) --- */}
                         <View className="flex-row w-full gap-5 mt-4">
