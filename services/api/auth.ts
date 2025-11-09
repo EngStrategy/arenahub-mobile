@@ -77,8 +77,6 @@ export interface VerifyCodeRequest {
   code: string;
 }
 
-
-
 export interface ResetPasswordRequest {
   email: string;
   newPassword: string;
