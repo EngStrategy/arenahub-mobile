@@ -28,9 +28,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Editar Arena',
+          title: 'Arenas',
           tabBarIcon: ({ color }) => <TabBarIcon name="lock" color={color} />,
-          href: '/editar-arena',
+          href: '/arenas',
         }}
       />
       <Tabs.Screen

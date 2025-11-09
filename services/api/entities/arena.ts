@@ -1,6 +1,4 @@
-
 import api from '@/services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ==================== INTERFACES ====================
 
@@ -31,7 +29,6 @@ export interface GetArenaResponse {
   quantidadeAvaliacoes: number;
   statusAssinatura: string;
 }
-
 
 export interface UpdateArenaRequest {
   nome: string;
@@ -80,6 +77,47 @@ export interface UpdateArenaResponse {
   statusAssinatura: string;
 }
 
+export interface ArenaQueryParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+  direction?: 'asc' | 'desc';
+  cidade?: string;
+  esporte?: 'FUTEBOL_SOCIETY' | 'FUTEBOL_SETE' | 'FUTEBOL_ONZE' | 'FUTSAL' | 'BEACHTENNIS' | 'VOLEI' | 'FUTEVOLEI' | 'BASQUETE' | 'HANDEBOL';
+  latitude?: number;
+  longitude?: number;
+  raioKm?: number;
+}
+
+export interface PaginatedResponse<T> {
+  content: T[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      sorted: boolean;
+      empty: boolean;
+      unsorted: boolean;
+    };
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  sort: {
+    sorted: boolean;
+    empty: boolean;
+    unsorted: boolean;
+  };
+  first: boolean;
+  numberOfElements: number;
+  empty: boolean;
+}
+
 // ==================== FUNÇÕES DA API ====================
 
 /**
@@ -97,6 +135,22 @@ export const getArenaById = async (id: string): Promise<GetArenaResponse> => {
 };
 
 /**
+ * Buscar todas as arenas com filtros
+ * Endpoint: GET /api/v1/arenas
+ */
+export const getAllArenas = async (
+  params: ArenaQueryParams = {}
+): Promise<PaginatedResponse<GetArenaResponse>> => {
+  try {
+    const response = await api.get('/arenas', { params });
+    return response.data;
+  } catch (error: any) {
+    console.error('📄 Erro ao buscar arenas:', error.response?.data || error.message);
+    throw new Error('Erro ao buscar arenas');
+  }
+};
+
+/**
  * Atualizar arena
  * Endpoint: PUT /api/v1/arenas/{id}
  */
@@ -109,4 +163,3 @@ export const updateArena = async (id: string, data: UpdateArenaRequest) => {
     throw new Error('Erro ao atualizar arena');
   }
 };
-
