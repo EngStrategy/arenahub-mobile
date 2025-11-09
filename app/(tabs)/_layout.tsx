@@ -1,11 +1,36 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 export default function TabLayout() {
   // -----------------------------------------------------------------
   // Mude esta variável para testar os dois modos!
   const isLogged = true;
   // -----------------------------------------------------------------
+
+  const [role, setRole] = React.useState<string | null>(null);
+
+  const getUserRole = async () => {
+    const userDataString = await AsyncStorage.getItem('userData');
+    if (!userDataString) throw new Error('Usuário não encontrado');
+    const userData = JSON.parse(userDataString);
+    return userData.role;
+  };
+
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const r = await getUserRole();
+        if (mounted) setRole(r);
+      } catch {
+        if (mounted) setRole(null);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <Tabs
@@ -69,6 +94,13 @@ export default function TabLayout() {
         name="perfil"
         options={{
           title: 'Perfil',
+          // href: '/editar-arena',
+          href:
+            role === ' ARENA'
+              ? '/editar-arena'
+              : role === 'ATLETA'
+                ? '/editar-atleta'
+                : '/editar-arena',
         }}
       />
     </Tabs>

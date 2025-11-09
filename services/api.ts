@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ⚠️ ALTERE AQUI PARA SEU IP LOCAL
 const API_BASE_URL = __DEV__ 
-  ? 'http://192.168.10.128:8080/api/v1'  // Desenvolvimento (IP do seu PC)
+  ? 'http://192.168.0.7:8080/api/v1'  // Desenvolvimento (IP do seu PC)
   : 'https://api.arenahub.app/api/v1'; // Produção
 
 export const api = axios.create({
@@ -15,24 +15,24 @@ export const api = axios.create({
   },
 });
 
-// api.interceptors.request.use(
-//   async (config) => {
-//     const token = await AsyncStorage.getItem('userToken');
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
+api.interceptors.request.use(
+  async (config) => {
+    const token = await AsyncStorage.getItem('userToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-//     console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
-//     console.log('📦 Data:', config.data);
-//     console.log('🔑 Token:', token ? 'Presente ✅' : 'Ausente ❌');
+    console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
+    console.log('📦 Data:', config.data);
+    console.log('🔑 Token:', token ? 'Presente ✅' : 'Ausente ❌');
 
-//     return config;
-//   },
-//   (error) => {
-//     console.error('❌ Request Error:', error);
-//     return Promise.reject(error);
-//   }
-// );
+    return config;
+  },
+  (error) => {
+    console.error('❌ Request Error:', error);
+    return Promise.reject(error);
+  }
+);
 
 // 💬 Interceptor para debug de respostas
 api.interceptors.response.use(
