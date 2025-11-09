@@ -203,13 +203,6 @@ export default function InformacoesPessoais() {
                             error={errors.telefone}
                         />
 
-                        <InputTexto
-                            label="Email"
-                            value={email}
-                            editable={false} // Campo desabilitado
-                            className="bg-gray-100" // Estilo para parecer desabilitado
-                        />
-
                         {/* --- Botões (igual ao EditarArena.js) --- */}
                         <View className="flex-row w-full gap-5 mt-4">
                             <Button
