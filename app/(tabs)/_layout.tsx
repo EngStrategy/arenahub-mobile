@@ -28,7 +28,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Editar Arena',
+          title: 'Editar arena',
           tabBarIcon: ({ color }) => <TabBarIcon name="lock" color={color} />,
           href: '/editar-arena',
         }}
@@ -36,9 +36,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="two"
         options={{
-          title: 'Verificar Código',
+          title: 'editar atleta',
           tabBarIcon: ({ color }) => <TabBarIcon name="check" color={color} />,
-          href: '/forgot-password/verify-code',
+          href: '/editar-atleta',
         }}
       />
       <Tabs.Screen

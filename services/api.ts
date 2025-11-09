@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ⚠️ ALTERE AQUI PARA SEU IP LOCAL
 const API_BASE_URL = __DEV__ 
-  ? 'http://192.168.0.7:8080/api/v1'  // Desenvolvimento (IP do seu PC)
+  ? 'http://192.168.0.8:8080/api/v1'  // Desenvolvimento (IP do seu PC)
   : 'https://api.arenahub.app/api/v1'; // Produção
 
 export const api = axios.create({
@@ -36,7 +36,12 @@ api.interceptors.request.use(
 
 // 💬 Interceptor para debug de respostas
 api.interceptors.response.use(
-  (response) => {
+  
+  async (response) => {
+  const token = await AsyncStorage.getItem('userToken');
+    if (token) {
+      response.headers.Authorization = `Bearer ${token}`;
+    }
     console.log('✅ Response:', response.status, response.config.url);
     return response;
   },
