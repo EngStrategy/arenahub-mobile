@@ -72,8 +72,6 @@ export default function AlterarSenha() {
 
         setLoading(true);
 
-        alert(role);
-
         try {
             if (role === 'ATLETA') {
                 await updatePassword(senhaAtual, novaSenha, confirmarSenha);
