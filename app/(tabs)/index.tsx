@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
   ActivityIndicator,
   FlatList,
   RefreshControl,
@@ -10,11 +9,16 @@ import { Picker } from '@react-native-picker/picker';
 import { Text } from '@/components/ui/text';
 import { InputTexto } from '@/components/forms/formInputs/InputTexto';
 import { ArenaCard } from '@/components/ui/cards/arena-card';
-import { getAllArenas, GetArenaResponse, ArenaQueryParams } from '@/services/api/entities/arena';
+import {
+  getAllArenas,
+  GetArenaResponse,
+  ArenaQueryParams,
+} from '@/services/api/entities/arena';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppHeader } from '@/components/layout/AppHeader'; // Certifique-se que o caminho está correto
+import { AppHeader } from '@/components/layout/AppHeader';
+import { VStack } from '@/components/ui/vstack';
 
 const sportLabels: Record<string, string> = {
   '': 'Todos os esportes',
@@ -31,62 +35,65 @@ const sportLabels: Record<string, string> = {
 
 type SportKey = keyof typeof sportLabels;
 
-const ArenasListHeader = React.memo(({
-  cidade,
-  esporte,
-  loading,
-  page,
-  totalElements,
-  onCidadeChange,
-  onEsporteChange,
-}: {
-  cidade: string;
-  esporte: SportKey;
-  loading: boolean;
-  page: number;
-  totalElements: number;
-  onCidadeChange: (text: string) => void;
-  onEsporteChange: (value: SportKey) => void;
-}) => {
-  return (
-    <View>
-      {/* 1. Header reutilizável */}
-      <AppHeader />
+const ArenasListHeader = React.memo(
+  ({
+    cidade,
+    esporte,
+    loading,
+    page,
+    totalElements,
+    onCidadeChange,
+    onEsporteChange,
+  }: {
+    cidade: string;
+    esporte: SportKey;
+    loading: boolean;
+    page: number;
+    totalElements: number;
+    onCidadeChange: (text: string) => void;
+    onEsporteChange: (value: SportKey) => void;
+  }) => {
+    return (
+      <VStack>
+        {/* 1. Header reutilizável */}
+        <AppHeader />
 
-      {/* 2. Filtros */}
-      <View className="bg-white px-4 pb-3 border-gray-200">
-        <InputTexto
-          placeholder="Buscar por cidade..."
-          value={cidade}
-          onChangeText={onCidadeChange}
-        />
+        {/* 2. Filtros */}
+        <VStack className="bg-white px-4 pb-3 border-gray-200">
+          <InputTexto
+            placeholder="Buscar por cidade..."
+            value={cidade}
+            onChangeText={onCidadeChange}
+          />
 
-        <View className="mt-3">
-          <View className="border border-gray-300 rounded-lg h-12 justify-center">
-            <Picker
-              selectedValue={esporte}
-              onValueChange={(value) => onEsporteChange(value as SportKey)} 
-              style={Platform.OS === 'ios' ? { height: 150 } : {}}
-              className="w-full"
-            >
-              {Object.entries(sportLabels).map(([key, label]) => (
-                <Picker.Item key={key} label={label} value={key} />
-              ))}
-            </Picker>
-          </View>
-        </View>
+          <VStack className="mt-3">
+            <VStack className="border border-gray-300 rounded-lg h-12 justify-center">
+              <Picker
+                selectedValue={esporte}
+                onValueChange={value => onEsporteChange(value as SportKey)}
+                style={Platform.OS === 'ios' ? { height: 150 } : {}}
+                className="w-full"
+              >
+                {Object.entries(sportLabels).map(([key, label]) => (
+                  <Picker.Item key={key} label={label} value={key} />
+                ))}
+              </Picker>
+            </VStack>
+          </VStack>
 
-        {/* 3. Contador de resultados */}
-        {/* Mostra o total *após* o carregamento inicial */}
-        {!loading && page === 0 && (
-          <Text className="text-sm text-gray-600 mt-3">
-            {totalElements} {totalElements === 1 ? 'arena encontrada' : 'arenas encontradas'}
-          </Text>
-        )}
-      </View>
-    </View>
-  );
-});
+          {/* 3. Contador de resultados */}
+          {/* Mostra o total *após* o carregamento inicial */}
+          {!loading && page === 0 && (
+            <Text className="text-sm text-gray-600 mt-3">
+              {totalElements}{' '}
+              {totalElements === 1 ? 'arena encontrada' : 'arenas encontradas'}
+            </Text>
+          )}
+        </VStack>
+      </VStack>
+    );
+  }
+);
 
 export default function ArenasScreen() {
   const router = useRouter();
@@ -129,7 +136,7 @@ export default function ArenasScreen() {
       if (isRefresh || pageNumber === 0) {
         setArenas(response.content);
       } else {
-        setArenas((prev) => [...prev, ...response.content]);
+        setArenas(prev => [...prev, ...response.content]);
       }
 
       setTotalElements(response.totalElements);
@@ -162,15 +169,16 @@ export default function ArenasScreen() {
 
   const handleArenaPress = (arenaId: string) => {
     // router.push(`/quadras/${arenaId}`);
+    console.log(`Navegar para as quadra da arena com ID: ${arenaId}`);
   };
 
   const renderFooter = () => {
     // Mostra o loader de "carregar mais" apenas se não for o load inicial
     if (!loading || (loading && page === 0)) return null;
     return (
-      <View className="py-4">
+      <VStack className="py-4">
         <ActivityIndicator size="small" color="#10b981" />
-      </View>
+      </VStack>
     );
   };
 
@@ -178,24 +186,24 @@ export default function ArenasScreen() {
     // Se estiver carregando (no page 0), mostre o loader
     if (loading && page === 0) {
       return (
-        <View className="flex-1 items-center justify-center py-20">
+        <VStack className="flex-1 items-center justify-center py-20">
           <ActivityIndicator size="large" color="#10b981" />
           <Text className="text-gray-500 mt-3">Carregando arenas...</Text>
-        </View>
+        </VStack>
       );
     }
 
     // Se não estiver carregando e não houver arenas, mostre a mensagem
     if (!loading && arenas.length === 0) {
       return (
-        <View className="flex-1 items-center justify-center py-20">
+        <VStack className="flex-1 items-center justify-center py-20">
           <Text className="text-gray-500 text-center">
             Nenhuma arena encontrada.
           </Text>
-        </View>
+        </VStack>
       );
     }
-    
+
     // Caso contrário (ex: carregando mais páginas), não mostre nada
     return null;
   };
@@ -216,27 +224,21 @@ export default function ArenasScreen() {
   );
 
   return (
-    // SafeAreaView respeita a barra de status
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <FlatList
         data={arenas}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <View className="px-4">
+          <VStack className="px-4">
             <ArenaCard
               arena={item}
               onPress={() => handleArenaPress(item.id)}
             />
-          </View>
+          </VStack>
         )}
         contentContainerStyle={{ paddingTop: 0, paddingBottom: 20 }}
-        
-        // Passamos o *elemento* memoizado
         ListHeaderComponent={listHeaderComponent}
-        
-        // `renderEmpty` agora controla o loading inicial
         ListEmptyComponent={renderEmpty}
-        
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -247,9 +249,7 @@ export default function ArenasScreen() {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
-        
-        // Importante para a experiência com o teclado
-        keyboardShouldPersistTaps="handled" 
+        keyboardShouldPersistTaps="handled"
       />
     </SafeAreaView>
   );
