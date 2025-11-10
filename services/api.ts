@@ -15,24 +15,24 @@ export const api = axios.create({
   },
 });
 
-// api.interceptors.request.use(
-//   async (config) => {
-//     const token = await AsyncStorage.getItem('userToken');
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
+api.interceptors.request.use(
+  async (config) => {
+    const token = await AsyncStorage.getItem('userToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-//     console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
-//     console.log('📦 Data:', config.data);
-//     console.log('🔑 Token:', token ? 'Presente ✅' : 'Ausente ❌');
+    console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
+    console.log('📦 Data:', config.data);
+    console.log('🔑 Token:', token ? 'Presente ✅' : 'Ausente ❌');
 
-//     return config;
-//   },
-//   (error) => {
-//     console.error('❌ Request Error:', error);
-//     return Promise.reject(error);
-//   }
-// );
+    return config;
+  },
+  (error) => {
+    console.error('❌ Request Error:', error);
+    return Promise.reject(error);
+  }
+);
 
 // 💬 Interceptor para debug de respostas
 api.interceptors.response.use(
