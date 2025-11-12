@@ -15,6 +15,13 @@ export const api = axios.create({
   },
 });
 
+/**
+ * Algumas rotas podem exigir autenticação.
+ * Este interceptor adiciona o token JWT ao cabeçalho Authorization.
+ * Descomente se precisar dessa funcionalidade.
+ * É preciso melhorar essa lógica para lidar com requisições para rotas públicas.
+ */
+
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('userToken');
