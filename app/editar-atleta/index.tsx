@@ -1,4 +1,3 @@
-// app/(tabs)/perfil/informacoes.tsx (ou caminho similar)
 import React, { useState, useEffect } from "react";
 import { getAtletaById, updateAtleta } from "@/services/api//entities/atleta"; // Assumindo que o caminho da api é similar
 import { Link, useRouter } from 'expo-router';
@@ -17,13 +16,12 @@ import { VStack } from '@/components/ui/vstack';
 import { formatarTelefone } from "@/context/functions/formatters";
 
 import {
-    validarNome, // Você precisará criar esta função
+    validarNome, 
     validarTelefone
-} from "@/context/functions/validators"; // Você precisará adicionar as validações
+} from "@/context/functions/validators"; 
 
-const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png"; // Mesmo default do seu colega
+const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png"; 
 
-// Tipagem para o estado de erros
 interface ErrorsState {
     nome?: string;
     telefone?: string;
@@ -39,12 +37,11 @@ export default function InformacoesPessoais() {
 
     const [errors, setErrors] = useState<ErrorsState>({});
 
-    // Função para pegar o ID do usuário, igual ao do seu colega
     const getUserId = async (): Promise<string> => {
         const userDataString = await AsyncStorage.getItem('userData');
         if (!userDataString) throw new Error('Usuário não encontrado');
         const userData = JSON.parse(userDataString);
-        return userData.id; // Ou userData.userId, dependendo de como está salvo
+        return userData.id; 
     };
 
     // Carregar dados do usuário
@@ -71,20 +68,17 @@ export default function InformacoesPessoais() {
         fetchAtleta();
     }, []);
 
-    // Lógica de upload de imagem (placeholder, como no código do seu colega)
     const selectImage = async () => {
         Alert.alert("Seleção de Imagem", "Esta funcionalidade será implementada na próxima etapa com uma biblioteca de seleção de imagens (ex: expo-image-picker).");
     };
 
-    // Lógica para remover imagem
     const handleRemoveImage = () => {
         setUrlFoto(DEFAULT_AVATAR_URL);
         Alert.alert('Sucesso', 'Foto removida. Salve as alterações para confirmar.');
     };
 
-    // Lógica de salvar
     const handleUpdateAtleta = async () => {
-        const nomeError = validarNome(nome); // Crie essa função em validators
+        const nomeError = validarNome(nome);
         const telefoneError = validarTelefone(telefone);
 
         setErrors({ nome: nomeError, telefone: telefoneError });
@@ -134,7 +128,7 @@ export default function InformacoesPessoais() {
                         <Heading className="text-2xl">Informações pessoais</Heading>
                         <Text className="text-typography-500">Gerencie suas informações pessoais e salve as alterações caso realize alguma mudança.</Text>
 
-                        {/* --- Seção de Foto de Perfil (baseado no EditarArena.js) --- */}
+                        {/* --- Seção de Foto de Perfil --- */}
                         <VStack space="sm">
                             <Text className="text-sm font-medium text-typography-500">Foto de Perfil</Text>
                             <HStack space="md" className='flex items-center'>
@@ -203,7 +197,7 @@ export default function InformacoesPessoais() {
                             error={errors.telefone}
                         />
 
-                        {/* --- Botões (igual ao EditarArena.js) --- */}
+                        {/* --- Botões --- */}
                         <View className="flex-row w-full gap-5 mt-4">
                             <Button
                                 size="xl"

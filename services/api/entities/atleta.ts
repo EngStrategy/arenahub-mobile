@@ -1,4 +1,3 @@
-// services/api/entities/atleta.ts
 import api from '@/services/api';
 
 // ==================== INTERFACES ====================
