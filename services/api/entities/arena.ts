@@ -1,6 +1,4 @@
-
 import api from '@/services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ==================== INTERFACES ====================
 
@@ -31,7 +29,6 @@ export interface GetArenaResponse {
   quantidadeAvaliacoes: number;
   statusAssinatura: string;
 }
-
 
 export interface UpdateArenaRequest {
   nome: string;
@@ -80,6 +77,47 @@ export interface UpdateArenaResponse {
   statusAssinatura: string;
 }
 
+export interface ArenaQueryParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+  direction?: 'asc' | 'desc';
+  cidade?: string;
+  esporte?: 'FUTEBOL_SOCIETY' | 'FUTEBOL_SETE' | 'FUTEBOL_ONZE' | 'FUTSAL' | 'BEACHTENNIS' | 'VOLEI' | 'FUTEVOLEI' | 'BASQUETE' | 'HANDEBOL';
+  latitude?: number;
+  longitude?: number;
+  raioKm?: number;
+}
+
+export interface PaginatedResponse<T> {
+  content: T[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      sorted: boolean;
+      empty: boolean;
+      unsorted: boolean;
+    };
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  sort: {
+    sorted: boolean;
+    empty: boolean;
+    unsorted: boolean;
+  };
+  first: boolean;
+  numberOfElements: number;
+  empty: boolean;
+}
+
 // ==================== FUNÇÕES DA API ====================
 
 /**
@@ -97,6 +135,22 @@ export const getArenaById = async (id: string): Promise<GetArenaResponse> => {
 };
 
 /**
+ * Buscar todas as arenas com filtros
+ * Endpoint: GET /api/v1/arenas
+ */
+export const getAllArenas = async (
+  params: ArenaQueryParams = {}
+): Promise<PaginatedResponse<GetArenaResponse>> => {
+  try {
+    const response = await api.get('/arenas', { params });
+    return response.data;
+  } catch (error: any) {
+    console.error('📄 Erro ao buscar arenas:', error.response?.data || error.message);
+    throw new Error('Erro ao buscar arenas');
+  }
+};
+
+/**
  * Atualizar arena
  * Endpoint: PUT /api/v1/arenas/{id}
  */
@@ -108,22 +162,4 @@ export const updateArena = async (id: string, data: UpdateArenaRequest) => {
     console.error('📄 Erro ao atualizar arena:', error.response?.data || error.message);
     throw new Error('Erro ao atualizar arena');
   }
-};
-
-/**
- * Alterar senha do usuário
- * Endpoint: PATCH /api/v1/arenas/me/alterar-senhad'
- */
-export const updatePasswordArena = async (senhaAtual: string, novaSenha: string, confirmacaoNovaSenha: string): Promise<void> => {
-    try {
-        // A API web recebia 3 argumentos, então vamos enviar os 3
-        await api.patch('/arenas/me/alterar-senha', {
-            senhaAtual,
-            novaSenha,
-            confirmacaoNovaSenha
-        });
-    } catch (error: any) {
-        const message = error.response?.data?.message || 'Erro ao alterar senha. Verifique sua senha atual.';
-        throw new Error(message);
-    }
 };

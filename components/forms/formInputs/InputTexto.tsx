@@ -3,7 +3,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 
 interface InputTextoProps {
-  label: string;
+  label?: string;
   placeholder?: string;
   value: string;
   onChangeText: (text: string) => void;
