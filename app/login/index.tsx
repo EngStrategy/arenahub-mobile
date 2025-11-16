@@ -47,7 +47,6 @@ export default function LoginScreen() {
 
       await AsyncStorage.setItem('userToken', response.accessToken);
 
-      // Salve outros dados do usuário se a API retornar
       const userData = JSON.stringify({
         id: response.userId,
         name: response.name,
