@@ -6,7 +6,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
 import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 
 import {
@@ -26,6 +26,19 @@ export default function LoginScreen() {
   const [errors, setErrors] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = React.useState(false);
   const toggleShowPassword = () => setShowPassword(prev => !prev);
+
+  useEffect(() => {
+    const clearSession = async () => {
+      try {
+        // Remove o token e os dados do usuário para garantir um login limpo
+        await AsyncStorage.multiRemove(['userToken', 'userData']);
+        console.log('🧹 Sessão limpa automaticamente na tela de login.');
+      } catch (e) {
+        console.log('Erro ao limpar sessão:', e);
+      }
+    };
+    clearSession();
+  }, []);
 
   const handleLogin = async () => {
     setErrors({ email: '', password: '' });
