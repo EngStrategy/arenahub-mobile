@@ -163,3 +163,20 @@ export const updateArena = async (id: string, data: UpdateArenaRequest) => {
     throw new Error('Erro ao atualizar arena');
   }
 };
+
+/**
+ * Alterar senha do usuário
+ * Endpoint: PATCH /api/v1/arenas/me/alterar-senhad'
+ */
+export const updatePasswordArena = async (senhaAtual: string, novaSenha: string, confirmacaoNovaSenha: string): Promise<void> => {
+    try {
+        await api.patch('/arenas/me/alterar-senha', {
+            senhaAtual,
+            novaSenha,
+            confirmacaoNovaSenha
+        });
+    } catch (error: any) {
+        const message = error.response?.data?.message || 'Erro ao alterar senha. Verifique sua senha atual.';
+        throw new Error(message);
+    }
+};

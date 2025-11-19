@@ -43,7 +43,12 @@ api.interceptors.request.use(
 
 // 💬 Interceptor para debug de respostas
 api.interceptors.response.use(
-  (response) => {
+  
+  async (response) => {
+  const token = await AsyncStorage.getItem('userToken');
+    if (token) {
+      response.headers.Authorization = `Bearer ${token}`;
+    }
     console.log('✅ Response:', response.status, response.config.url);
     return response;
   },

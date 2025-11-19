@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { getArenaById, updateArena } from "@/services/api//entities/arena";
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { Picker } from "@react-native-picker/picker";
-// import {Trash2, Upload} from 'lucide-react-native';
+import { Trash2, Upload } from 'lucide-react-native';
 import apiCEP from "@/services/apiCEP";
 import apiCidades from "@/services/apiCidades";
 import apiLatitudeLongitude from "@/services/apiLatitudeLongitude";
@@ -251,7 +251,7 @@ export default function EditarArena() {
       router.back();
 
     } catch (error: any) {
-      console.error(error); 
+      console.error(error);
       Alert.alert("Erro", error.response?.data?.message || "Erro ao atualizar arena");
     } finally {
       setLoading(false);
@@ -260,33 +260,37 @@ export default function EditarArena() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      className="flex-1"
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40, paddingHorizontal: 24, paddingTop: 14 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: 40,
+          paddingHorizontal: 24,
+          paddingTop: 14,
+        }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <FormControl className="pt-9 rounded-lg w-full">
+        <FormControl className="pt-9 rounded-lg w-full flex-1">
           <VStack className="w-full gap-4">
             <Heading className="text-2xl">Informações da arena</Heading>
             <Text className="text-typography-500">Gerenciee suas informações pessoais e salve as alterações caso realize alguma mudança.</Text>
 
-            {/* --- Seção de Foto da Quadra --- */}
-            {/* <VStack space="sm">
-              <Text className="text-sm font-medium">Foto da Quadra</Text>
+            <VStack space="sm">
+              <Text className="text-sm font-medium text-typography-500">Foto de Perfil</Text>
               <HStack space="md" className='flex items-center'>
                 <Image
-                  source={{ uri: imageUrl ?? DEFAULT_AVATAR_URL }}
-                  alt="Foto da Quadra"
+                  source={{ uri: urlFoto ?? DEFAULT_AVATAR_URL }}
+                  alt="Foto de Perfil"
                   className="w-16 h-16 rounded-full border border-gray-300"
                   size="md"
                 />
 
                 <VStack space="xs">
                   <Text className="text-xs text-gray-500">
-                    Recomendamos uma imagem quadrada.
+                    Tamanho máximo: 5MB
                   </Text>
                   <HStack space="sm">
                     <Button
@@ -299,7 +303,7 @@ export default function EditarArena() {
                       <Upload size={16} color='black' />
                       <ButtonText className="ml-2">Escolher foto</ButtonText>
                     </Button>
-                    {imageUrl && imageUrl !== DEFAULT_AVATAR_URL && (
+                    {urlFoto && urlFoto !== DEFAULT_AVATAR_URL && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -314,7 +318,8 @@ export default function EditarArena() {
                   </HStack>
                 </VStack>
               </HStack>
-            </VStack> */}
+            </VStack>
+
 
             <InputTexto
               label="Nome da arena"
