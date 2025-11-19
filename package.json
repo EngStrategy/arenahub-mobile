@@ -12,10 +12,11 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@expo/html-elements": "^0.10.1",
+    "@expo/html-elements": "^0.12.5",
     "@expo/vector-icons": "^15.0.3",
     "@gluestack-ui/core": "^3.0.10",
     "@gluestack-ui/utils": "^3.0.11",
+    "@gorhom/bottom-sheet": "^5.0.0-alpha.11",
     "@legendapp/motion": "^2.4.0",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-picker/picker": "^2.11.4",
@@ -30,7 +31,7 @@
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",
     "expo-web-browser": "~15.0.8",
-    "lucide-react-native": "^0.552.0",
+    "lucide-react-native": "^0.510.0",
     "nativewind": "^4.1.23",
     "react": "19.1.0",
     "react-aria": "^3.33.0",

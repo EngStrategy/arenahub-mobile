@@ -7,6 +7,7 @@ export default function RootLayout() {
       <Stack.Screen name="login" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="forgot-password" />
+      <Stack.Screen name="cadastrar-quadra" />
     </Stack>
   );
 }

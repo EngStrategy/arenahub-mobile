@@ -1,3 +1,4 @@
+import { Arena } from '@/context/types/Arena';
 import api from '@/services/api';
 
 // ==================== INTERFACES ====================
@@ -120,18 +121,9 @@ export interface PaginatedResponse<T> {
 
 // ==================== FUNÇÕES DA API ====================
 
-/**
- * Buscar arena por ID
- * Endpoint: GET /api/v1/arenas/{id}
- */
-export const getArenaById = async (id: string): Promise<GetArenaResponse> => {
-  try {
+export const getArenaById = async (id: string): Promise<Arena> => {
     const response = await api.get(`/arenas/${id}`);
     return response.data;
-  } catch (error: any) {
-    console.error('📄 Erro ao buscar arena:', error.response?.data || error.message);
-    throw new Error('Erro ao buscar arena');
-  }
 };
 
 /**
