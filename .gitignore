@@ -41,6 +41,8 @@ yarn-error.*
 *.tsbuildinfo
 *.orig.*
 web-build/
+package-lock.json
+yarn.lock
 
 
 
