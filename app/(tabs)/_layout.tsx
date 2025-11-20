@@ -84,8 +84,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="agendamentos"
         options={{
-          title: 'Agendamentos',
-          href: isLogged ? undefined : null,
+          title: 'Quadras',
+          href: "/cadastrar-quadra",
         }}
       />
 
