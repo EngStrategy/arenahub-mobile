@@ -23,8 +23,8 @@ import {
   SelectBackdrop,
   SelectContent,
   SelectDragIndicator,
-  SelectDragIndicatorWrapper,
   SelectScrollView,
+  SelectDragIndicatorWrapper,
   SelectItem,
 } from '@/components/ui/select';
 import { ChevronDownIcon } from '@/components/ui/icon';
@@ -473,13 +473,13 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             <View className="flex-1">
               <Text>Estado</Text>
               <Select
-                selectedValue={mudarEstado(estado)}
+                selectedValue={estado}
                 onValueChange={(value: string) => {
                   setEstado(value);
                   setCidade("");
                 }}
               >
-                <SelectTrigger variant="outline" size="md">
+                <SelectTrigger variant="outline" size="md" className="justify-between">
                   <SelectInput placeholder="Estado" />
                   <SelectIcon className="mr-3" as={ChevronDownIcon} />
                 </SelectTrigger>
@@ -487,38 +487,36 @@ export const RegistroArena = ({ className }: { className?: string }) => {
                   <SelectBackdrop />
                   <SelectContent className="max-h-80">
                     <SelectScrollView>
-                      {estados.map(e => (
-                        <SelectItem
-                          label={e.nome}
-                          value={e.nome}
-                        />
-                      ))}
+                    {estados.map((uf) => (
+                      <SelectItem key={uf.sigla} label={uf.nome} value={uf.sigla} />
+                    ))}
                     </SelectScrollView>
                   </SelectContent>
                 </SelectPortal>
               </Select>
             </View>
 
-            ==
             <View className="flex-1">
               <Text>Cidade</Text>
               <Select
                 selectedValue={cidade}
                 onValueChange={(value: string) => setCidade(value)}
               >
-                <SelectTrigger variant="outline" size="md">
+                <SelectTrigger variant="outline" size="md" className="justify-between">
                   <SelectInput placeholder="Cidade" />
                   <SelectIcon className="mr-3" as={ChevronDownIcon} />
                 </SelectTrigger>
                 <SelectPortal>
                   <SelectBackdrop />
-                  <SelectContent
-                    className="max-h-80"   // ~ 320px
-                  >
+                  <SelectContent className="max-h-80">
                     <SelectScrollView>
-                      {cidades.map(c => (
+                    {cidades.length === 0 ? (
+                      <SelectItem label="Nenhuma cidade" value="" isDisabled />
+                    ) : (
+                      cidades.map((c) => (
                         <SelectItem key={c.id} label={c.nome} value={c.nome} />
-                      ))}
+                      ))
+                    )}
                     </SelectScrollView>
                   </SelectContent>
                 </SelectPortal>
