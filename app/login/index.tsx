@@ -1,13 +1,14 @@
 import { login } from '@/services/api/auth';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
-import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
-import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { InputSenha } from '@/components/forms/formInputs/InputSenha';
+import { InputTexto } from '@/components/forms/formInputs/InputTexto';
+import { validarEmail, validarPassword } from '@/context/functions/validators';
+import { PasswordStrengthIndicator } from '@/components/forms/passwordStrengthIndicador';
 
 import {
   Alert,
@@ -63,7 +64,7 @@ export default function LoginScreen() {
       const userData = JSON.stringify({
         id: response.userId,
         name: response.name,
-        role:response.role,
+        role: response.role,
         imageUrl: response.imageUrl,
         statusAssinatura: response.statusAssinatura,
       });
@@ -119,58 +120,47 @@ export default function LoginScreen() {
           Faça login para continuar.
         </Text>
 
-        {/* Input de Email */}
+        <InputTexto
+          label="Email"
+          placeholder="Insira seu email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          onBlur={() => {
+            const emailError = validarEmail(email) ? '' : 'Email inválido.';
+            setErrors(prev => ({ ...prev, email: emailError }));
+          }}
+          error={errors.email}
+        />
 
-        <VStack space="xs">
-          <Text className="text-typography-500">Email</Text>
-          <Input size="xl" className="border border-gray-300 rounded-lg" >
-            <InputField
-              className="text-base"
-              type="text"
-              placeholder="Insira seu email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-            />
-          </Input>
-        </VStack>
+        <InputSenha
+          label="Senha"
+          value={password}
+          onChangeText={setPassword}
+          onBlur={() => {
+            const passwordError = validarPassword(password);
+            setErrors((prev) => ({ ...prev, password: passwordError }));
+          }}
+          error={errors.password}
+        />
 
-        {/* Input de Senha */}
-        <VStack space="xs">
-          <Text className="text-typography-500">Senha</Text>
-          <Input size="xl" className="border border-gray-300 rounded-lg">
-            <InputField
-              className="text-base"
-              type={showPassword ? "text" : "password"}
-              placeholder="Insira sua senha"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
-            <InputSlot className="pr-3" onPress={toggleShowPassword}>
-              <InputIcon
-                as={showPassword ? EyeIcon : EyeOffIcon}
-                fill="none"
-              />
-            </InputSlot>
-          </Input>
-        </VStack>
-
-        <Button size="xl" className="justify-end p-0"
+        <Button size="xl" className="justify-end p-0 bg-transparent"
           onPress={() => router.push('/forgot-password')}
         >
-          <ButtonText className="text-base text-green-primary p-0"
-          >
-            Esqueceu sua senha??
+          <ButtonText className="text-base text-green-primary p-0">
+            Esqueceu sua senha?
           </ButtonText>
         </Button>
 
         {/* Botão Entrar */}
 
 
-        <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
+        <Button
+          size="xl"
+          className="bg-green-primary rounded-lg py-3 mt-4"
           onPress={handleLogin}
           disabled={loading}
+          android_ripple={{ color: 'transparent' }}
         >
           <ButtonText className="text-base text-white">
             Entrar
@@ -183,7 +173,7 @@ export default function LoginScreen() {
           className="flex-row items-center mt-4"
         >
 
-          <Button size="xl" className="justify-start p-0"
+          <Button size="xl" className="justify-start p-0 bg-transparent "
             onPress={() => router.push('/register')}
           >
             <Text className="text-sm text-gray-500">Não tem uma conta?</Text>

@@ -21,8 +21,8 @@ export function InputTextArea({
   return (
     <VStack space="xs">
       <HStack className="gap-1 items-center">
-        <Text className="text-typography-500">{label}</Text>
-        {optional && <Text className="text-typography-500 text-xs">(Opcional)</Text>}
+        <Text>{label}</Text>
+        {optional && <Text className="text-xs">(Opcional)</Text>}
       </HStack>
 
       <Textarea size="xl" className="border border-gray-300 rounded-lg">

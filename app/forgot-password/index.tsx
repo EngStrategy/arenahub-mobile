@@ -106,7 +106,7 @@ export default function ForgotPasswordScreen() {
 
         {/* Link de Voltar */}
         <TouchableOpacity
-          className="flex-row items-center justify-center gap-1"
+          className="flex-row items-center justify-start gap-1"
           onPress={() => router.back()}
           disabled={loading}
           activeOpacity={0.7}

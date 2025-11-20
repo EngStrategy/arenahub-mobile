@@ -34,7 +34,7 @@ export const InputSenha = ({
 
   return (
     <VStack space="xs" className="w-full">
-      <Text className="text-typography-500">{label}</Text>
+      <Text>{label}</Text>
 
       <Input size="xl" className="border border-gray-300 rounded-lg">
         <InputField
