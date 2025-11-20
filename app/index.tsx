@@ -123,6 +123,16 @@ export default function Home() {
           >
             <ButtonText>Esqueceu sua senha</ButtonText>
           </Button>
+
+          <Button
+            size="md"
+            className="bg-primary-500 px-6 py-2 rounded-full"
+            onPress={() => {
+              router.push('/cadastrar-quadra');
+            }}
+          >
+            <ButtonText>Cadastrar Quadra</ButtonText>
+          </Button>
         </Box>
         <Box className="flex-1 justify-center items-center h-[20px] w-[300px] lg:h-[160px] lg:w-[400px]">
           <Logo />
