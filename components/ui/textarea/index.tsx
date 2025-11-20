@@ -15,6 +15,7 @@ const UITextarea = createTextarea({
   Input: TextInput,
 });
 
+
 const textareaStyle = tva({
   base: 'w-full h-[100px] border border-background-300 rounded data-[hover=true]:border-outline-400 data-[focus=true]:border-primary-700 data-[focus=true]:data-[hover=true]:border-primary-700 data-[disabled=true]:opacity-40 data-[disabled=true]:bg-background-50 data-[disabled=true]:data-[hover=true]:border-background-300',
 
@@ -33,7 +34,7 @@ const textareaStyle = tva({
 });
 
 const textareaInputStyle = tva({
-  base: 'p-2 web:outline-0 web:outline-none flex-1 color-typography-900 placeholder:text-typography-500 web:cursor-text web:data-[disabled=true]:cursor-not-allowed',
+  base: 'p-2 web:outline-0 web:outline-none flex-1 color-typography-900 placeholder:text-gray-400 web:cursor-text web:data-[disabled=true]:cursor-not-allowed',
   parentVariants: {
     size: {
       sm: 'text-sm',

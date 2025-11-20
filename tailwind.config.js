@@ -4,6 +4,9 @@ module.exports = {
   content: [
     './app/**/*.{html,js,jsx,ts,tsx,mdx}',
     './components/**/*.{html,js,jsx,ts,tsx,mdx}',
+    './utils/**/*.{html,js,jsx,ts,tsx,mdx}',
+    './*.{html,js,jsx,ts,tsx,mdx}',
+    './src/**/*.{html,js,jsx,ts,tsx,mdx}',
   ],
   presets: [require('nativewind/preset')],
   important: 'html',
@@ -170,6 +173,10 @@ module.exports = {
           info: 'rgb(var(--color-indicator-info)/<alpha-value>)',
           error: 'rgb(var(--color-indicator-error)/<alpha-value>)',
         },
+        'green-primary': '#15A01A',
+        'gray-not-selected': '#CCCCCC',
+        'gray-voltar': 'rgba(64,64,64,0.15)',
+        'gray-input-background': '#8B8B8C',
       },
       fontFamily: {
         heading: undefined,
