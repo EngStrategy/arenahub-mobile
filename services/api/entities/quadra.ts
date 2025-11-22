@@ -7,9 +7,11 @@ export const createQuadra = async (newQuadra: QuadraCreate): Promise<Quadra> => 
     return response.data;
 };
 
-export const getQuadrasByArenaId = async (arenaId: string): Promise<Quadra[]> => {
-    const response = await api.get<Quadra[]>(`/quadras/arena/${arenaId}`);
-    return response.data;
+// Busca todas as quadras de uma arena específica
+export const getQuadrasByArena = async (arenaId: string): Promise<Quadra[]> => {
+  // O endpoint retorna um array direto conforme seu exemplo JSON
+  const response = await api.get<Quadra[]>(`/quadras/arena/${arenaId}`);
+  return response.data;
 };
 
 export const getQuadraById = async (id: number): Promise<Quadra> => {

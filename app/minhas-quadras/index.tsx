@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Plus, Search, ChevronDown } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getQuadrasByArenaId } from '@/services/api/entities/quadra';
+import { getQuadrasByArena } from '@/services/api/entities/quadra';
 import { getArenaById } from '@/services/api/entities/arena';
 import { Quadra } from '@/context/types/Quadra';
 import { QuadraCard } from '@/components/cards/QuadraCard';
@@ -26,7 +26,7 @@ export default function MinhasQuadras() {
             const userData = JSON.parse(userDataString);
             const arenaId = userData.id;
 
-            const listaQuadras = await getQuadrasByArenaId(arenaId);
+            const listaQuadras = await getQuadrasByArena(arenaId);
             setQuadras(listaQuadras);
 
             const arenaData = await getArenaById(arenaId);
