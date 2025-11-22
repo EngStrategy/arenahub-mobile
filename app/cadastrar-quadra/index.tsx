@@ -14,7 +14,7 @@ import { MATERIAIS_OPTIONS, TIPO_QUADRA_OPTIONS, DURACAO_OPTIONS } from '@/const
 import { ModalCriarHorarios } from '@/components/modais/ModalCriarHorarios';
 import { ModalMultiSelect } from '@/components/modais/ModalMultiSelect';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ArenaCard from '@/components/cards/ArenaCard';
+import { ArenaCard } from '@/components/cards/ArenaCard';
 import { Spinner } from '@/components/ui/spinner';
 import { Picker } from '@react-native-picker/picker';
 
