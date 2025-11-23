@@ -77,15 +77,15 @@ export default function TabLayout() {
         }}
       />
 
-      {/* --- ABA CONDICIONAL --- */}
-      {/* Sempre renderizamos a configuração da aba, 
-        mas usamos 'href: null' para escondê-la dinamicamente.
-      */}
+      {/* Aba CONDICIONAL - Alterada para Minhas Quadras */}
       <Tabs.Screen
-        name="agendamentos"
+        name="agendamentos" 
         options={{
-          title: 'Quadras',
-          href: "/cadastrar-quadra",
+          title: 'Minhas Quadras', 
+          href: role === 'ARENA' ? "/minhas-quadras" : null, 
+          tabBarIcon: ({ focused, color, size }) => (
+             <Ionicons name={focused ? 'list' : 'list-outline'} size={size} color={color} />
+          )
         }}
       />
 

@@ -1,11 +1,9 @@
 import { login } from '@/services/api/auth';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
-import { Button, ButtonText } from '@/components/ui/button';
-import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
+import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 
@@ -14,9 +12,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  TouchableOpacity,
   View,
 } from 'react-native';
+
+import { InputTexto } from '@/components/forms/formInputs/InputTexto';
+import { InputSenha } from '@/components/forms/formInputs/InputSenha';
+
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -24,8 +25,6 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ email: '', password: '' });
-  const [showPassword, setShowPassword] = React.useState(false);
-  const toggleShowPassword = () => setShowPassword(prev => !prev);
 
   useEffect(() => {
     const clearSession = async () => {
@@ -63,7 +62,7 @@ export default function LoginScreen() {
       const userData = JSON.stringify({
         id: response.userId,
         name: response.name,
-        role:response.role,
+        role: response.role,
         imageUrl: response.imageUrl,
         statusAssinatura: response.statusAssinatura,
       });
@@ -119,62 +118,55 @@ export default function LoginScreen() {
           Faça login para continuar.
         </Text>
 
-        {/* Input de Email */}
-
-        <VStack space="xs">
-          <Text className="text-typography-500">Email</Text>
-          <Input size="xl" className="border border-gray-300 rounded-lg" >
-            <InputField
-              className="text-base"
-              type="text"
-              placeholder="Insira seu email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-            />
-          </Input>
+        <VStack space="md" className='mb-4'>
+          <InputTexto
+            label="Email"
+            placeholder="Insira seu email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            error={errors.email}
+          />
         </VStack>
 
-        {/* Input de Senha */}
-        <VStack space="xs">
-          <Text className="text-typography-500">Senha</Text>
-          <Input size="xl" className="border border-gray-300 rounded-lg">
-            <InputField
-              className="text-base"
-              type={showPassword ? "text" : "password"}
-              placeholder="Insira sua senha"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
-            <InputSlot className="pr-3" onPress={toggleShowPassword}>
-              <InputIcon
-                as={showPassword ? EyeIcon : EyeOffIcon}
-                fill="none"
-              />
-            </InputSlot>
-          </Input>
+        <VStack space="md">
+          <InputSenha
+            label="Senha"
+            placeholder="Insira sua senha"
+            value={password}
+            onChangeText={setPassword}
+            error={errors.password}
+          />
         </VStack>
 
-        <Button size="xl" className="justify-end p-0"
+        <Button
+          size="xl"
+          variant="link" // Usando variante 'link'
+          action="primary" // Usando action 'primary' para a cor
+          className="justify-end p-0"
           onPress={() => router.push('/forgot-password')}
         >
-          <ButtonText className="text-base text-green-primary p-0"
+          <ButtonText
+            className="text-base text-green-primary p-0"
           >
-            Esqueceu sua senha??
+            Esqueceu sua senha?
           </ButtonText>
         </Button>
 
-        {/* Botão Entrar */}
-
-
-        <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
+        <Button
+          size="xl"
+          action="positive" // Usando action="positive" para o botão primário (verde)
+          className="bg-green-primary rounded-lg py-3 mt-4" // Mantendo classes customizadas
           onPress={handleLogin}
           disabled={loading}
         >
-          <ButtonText className="text-base text-white">
-            Entrar
-          </ButtonText>
+          {loading ? (
+            <ButtonSpinner className="text-white" /> // Spinner para o estado de carregamento
+          ) : (
+            <ButtonText className="text-base text-white">
+              Entrar
+            </ButtonText>
+          )}
         </Button>
 
         {/* Link de Cadastro */}
@@ -182,12 +174,16 @@ export default function LoginScreen() {
           // styles.registerContainer
           className="flex-row items-center mt-4"
         >
-
-          <Button size="xl" className="justify-start p-0"
+          {/* Usando um Button com variant="link" para o link de cadastro */}
+          <Button
+            size="xl"
+            variant="link"
+            action="primary"
+            className="justify-start p-0"
             onPress={() => router.push('/register')}
           >
             <Text className="text-sm text-gray-500">Não tem uma conta?</Text>
-            <ButtonText className="text-base text-green-primary p-0 underline"
+            <ButtonText className="text-base text-green-primary p-0 underline ml-1"
             >
               Cadastre-se
             </ButtonText>
