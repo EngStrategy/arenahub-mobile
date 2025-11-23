@@ -1,5 +1,6 @@
-import { type QuadraCreate, type Quadra } from '@/context/types/Quadra';
+import { QuadraCreate, Quadra, HorariosDisponiveis } from '@/context/types/Quadra';
 import api from '@/services/api';
+
 
 export const createQuadra = async (newQuadra: QuadraCreate): Promise<Quadra> => {
     console.log("Cadastrando nova Quadra:", newQuadra);
@@ -26,4 +27,16 @@ export const updateQuadra = async (id: number, data: Partial<QuadraCreate>): Pro
 
 export const deleteQuadra = async (id: number): Promise<void> => {
     await api.delete(`/quadras/${id}`);
+};
+
+// Busca horários disponíveis para uma quadra em uma data
+export const getHorariosDisponiveisPorQuadra = async (
+  quadraId: number, 
+  data: string // formato YYYY-MM-DD
+): Promise<HorariosDisponiveis[]> => {
+  const response = await api.get<HorariosDisponiveis[]>(
+    `/quadras/${quadraId}/horarios-disponiveis`, 
+    { params: { data } }
+  );
+  return response.data;
 };

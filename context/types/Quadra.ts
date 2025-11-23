@@ -6,6 +6,8 @@ export type MaterialFornecido = "BOLA" | "COLETE" | "LUVA" | "CONE" | "APITO" | 
 
 export type DuracaoReserva = "TRINTA_MINUTOS" | "UMA_HORA" | "UMA_HORA_E_MEIA" | "DUAS_HORAS";
 
+export type StatusHorario = "DISPONIVEL" | "INDISPONIVEL" | "MANUTENCAO";
+
 export interface Quadra {
     id: number;
     nomeQuadra: string;
@@ -34,4 +36,12 @@ export interface QuadraCreate {
     materiaisFornecidos: Array<MaterialFornecido>;
     arenaId: string;
     horariosFuncionamento: Array<HorarioFuncionamentoCreate>;
+}
+
+export interface HorariosDisponiveis {
+  id: number;
+  horarioInicio: string;
+  horarioFim: string;
+  valor: number;
+  statusDisponibilidade: StatusHorario;
 }
