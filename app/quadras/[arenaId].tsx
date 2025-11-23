@@ -16,10 +16,7 @@ import { ArenaCard } from '@/components/cards/ArenaCard';
 
 // Utils
 import { addDuration, subDuration, getDuracaoEmMinutos } from '@/utils/time';
-
-// --- HELPERS ---
-const formatarEsporte = (esporte: string) => 
-  esporte.replace('FUTEBOL_', 'Futebol ').replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+import { formatarEsporte, formatarMaterial } from '@/constants/Quadra';
 
 // --- COMPONENTES INTERNOS ---
 
@@ -37,6 +34,8 @@ const QuadraCard = ({
   onSlotPress: (quadra: Quadra, slot: HorariosDisponiveis) => void;
   selectedSlots?: string[];
 }) => {
+  
+  const fallbackSrc = require('@/assets/images/imagem-default.png');
   
   const manha = slots.filter(h => parseInt(h.horarioInicio.split(':')[0]) < 12);
   const tarde = slots.filter(h => parseInt(h.horarioInicio.split(':')[0]) >= 12 && parseInt(h.horarioInicio.split(':')[0]) < 18);
@@ -110,7 +109,7 @@ const QuadraCard = ({
             // Definir classes base para cada estado
             const baseClasses = `
               flex-grow basis-[30%] max-w-[32%] 
-              border-2 rounded-lg py-2 px-1 items-center justify-center mb-2
+              border border-gray-200 rounded-lg py-2 px-1 items-center justify-center mb-2
             `;
             
             const stateClasses = 
@@ -156,21 +155,21 @@ const QuadraCard = ({
   };
 
   return (
-    <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-6">
+    <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-2">
       <View className="flex-row gap-3 mb-4 border-b border-gray-100 pb-3">
         <Image 
-          source={{ uri: quadra.urlFotoQuadra || 'https://i.imgur.com/hepj9ZS.png' }} 
-          className="w-16 h-16 rounded-lg bg-gray-100"
+          source={quadra.urlFotoQuadra ? { uri: quadra.urlFotoQuadra } : fallbackSrc} 
+          className="w-24 h-24 rounded-lg bg-gray-100"
           resizeMode="cover"
         />
         <View className="flex-1 justify-center">
           <Text className="text-lg font-bold text-gray-900">{quadra.nomeQuadra}</Text>
-          <Text className="text-green-600 font-bold text-xs uppercase mt-0.5">
+          <Text className="text-green-600 font-bold text-sm mt-0.5">
             {quadra.tipoQuadra.map(formatarEsporte).join(', ')}
           </Text>
           {quadra.materiaisFornecidos.length > 0 && (
-             <Text className="text-gray-500 text-[10px] mt-1">
-               <Text className="font-bold">Inclui:</Text> {quadra.materiaisFornecidos.join(', ')}
+             <Text className="text-gray-500 text-sm mt-1">
+               <Text className="font-bold">Inclui:</Text> {quadra.materiaisFornecidos.map(formatarMaterial).join(', ')}
              </Text>
           )}
         </View>
@@ -338,48 +337,78 @@ export default function QuadrasScreen() {
           </View>
         )}
 
-        <View className="bg-white py-4 mb-2 border-y border-gray-100">
+        <View className="bg-white py-4 px-7 mb-2 border-y border-gray-100">
           <Text className="text-center text-base font-bold text-gray-800 mb-3 capitalize">
             {format(selectedDate, "MMMM yyyy", { locale: ptBR })}
           </Text>
-          <FlatList
-            horizontal
-            data={dates}
-            keyExtractor={(item) => item.toISOString()}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
-            renderItem={({ item }) => {
-              const isSelected = isSameDay(item, selectedDate);
-              return (
-                <Pressable
-                  onPress={() => setSelectedDate(item)}
-                  className={`items-center justify-center rounded-lg w-[60px] h-[64px] border ${
-                    isSelected ? 'bg-green-600 border-green-600' : 'bg-white border-gray-200'
-                  }`}
-                >
-                  <Text className={`text-xs font-bold uppercase mb-1 ${isSelected ? 'text-green-100' : 'text-gray-400'}`}>
-                    {format(item, "EEE", { locale: ptBR })}
-                  </Text>
-                  <Text className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-gray-800'}`}>
-                    {format(item, "dd")}
-                  </Text>
-                </Pressable>
-              );
-            }}
-          />
+          <View className="flex-row items-center">
+            {/* Seta Esquerda */}
+            <View className="pl-3 pr-2">
+              <Ionicons name="chevron-back" size={20} color="#9ca3af" />
+            </View>
+            
+            {/* Calendário */}
+            <FlatList
+              horizontal
+              data={dates}
+              keyExtractor={(item) => item.toISOString()}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8 }}
+              className="flex-1"
+              renderItem={({ item }) => {
+                const isSelected = isSameDay(item, selectedDate);
+                const dayNumber = format(item, "dd");
+                const dayName = format(item, "EEE", { locale: ptBR }).charAt(0).toUpperCase() + 
+                               format(item, "EEE", { locale: ptBR }).slice(1, 3).toLowerCase();
+                
+                return (
+                  <Pressable
+                    onPress={() => setSelectedDate(item)}
+                    className={`items-center justify-center rounded-lg w-[50px] h-[50px] ${
+                      isSelected ? 'bg-green-500' : 'bg-gray-100'
+                    }`}
+                  >
+                    <Text className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-gray-800'}`}>
+                      {dayNumber}
+                    </Text>
+                    <Text className={`text-[10px] font-semibold ${isSelected ? 'text-white' : 'text-gray-600'}`}>
+                      {dayName}
+                    </Text>
+                  </Pressable>
+                );
+              }}
+            />
+            
+            {/* Seta Direita */}
+            <View className="pr-3 pl-2">
+              <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+            </View>
+          </View>
         </View>
 
         <View className="px-4 pb-10">
-          {quadras.map((quadra) => (
-            <QuadraCard
-              key={quadra.id}
-              quadra={quadra}
-              slots={horarios[quadra.id] || []}
-              loading={loadingHorarios}
-              onSlotPress={handleSlotPress}
-              selectedSlots={selectedSlots}
-            />
-          ))}
+          {quadras.length === 0 && !loadingHorarios ? (
+            <View className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 items-center">
+              <Ionicons name="basketball-outline" size={48} color="#d1d5db" />
+              <Text className="text-gray-800 font-bold text-lg mt-4 text-center">
+                Nenhuma quadra cadastrada
+              </Text>
+              <Text className="text-gray-500 text-sm mt-2 text-center">
+                Esta arena ainda não possui quadras disponíveis para reserva.
+              </Text>
+            </View>
+          ) : (
+            quadras.map((quadra) => (
+              <QuadraCard
+                key={quadra.id}
+                quadra={quadra}
+                slots={horarios[quadra.id] || []}
+                loading={loadingHorarios}
+                onSlotPress={handleSlotPress}
+                selectedSlots={selectedSlots}
+              />
+            ))
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

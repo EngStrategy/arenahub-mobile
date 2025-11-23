@@ -33,8 +33,6 @@ export function ArenaCard({
   showEsportes = true 
 }: ArenaCardProps) {
   const [imageError, setImageError] = useState(false);
-  
-  // REMOVIDO: const [isPressed, setIsPressed] = useState(false); NÃO É MAIS NECESSÁRIO
 
   const imageSource =
     imageError || !arena.urlFoto ? fallbackSrc : { uri: arena.urlFoto };
@@ -68,8 +66,6 @@ export function ArenaCard({
     <Pressable
       onPress={onPress}
       disabled={!onPress}
-      // O truque está aqui: active:border-gray-200 e active:opacity-70
-      // O NativeWind lida com isso automaticamente ao pressionar
       className={`
         bg-white rounded-lg overflow-hidden mb-4 
         border border-transparent 
