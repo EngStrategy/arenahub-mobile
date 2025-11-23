@@ -3,34 +3,6 @@ import api from '@/services/api';
 
 // ==================== INTERFACES ====================
 
-export interface GetArenaResponse {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  endereco: {
-    cep: string;
-    estado: string;
-    cidade: string;
-    bairro: string;
-    rua: string;
-    numero: string;
-    complemento?: string;
-    latitude?: number;
-    longitude?: number;
-  };
-  descricao?: string;
-  urlFoto: string;
-  dataCriacao: string;
-  role: string;
-  esportes: string[];
-  quadras: any;
-  notaMedia: number;
-  horasCancelarAgendamento?: number;
-  quantidadeAvaliacoes: number;
-  statusAssinatura: string;
-}
-
 export interface UpdateArenaRequest {
   nome: string;
   telefone: string;
@@ -132,7 +104,7 @@ export const getArenaById = async (id: string): Promise<Arena> => {
  */
 export const getAllArenas = async (
   params: ArenaQueryParams = {}
-): Promise<PaginatedResponse<GetArenaResponse>> => {
+): Promise<PaginatedResponse<Arena>> => {
   try {
     const response = await api.get('/arenas', { params });
     return response.data;
