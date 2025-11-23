@@ -273,7 +273,7 @@ export default function EditarArena() {
         <FormControl className="pt-6 rounded-lg w-full flex-1">
           <VStack className="w-full gap-4">
             <Heading className="text-2xl">Informações da arena</Heading>
-            <Text className="text-typography-500">Gerenciee suas informações pessoais e salve as alterações caso realize alguma mudança.</Text>
+            <Text className="text-typography-500">Gerencie suas informações pessoais e salve as alterações caso realize alguma mudança.</Text>
 
             <VStack space="sm">
               <Text className="text-sm font-medium text-typography-500">Foto de Perfil</Text>

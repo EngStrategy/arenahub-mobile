@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, KeyboardAvoidingView, Platform, Alert, View, TouchableOpacity, Text, TextInput, Switch, Image, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Edit, Trash2, Upload, ChevronDown } from 'lucide-react-native';
-import { Ionicons } from '@expo/vector-icons'; // Adicionado
+import { Ionicons } from '@expo/vector-icons'; 
 import { type Arena } from '@/context/types/Arena';
 import { type QuadraCreate } from '@/context/types/Quadra';
 import { TipoQuadra, MaterialFornecido, DuracaoReserva } from '@/context/types/Quadra';

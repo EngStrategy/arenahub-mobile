@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, KeyboardAvoidingView, Platform, Alert, View, TouchableOpacity, Text, TextInput, Switch, Image } from 'react-native';
+import { ScrollView, KeyboardAvoidingView, Platform, Alert, View, TouchableOpacity, Text, TextInput, Image, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Edit, Trash2, Upload, ChevronDown } from 'lucide-react-native';
+import { Edit, Upload, ChevronDown } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { type QuadraCreate } from '@/context/types/Quadra';
 import { TipoQuadra, MaterialFornecido, DuracaoReserva } from '@/context/types/Quadra';
 import { horariosDaSemanaCompleta, HorarioFuncionamentoCreate, DiaDaSemana } from '@/context/types/Horario';
@@ -179,11 +180,20 @@ export default function EditarQuadra() {
 
     return (
         <SafeAreaView className="flex-1 bg-white">
+            
+            <View className="flex-row items-center px-4 py-3 border-b border-gray-100 bg-white z-10">
+                <Pressable onPress={() => router.back()} className="mr-4 p-1">
+                    <Ionicons name="arrow-back" size={24} color="#374151" />
+                </Pressable>
+                <Text className="text-lg font-bold text-gray-800 flex-1" numberOfLines={1}>
+                    Editar quadra
+                </Text>
+            </View>
+
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
                 <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
                     <View className="w-full max-w-3xl mx-auto px-6">
                         <FlexCol space={3} className="mt-2">
-                            <Text className="text-2xl font-bold">Editar quadra</Text>
 
                             {/* FOTO (Simplificado para este exemplo) */}
                             <FlexRow space={2} className='items-center'>

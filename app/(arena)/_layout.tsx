@@ -45,7 +45,7 @@ export default function ArenaTabLayout() {
       <Tabs.Screen
         name="quadras"
         options={{
-          title: 'Minhas Quadras',
+          title: 'Quadras',
         }}
       />
 
@@ -53,7 +53,7 @@ export default function ArenaTabLayout() {
       <Tabs.Screen
         name="agendamentos" 
         options={{
-          title: 'Agenda', 
+          title: 'Agendamentos', 
         }}
       />
 
