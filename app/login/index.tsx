@@ -29,7 +29,6 @@ export default function LoginScreen() {
   useEffect(() => {
     const clearSession = async () => {
       try {
-        // Remove o token e os dados do usuário para garantir um login limpo
         await AsyncStorage.multiRemove(['userToken', 'userData']);
         console.log('🧹 Sessão limpa automaticamente na tela de login.');
       } catch (e) {
@@ -62,42 +61,42 @@ export default function LoginScreen() {
       const userData = JSON.stringify({
         id: response.userId,
         name: response.name,
-        role: response.role,
+        role: response.role, 
         imageUrl: response.imageUrl,
         statusAssinatura: response.statusAssinatura,
       });
 
       await AsyncStorage.setItem('userData', userData);
 
-      router.push('/(tabs)');
+      if (response.role === 'ARENA') {
+        console.log('Redirecionando para painel da Arena...');
+        router.replace('/(arena)'); 
+      } else {
+        console.log('Redirecionando para painel do Atleta...');
+        router.replace('/(atleta)');
+      }
 
     } catch (error: any) {
-      Alert.alert('Erro no Login', error.message);
+      Alert.alert('Erro no Login', error.message || 'Ocorreu um erro inesperado');
     } finally {
       setLoading(false);
     }
   };
 
-
   return (
     <KeyboardAvoidingView
-      // styles.container
       className="flex-1 bg-white"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        // styles.scrollContent
-        // Note: para ScrollView, use 'contentContainerClassName'
         contentContainerClassName="flex-grow p-6 justify-center"
         keyboardShouldPersistTaps="handled"
       >
         {/* Ícone */}
         <View
-          // styles.iconContainer
           className="items-center mb-6"
         >
           <View
-            // styles.iconCircle
             className="w-20 h-20 rounded-full bg-green-primary items-center justify-center"
           >
             <Ionicons name="person" size={32} color="#fff" />
@@ -106,13 +105,11 @@ export default function LoginScreen() {
 
         {/* Título e Subtítulo */}
         <Text
-          // styles.title
           className="text-2xl font-semibold text-center mb-2 text-gray-800"
         >
           Bem-vindo!
         </Text>
         <Text
-          // styles.subtitle
           className="text-sm text-center text-gray-500 mb-8"
         >
           Faça login para continuar.
@@ -141,8 +138,8 @@ export default function LoginScreen() {
 
         <Button
           size="xl"
-          variant="link" // Usando variante 'link'
-          action="primary" // Usando action 'primary' para a cor
+          variant="link" 
+          action="primary" 
           className="justify-end p-0"
           onPress={() => router.push('/forgot-password')}
         >
@@ -155,13 +152,13 @@ export default function LoginScreen() {
 
         <Button
           size="xl"
-          action="positive" // Usando action="positive" para o botão primário (verde)
-          className="bg-green-primary rounded-lg py-3 mt-4" // Mantendo classes customizadas
+          action="positive"
+          className="bg-green-primary rounded-lg py-3 mt-4" 
           onPress={handleLogin}
           disabled={loading}
         >
           {loading ? (
-            <ButtonSpinner className="text-white" /> // Spinner para o estado de carregamento
+            <ButtonSpinner className="text-white" /> 
           ) : (
             <ButtonText className="text-base text-white">
               Entrar
@@ -171,10 +168,8 @@ export default function LoginScreen() {
 
         {/* Link de Cadastro */}
         <View
-          // styles.registerContainer
           className="flex-row items-center mt-4"
         >
-          {/* Usando um Button com variant="link" para o link de cadastro */}
           <Button
             size="xl"
             variant="link"
