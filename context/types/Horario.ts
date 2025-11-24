@@ -26,6 +26,7 @@ export type HorarioFuncionamento = {
 export type HorarioFuncionamentoCreate = {
     diaDaSemana: DiaDaSemana;
     intervalosDeHorario: Array<{
+        id?: number; 
         inicio: string;
         fim: string;
         valor: number;

@@ -62,12 +62,11 @@ export default function MinhasQuadras() {
 
     return (
         <SafeAreaView className="flex-1 bg-white relative" edges={['top']}> 
-            {/* Adicionei 'relative' no container pai para garantir contexto de posicionamento, embora SafeAreaView já tenha comportamento flex */}
-
+            
             <ScrollView
                 contentContainerStyle={{
                     flexGrow: 1,
-                    paddingBottom: 100, // AUMENTEI O PADDING BOTTOM para o conteúdo não ficar escondido atrás do botão flutuante
+                    paddingBottom: 100, 
                     paddingHorizontal: 24,
                 }}
                 keyboardShouldPersistTaps="handled"

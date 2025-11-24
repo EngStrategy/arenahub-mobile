@@ -73,6 +73,7 @@ export default function EditarQuadra() {
                         return {
                             diaDaSemana: diaDefault.diaDaSemana,
                             intervalosDeHorario: diaBackend.intervalosDeHorario.map(intervalo => ({
+                                id: intervalo.id, 
                                 inicio: intervalo.inicio,
                                 fim: intervalo.fim,
                                 valor: Number(intervalo.valor),
@@ -98,44 +99,46 @@ export default function EditarQuadra() {
     }, [id]);
 
     const handleSave = async () => {
-        if (!validateForm()) return;
+    if (!validateForm()) return;
 
-        setSaving(true);
-        try {
+    setSaving(true);
+    try {
+        const payload: any = {
+            nomeQuadra,
+            tipoQuadra: tipoQuadra as TipoQuadra[], 
+            materiaisFornecidos: materiaisFornecidos as MaterialFornecido[],
+            cobertura,
+            iluminacaoNoturna,
+            descricao,
+            urlFotoQuadra: imageUrl || '',
             
-            const quadraUpdate: Partial<QuadraCreate> = {
-                nomeQuadra,
-                tipoQuadra: tipoQuadra as TipoQuadra[],
-                materiaisFornecidos: materiaisFornecidos as MaterialFornecido[],
-                duracaoReserva: duracaoReserva as DuracaoReserva,
-                cobertura,
-                iluminacaoNoturna,
-                descricao,
-                urlFotoQuadra: imageUrl || '',
-                
-                horariosFuncionamento: horarios
-                    .filter(dia => dia.intervalosDeHorario.length > 0)
-                    .map(item => ({
-                        diaDaSemana: item.diaDaSemana,
-                        intervalosDeHorario: item.intervalosDeHorario.map(h => ({
-                            inicio: h.inicio,
-                            fim: h.fim,
-                            valor: Number(h.valor) || 0,
-                            status: h.status ?? 'DISPONIVEL',
-                        })),
+            horariosFuncionamento: horarios
+                .filter(dia => dia.intervalosDeHorario.length > 0)
+                .map(item => ({
+                    diaDaSemana: item.diaDaSemana,
+                    intervalosDeHorario: item.intervalosDeHorario.map(h => ({
+                        id: h.id, 
+                        inicio: h.inicio,
+                        fim: h.fim,
+                        valor: Number(h.valor) || 0,
+                        status: h.status ?? 'DISPONIVEL',
                     })),
-            };
+                })),
+        };
 
-            await updateQuadra(Number(id), quadraUpdate);
-            Alert.alert("Sucesso", "Quadra atualizada com sucesso!");
-            router.back();
-        } catch (error: any) {
-            console.error("Erro update:", error);
-            Alert.alert("Erro", error.message || "Erro ao atualizar quadra.");
-        } finally {
-            setSaving(false);
-        }
-    };
+        await updateQuadra(Number(id), payload);
+        
+        Alert.alert("Sucesso", "Quadra atualizada com sucesso!");
+        router.back();
+    } catch (error: any) {
+        console.error("Erro update:", error);
+        if(error.response?.data) console.log(JSON.stringify(error.response.data, null, 2));
+        
+        Alert.alert("Erro", error.message || "Erro ao atualizar quadra.");
+    } finally {
+        setSaving(false);
+    }
+};
 
     const validateForm = () => {
         const errors: any = {};
@@ -234,8 +237,6 @@ export default function EditarQuadra() {
                                         </Picker>
                                     </View>
                                 </View>
-
-                                {/* Switches Cobertura/Iluminação (Opcional adicionar aqui se quiser igual ao create) */}
                             </FlexCol>
 
                             <FlexCol space={1} className='mt-4'>
@@ -258,7 +259,6 @@ export default function EditarQuadra() {
                 </ScrollView>
             </KeyboardAvoidingView>
             
-            {/* Modais reutilizados */}
             <ModalMultiSelect open={isModalTipoQuadraVisible} title="Tipos de Quadra" options={TIPO_QUADRA_OPTIONS} initialValues={tipoQuadra} onClose={() => setIsModalTipoQuadraVisible(false)} onSave={(v) => {setTipoQuadra(v); setIsModalTipoQuadraVisible(false)}} />
             <ModalMultiSelect open={isModalMateriaisVisible} title="Materiais" options={MATERIAIS_OPTIONS} initialValues={materiaisFornecidos} onClose={() => setIsModalMateriaisVisible(false)} onSave={(v) => {setMateriaisFornecidos(v); setIsModalMateriaisVisible(false)}} />
             <ModalCriarHorarios open={isModalVisible} onCancel={() => setIsModalVisible(false)} onOk={handleModalSave} day={editingDay} />
