@@ -37,24 +37,24 @@ cssInterop(PrimitiveIcon, {
 });
 
 const buttonStyle = tva({
-  base: 'group/button rounded bg-primary-500 flex-row items-center justify-center data-[focus-visible=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[disabled=true]:opacity-40 gap-2',
+  base: 'group/button rounded bg-primary-500 flex-row items-center justify-center data-[focus-visible=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[disabled=true]:opacity-40 gap-2 data-[active=true]:opacity-70',
   variants: {
     action: {
       primary:
-        'bg-primary-500 data-[hover=true]:bg-primary-600 data-[active=true]:bg-primary-700 border-primary-300 data-[hover=true]:border-primary-400 data-[active=true]:border-primary-500 data-[focus-visible=true]:web:ring-indicator-info',
+        'bg-primary-500 data-[hover=true]:bg-primary-600 border-primary-300 data-[hover=true]:border-primary-400 data-[focus-visible=true]:web:ring-indicator-info',
       secondary:
-        'bg-secondary-500 border-secondary-300 data-[hover=true]:bg-secondary-600 data-[hover=true]:border-secondary-400 data-[active=true]:bg-secondary-700 data-[active=true]:border-secondary-700 data-[focus-visible=true]:web:ring-indicator-info',
+        'bg-secondary-500 border-secondary-300 data-[hover=true]:bg-secondary-600 data-[hover=true]:border-secondary-400 data-[focus-visible=true]:web:ring-indicator-info',
       positive:
-        'bg-success-500 border-success-300 data-[hover=true]:bg-success-600 data-[hover=true]:border-success-400 data-[active=true]:bg-success-700 data-[active=true]:border-success-500 data-[focus-visible=true]:web:ring-indicator-info',
+        'bg-success-500 border-success-300 data-[hover=true]:bg-success-600 data-[hover=true]:border-success-400 data-[focus-visible=true]:web:ring-indicator-info',
       negative:
-        'bg-error-500 border-error-300 data-[hover=true]:bg-error-600 data-[hover=true]:border-error-400 data-[active=true]:bg-error-700 data-[active=true]:border-error-500 data-[focus-visible=true]:web:ring-indicator-info',
+        'bg-error-500 border-error-300 data-[hover=true]:bg-error-600 data-[hover=true]:border-error-400 data-[focus-visible=true]:web:ring-indicator-info',
       default:
-        'bg-transparent data-[hover=true]:bg-background-50 data-[active=true]:bg-transparent',
+        'bg-transparent data-[hover=true]:bg-background-50',
     },
     variant: {
       link: 'px-0',
       outline:
-        'bg-transparent border data-[hover=true]:bg-background-50 data-[active=true]:bg-transparent',
+        'bg-transparent border data-[hover=true]:bg-background-50',
       solid: '',
     },
 
@@ -71,49 +71,49 @@ const buttonStyle = tva({
       action: 'primary',
       variant: 'link',
       class:
-        'px-0 bg-transparent data-[hover=true]:bg-transparent data-[active=true]:bg-transparent',
+        'px-0 bg-transparent data-[hover=true]:bg-transparent',
     },
     {
       action: 'secondary',
       variant: 'link',
       class:
-        'px-0 bg-transparent data-[hover=true]:bg-transparent data-[active=true]:bg-transparent',
+        'px-0 bg-transparent data-[hover=true]:bg-transparent',
     },
     {
       action: 'positive',
       variant: 'link',
       class:
-        'px-0 bg-transparent data-[hover=true]:bg-transparent data-[active=true]:bg-transparent',
+        'px-0 bg-transparent data-[hover=true]:bg-transparent',
     },
     {
       action: 'negative',
       variant: 'link',
       class:
-        'px-0 bg-transparent data-[hover=true]:bg-transparent data-[active=true]:bg-transparent',
+        'px-0 bg-transparent data-[hover=true]:bg-transparent',
     },
     {
       action: 'primary',
       variant: 'outline',
       class:
-        'bg-transparent data-[hover=true]:bg-background-50 data-[active=true]:bg-transparent',
+        'bg-transparent data-[hover=true]:bg-background-50',
     },
     {
       action: 'secondary',
       variant: 'outline',
       class:
-        'bg-transparent data-[hover=true]:bg-background-50 data-[active=true]:bg-transparent',
+        'bg-transparent data-[hover=true]:bg-background-50',
     },
     {
       action: 'positive',
       variant: 'outline',
       class:
-        'bg-transparent data-[hover=true]:bg-background-50 data-[active=true]:bg-transparent',
+        'bg-transparent data-[hover=true]:bg-background-50',
     },
     {
       action: 'negative',
       variant: 'outline',
       class:
-        'bg-transparent data-[hover=true]:bg-background-50 data-[active=true]:bg-transparent',
+        'bg-transparent data-[hover=true]:bg-background-50',
     },
   ],
 });
@@ -123,19 +123,19 @@ const buttonTextStyle = tva({
   parentVariants: {
     action: {
       primary:
-        'text-primary-600 data-[hover=true]:text-primary-600 data-[active=true]:text-primary-700',
+        'text-primary-600 data-[hover=true]:text-primary-600', // Removido active
       secondary:
-        'text-typography-500 data-[hover=true]:text-typography-600 data-[active=true]:text-typography-700',
+        'text-typography-500 data-[hover=true]:text-typography-600', // Removido active
       positive:
-        'text-success-600 data-[hover=true]:text-success-600 data-[active=true]:text-success-700',
+        'text-success-600 data-[hover=true]:text-success-600', // Removido active
       negative:
-        'text-error-600 data-[hover=true]:text-error-600 data-[active=true]:text-error-700',
+        'text-error-600 data-[hover=true]:text-error-600', // Removido active
     },
     variant: {
       link: 'data-[hover=true]:underline data-[active=true]:underline',
       outline: '',
       solid:
-        'text-typography-0 data-[hover=true]:text-typography-0 data-[active=true]:text-typography-0',
+        'text-typography-0 data-[hover=true]:text-typography-0', // Mantém sempre branco
     },
     size: {
       xs: 'text-xs',
@@ -150,49 +150,49 @@ const buttonTextStyle = tva({
       variant: 'solid',
       action: 'primary',
       class:
-        'text-typography-0 data-[hover=true]:text-typography-0 data-[active=true]:text-typography-0',
+        'text-typography-0 data-[hover=true]:text-typography-0', // Removido active
     },
     {
       variant: 'solid',
       action: 'secondary',
       class:
-        'text-typography-800 data-[hover=true]:text-typography-800 data-[active=true]:text-typography-800',
+        'text-typography-800 data-[hover=true]:text-typography-800', // Removido active
     },
     {
       variant: 'solid',
       action: 'positive',
       class:
-        'text-typography-0 data-[hover=true]:text-typography-0 data-[active=true]:text-typography-0',
+        'text-typography-0 data-[hover=true]:text-typography-0', // Removido active
     },
     {
       variant: 'solid',
       action: 'negative',
       class:
-        'text-typography-0 data-[hover=true]:text-typography-0 data-[active=true]:text-typography-0',
+        'text-typography-0 data-[hover=true]:text-typography-0', // Removido active
     },
     {
       variant: 'outline',
       action: 'primary',
       class:
-        'text-primary-500 data-[hover=true]:text-primary-500 data-[active=true]:text-primary-500',
+        'text-primary-500 data-[hover=true]:text-primary-500', // Removido active
     },
     {
       variant: 'outline',
       action: 'secondary',
       class:
-        'text-typography-500 data-[hover=true]:text-primary-600 data-[active=true]:text-typography-700',
+        'text-typography-500 data-[hover=true]:text-primary-600', // Removido active
     },
     {
       variant: 'outline',
       action: 'positive',
       class:
-        'text-primary-500 data-[hover=true]:text-primary-500 data-[active=true]:text-primary-500',
+        'text-primary-500 data-[hover=true]:text-primary-500', // Removido active
     },
     {
       variant: 'outline',
       action: 'negative',
       class:
-        'text-primary-500 data-[hover=true]:text-primary-500 data-[active=true]:text-primary-500',
+        'text-primary-500 data-[hover=true]:text-primary-500', // Removido active
     },
   ],
 });
@@ -204,7 +204,7 @@ const buttonIconStyle = tva({
       link: 'data-[hover=true]:underline data-[active=true]:underline',
       outline: '',
       solid:
-        'text-typography-0 data-[hover=true]:text-typography-0 data-[active=true]:text-typography-0',
+        'text-typography-0 data-[hover=true]:text-typography-0', // Mantém branco
     },
     size: {
       xs: 'h-3.5 w-3.5',
@@ -215,14 +215,13 @@ const buttonIconStyle = tva({
     },
     action: {
       primary:
-        'text-primary-600 data-[hover=true]:text-primary-600 data-[active=true]:text-primary-700',
+        'text-primary-600 data-[hover=true]:text-primary-600', // Removido active
       secondary:
-        'text-typography-500 data-[hover=true]:text-typography-600 data-[active=true]:text-typography-700',
+        'text-typography-500 data-[hover=true]:text-typography-600', // Removido active
       positive:
-        'text-success-600 data-[hover=true]:text-success-600 data-[active=true]:text-success-700',
-
+        'text-success-600 data-[hover=true]:text-success-600', // Removido active
       negative:
-        'text-error-600 data-[hover=true]:text-error-600 data-[active=true]:text-error-700',
+        'text-error-600 data-[hover=true]:text-error-600', // Removido active
     },
   },
   parentCompoundVariants: [
@@ -230,25 +229,25 @@ const buttonIconStyle = tva({
       variant: 'solid',
       action: 'primary',
       class:
-        'text-typography-0 data-[hover=true]:text-typography-0 data-[active=true]:text-typography-0',
+        'text-typography-0 data-[hover=true]:text-typography-0',
     },
     {
       variant: 'solid',
       action: 'secondary',
       class:
-        'text-typography-800 data-[hover=true]:text-typography-800 data-[active=true]:text-typography-800',
+        'text-typography-800 data-[hover=true]:text-typography-800',
     },
     {
       variant: 'solid',
       action: 'positive',
       class:
-        'text-typography-0 data-[hover=true]:text-typography-0 data-[active=true]:text-typography-0',
+        'text-typography-0 data-[hover=true]:text-typography-0',
     },
     {
       variant: 'solid',
       action: 'negative',
       class:
-        'text-typography-0 data-[hover=true]:text-typography-0 data-[active=true]:text-typography-0',
+        'text-typography-0 data-[hover=true]:text-typography-0',
     },
   ],
 });
