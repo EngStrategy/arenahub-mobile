@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, TextInput } from "react-native";
+import { View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform, TextInput } from "react-native";
 import { RegistroAtleta } from "../../components/forms/RegistroAtleta";
 import { RegistroArena } from "../../components/forms/RegistroArena";
 
@@ -23,24 +23,24 @@ export default function Register() {
         </Text>
 
         {/* Botões Atleta / Arena */}
-        <View className="flex-row mb-4 w-full">
-          <TouchableOpacity
-            className={`flex-1 py-2 border-b-2 ${accountType === "atleta" ? "border-green-primary" : "border-gray-not-selected"}`}
+        <View className="flex-row mb-4 w-full border-b border-gray-200">
+          <Pressable
+            className={`flex-1 py-3 border-b-2 ${accountType === "atleta" ? "border-green-primary" : "border-transparent"}`}
             onPress={() => setAccountType("atleta")}
           >
-            <Text className={`text-center font-semibold ${accountType === "atleta" ? "text-green-primary" : "text-gray-not-selected"}`}>
+            <Text className={`text-center font-semibold text-base ${accountType === "atleta" ? "text-green-primary" : "text-gray-400"}`}>
               Atleta
             </Text>
-          </TouchableOpacity>
+          </Pressable>
 
-          <TouchableOpacity
-            className={`flex-1 py-2 border-b-2 ${accountType === "arena" ? "border-green-primary" : "border-gray-not-selected"}`}
+          <Pressable
+            className={`flex-1 py-3 border-b-2 ${accountType === "arena" ? "border-green-primary" : "border-transparent"}`}
             onPress={() => setAccountType("arena")}
           >
-            <Text className={`text-center font-semibold ${accountType === "arena" ? "text-green-primary" : "text-gray-not-selected"}`}>
+            <Text className={`text-center font-semibold text-base ${accountType === "arena" ? "text-green-primary" : "text-gray-400"}`}>
               Arena
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Formulário */}
