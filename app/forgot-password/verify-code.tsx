@@ -5,13 +5,14 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { verifyResetCode, forgotPassword } from '@/services/api/auth';
 import { useTimer } from '@/hooks/useTimer';
+
+import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 
 export default function VerifyCodeScreen() {
   const { email } = useLocalSearchParams<{ email: string }>();
@@ -121,7 +122,7 @@ export default function VerifyCodeScreen() {
       </View>
 
       {/* Timer e Reenviar */}
-      <View className="flex-row justify-between items-center mb-6">
+      <View className="flex-row justify-between items-center mb-8">
         <Text className="text-xs text-gray-500">
           {timer > 0
             ? `Reenviar código em ${String(timer).padStart(2, '0')}s`
@@ -140,23 +141,22 @@ export default function VerifyCodeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Botão Confirmar */}
-      <TouchableOpacity
-        className={`bg-green-primary p-4 rounded-lg items-center ${
-          loading ? 'opacity-60' : ''
-        }`}
+      {/* Botão Confirmar Atualizado */}
+      <Button
+        size="xl"
+        className="bg-green-primary rounded-lg py-3"
         onPress={() => handleVerifyCode(code.join(''))}
         disabled={loading || code.some((digit) => !digit)}
-        activeOpacity={0.8}
       >
         {loading ? (
-          <ActivityIndicator color="#fff" />
+          <ButtonSpinner className="text-white" />
         ) : (
-          <Text className="text-white text-base font-semibold">
+          <ButtonText className="text-base text-white">
             Confirmar código
-          </Text>
+          </ButtonText>
         )}
-      </TouchableOpacity>
+      </Button>
+
     </ScrollView>
   );
 }
