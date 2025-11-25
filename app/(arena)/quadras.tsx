@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, ScrollView } from 'react-native'; // Adicionado TouchableOpacity
+import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getQuadrasByArena } from '@/services/api/entities/quadra';
-import { getArenaById } from '@/services/api/entities/arena';
 import { Quadra } from '@/context/types/Quadra';
 import { QuadraCard } from '@/components/cards/QuadraCard';
 import { Spinner } from '@/components/ui/spinner';
@@ -16,7 +15,6 @@ export default function MinhasQuadras() {
     const [quadras, setQuadras] = useState<Quadra[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [arenaCep, setArenaCep] = useState('');
 
     const fetchDados = async () => {
         try {
@@ -28,9 +26,6 @@ export default function MinhasQuadras() {
 
             const listaQuadras = await getQuadrasByArena(arenaId);
             setQuadras(listaQuadras);
-
-            const arenaData = await getArenaById(arenaId);
-            setArenaCep(arenaData.endereco.cep);
 
         } catch (error) {
             console.error(error);
@@ -97,7 +92,6 @@ export default function MinhasQuadras() {
                                     quadra={item} 
                                     onEdit={handleEdit} 
                                     onDelete={handleDelete}
-                                    arenaCep={arenaCep}
                                 />
                             )}
                             contentContainerStyle={{ paddingBottom: 20, gap: 4 }}
