@@ -2,6 +2,7 @@ export const TIPO_QUADRA_OPTIONS = [
     { value: 'FUTEBOL_SOCIETY', label: 'Futebol society' },
     { value: 'FUTEBOL_SETE', label: 'Futebol 7' },
     { value: 'FUTEBOL_ONZE', label: 'Futebol 11' },
+    { value: 'FUTEBOL_AREIA', label: 'Futebol de areia' },
     { value: 'FUTSAL', label: 'Futsal' },
     { value: 'BEACHTENNIS', label: 'Beach tennis' },
     { value: 'VOLEI', label: 'Vôlei' },
@@ -12,18 +13,13 @@ export const TIPO_QUADRA_OPTIONS = [
 
 export const MATERIAIS_OPTIONS = [
     { value: 'BOLA', label: 'Bola' },
-    { value: 'REDE', label: 'Rede' },
     { value: 'COLETE', label: 'Colete' },
     { value: 'APITO', label: 'Apito' },
     { value: 'LUVA', label: 'Luva' },
     { value: 'CONE', label: 'Cone' },
     { value: 'BOMBA', label: 'Bomba' },
-    { value: 'TRAVE', label: 'Trave' },
-    { value: 'ILUMINACAO', label: 'Iluminação' },
-    { value: 'VESTIARIO', label: 'Vestiário' },
-    { value: 'ESTACIONAMENTO', label: 'Estacionamento' },
-    { value: 'CHURRASQUEIRA', label: 'Churrasqueira' },
-    { value: 'LANCHONETE', label: 'Lanchonete' },
+    { value: 'MARCADOR_PLACAR', label: 'Marcador de placar' },
+    { value: 'BOTAO_GOL', label: 'Botão de gol' },
 ];
 
 export const DURACAO_OPTIONS = [

@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, KeyboardAvoidingView, Platform, Alert, View, TouchableOpacity, Text, TextInput, Switch, Image } from 'react-native';
+import { ScrollView, KeyboardAvoidingView, Platform, Alert, View, TouchableOpacity, Text, TextInput, Image, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Edit, Trash2, Upload, ChevronDown } from 'lucide-react-native';
+import { Edit, Upload, ChevronDown } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { type QuadraCreate } from '@/context/types/Quadra';
 import { TipoQuadra, MaterialFornecido, DuracaoReserva } from '@/context/types/Quadra';
 import { horariosDaSemanaCompleta, HorarioFuncionamentoCreate, DiaDaSemana } from '@/context/types/Horario';
 import { formatarDiaSemanaCompleto } from '@/context/functions/mapeamentoDiaSemana';
-import { getQuadraById, updateQuadra } from '@/services/api/entities/quadra'; // Importar funções novas
+import { getQuadraById, updateQuadra } from '@/services/api/entities/quadra'; 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MATERIAIS_OPTIONS, TIPO_QUADRA_OPTIONS, DURACAO_OPTIONS } from '@/constants/Quadra';
 import { ModalCriarHorarios } from '@/components/modais/ModalCriarHorarios';
 import { ModalMultiSelect } from '@/components/modais/ModalMultiSelect';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Spinner } from '@/components/ui/spinner';
 import { Picker } from '@react-native-picker/picker';
 
-const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png";
+const fallbackSrc = require('@/assets/images/imagem-default.png');
 
 const FlexCol: React.FC<{ children: React.ReactNode; className?: string; space?: number }> = ({ children, className = '', space = 0 }) => (
     <View className={`flex flex-col ${className}`} style={{ gap: space * 4 }}>{children}</View>
@@ -39,7 +39,9 @@ export default function EditarQuadra() {
     const [cobertura, setCobertura] = useState(false);
     const [iluminacaoNoturna, setIluminacaoNoturna] = useState(false);
     const [descricao, setDescricao] = useState('');
-    const [imageUrl, setImageUrl] = useState<string | null>(DEFAULT_AVATAR_URL);
+    
+    // Inicializa como null. Se tiver foto, preenchemos no useEffect.
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
     
     const [horarios, setHorarios] = useState(horariosDaSemanaCompleta);
     
@@ -62,7 +64,9 @@ export default function EditarQuadra() {
                 setCobertura(quadraData.cobertura);
                 setIluminacaoNoturna(quadraData.iluminacaoNoturna);
                 setDescricao(quadraData.descricao || '');
-                setImageUrl(quadraData.urlFotoQuadra || DEFAULT_AVATAR_URL);
+                
+                // Se vier string vazia ou nulo, setamos null para usar o fallback no render
+                setImageUrl(quadraData.urlFotoQuadra || null);
 
                 
                 const horariosMapeados = horariosDaSemanaCompleta.map(diaDefault => {
@@ -72,6 +76,7 @@ export default function EditarQuadra() {
                         return {
                             diaDaSemana: diaDefault.diaDaSemana,
                             intervalosDeHorario: diaBackend.intervalosDeHorario.map(intervalo => ({
+                                id: intervalo.id, 
                                 inicio: intervalo.inicio,
                                 fim: intervalo.fim,
                                 valor: Number(intervalo.valor),
@@ -101,15 +106,14 @@ export default function EditarQuadra() {
 
         setSaving(true);
         try {
-            
-            const quadraUpdate: Partial<QuadraCreate> = {
+            const payload: any = {
                 nomeQuadra,
-                tipoQuadra: tipoQuadra as TipoQuadra[],
+                tipoQuadra: tipoQuadra as TipoQuadra[], 
                 materiaisFornecidos: materiaisFornecidos as MaterialFornecido[],
-                duracaoReserva: duracaoReserva as DuracaoReserva,
                 cobertura,
                 iluminacaoNoturna,
                 descricao,
+                // Envia a URL se existir, ou string vazia (nunca envia o objeto require do fallback)
                 urlFotoQuadra: imageUrl || '',
                 
                 horariosFuncionamento: horarios
@@ -117,6 +121,7 @@ export default function EditarQuadra() {
                     .map(item => ({
                         diaDaSemana: item.diaDaSemana,
                         intervalosDeHorario: item.intervalosDeHorario.map(h => ({
+                            id: h.id, 
                             inicio: h.inicio,
                             fim: h.fim,
                             valor: Number(h.valor) || 0,
@@ -125,11 +130,14 @@ export default function EditarQuadra() {
                     })),
             };
 
-            await updateQuadra(Number(id), quadraUpdate);
+            await updateQuadra(Number(id), payload);
+            
             Alert.alert("Sucesso", "Quadra atualizada com sucesso!");
             router.back();
         } catch (error: any) {
             console.error("Erro update:", error);
+            if(error.response?.data) console.log(JSON.stringify(error.response.data, null, 2));
+            
             Alert.alert("Erro", error.message || "Erro ao atualizar quadra.");
         } finally {
             setSaving(false);
@@ -179,15 +187,32 @@ export default function EditarQuadra() {
 
     return (
         <SafeAreaView className="flex-1 bg-white">
+            
+            <View className="flex-row items-center px-4 py-3 border-b border-gray-100 bg-white z-10">
+                <Pressable onPress={() => router.back()} className="mr-4 p-1">
+                    <Ionicons name="arrow-back" size={24} color="#374151" />
+                </Pressable>
+                <Text className="text-lg font-bold text-gray-800 flex-1" numberOfLines={1}>
+                    Editar quadra
+                </Text>
+            </View>
+
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
                 <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
                     <View className="w-full max-w-3xl mx-auto px-6">
                         <FlexCol space={3} className="mt-2">
-                            <Text className="text-2xl font-bold">Editar quadra</Text>
 
-                            {/* FOTO (Simplificado para este exemplo) */}
+                            {/* FOTO */}
                             <FlexRow space={2} className='items-center'>
-                                <Image source={{ uri: imageUrl ?? DEFAULT_AVATAR_URL }} className="w-16 h-16 rounded-full border border-gray-300" />
+                                <Image 
+                                    // Lógica de fallback visual:
+                                    // Se tem URL válida, usa { uri: imageUrl }
+                                    // Se não tem (ou deu erro), usa fallbackSrc
+                                    source={imageUrl ? { uri: imageUrl } : fallbackSrc} 
+                                    className="w-16 h-16 rounded-full border border-gray-300" 
+                                    // Se a URL remota falhar (404, etc), reseta para null para mostrar o fallback
+                                    onError={() => setImageUrl(null)}
+                                />
                                 <TouchableOpacity onPress={() => Alert.alert("Em breve", "Upload de imagem")} className="py-2 px-3 border border-gray-400 rounded-lg flex-row items-center">
                                     <Upload size={16} color='black' />
                                     <Text className="ml-2 text-gray-700">Alterar foto</Text>
@@ -224,8 +249,6 @@ export default function EditarQuadra() {
                                         </Picker>
                                     </View>
                                 </View>
-
-                                {/* Switches Cobertura/Iluminação (Opcional adicionar aqui se quiser igual ao create) */}
                             </FlexCol>
 
                             <FlexCol space={1} className='mt-4'>
@@ -248,7 +271,6 @@ export default function EditarQuadra() {
                 </ScrollView>
             </KeyboardAvoidingView>
             
-            {/* Modais reutilizados */}
             <ModalMultiSelect open={isModalTipoQuadraVisible} title="Tipos de Quadra" options={TIPO_QUADRA_OPTIONS} initialValues={tipoQuadra} onClose={() => setIsModalTipoQuadraVisible(false)} onSave={(v) => {setTipoQuadra(v); setIsModalTipoQuadraVisible(false)}} />
             <ModalMultiSelect open={isModalMateriaisVisible} title="Materiais" options={MATERIAIS_OPTIONS} initialValues={materiaisFornecidos} onClose={() => setIsModalMateriaisVisible(false)} onSave={(v) => {setMateriaisFornecidos(v); setIsModalMateriaisVisible(false)}} />
             <ModalCriarHorarios open={isModalVisible} onCancel={() => setIsModalVisible(false)} onOk={handleModalSave} day={editingDay} />

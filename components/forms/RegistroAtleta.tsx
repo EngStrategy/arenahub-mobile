@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useRouter } from 'expo-router';
 import { registerAthlete } from '@/services/api/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FormControl } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { PasswordStrengthIndicator } from "@/components/forms/passwordStrengthIndicador";
-import { View, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { formatarTelefone } from "@/context/functions/formatters";
 import { InputTexto } from "./formInputs/InputTexto";
 import { InputNumero } from "./formInputs/InputNumero";
@@ -146,13 +145,19 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
             error={errors.confirmPassword}
           />
 
-          <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
+          <Button 
+            size="xl" 
+            className="bg-green-primary rounded-lg py-3 mt-4"
             onPress={handleRegister}
             disabled={loading}
           >
-            <ButtonText className="text-base text-white">
-              Criar conta
-            </ButtonText>
+            {loading ? (
+              <ButtonSpinner className="text-white" />
+            ) : (
+              <ButtonText className="text-base text-white">
+                Cadastrar atleta
+              </ButtonText>
+            )}
           </Button>
         </VStack>
       </FormControl>

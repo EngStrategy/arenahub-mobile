@@ -1,4 +1,3 @@
-// app/quadras/[arenaId].tsx
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, Image, ScrollView, Pressable, ActivityIndicator, FlatList } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
