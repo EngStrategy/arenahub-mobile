@@ -1,7 +1,6 @@
-// app/(arena)/perfil.tsx
 import React, { useState, useEffect } from "react";
 import { getArenaById, updateArena } from "@/services/api//entities/arena";
-import { Link, useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Picker } from "@react-native-picker/picker";
 import { Trash2, Upload } from 'lucide-react-native';
 import apiCEP from "@/services/apiCEP";
@@ -17,7 +16,7 @@ import { InputTexto } from "@/components/forms/formInputs/InputTexto";
 import { InputNumero } from "@/components/forms/formInputs/InputNumero";
 import { InputTextArea } from "@/components/forms/formInputs/InputTextArea";
 import { FormControl } from '@/components/ui/form-control';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button'; 
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
@@ -46,6 +45,8 @@ const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png";
 export default function EditarArena() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  
+  // Estados do formulário
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [cep, setCep] = useState("");
@@ -59,6 +60,23 @@ export default function EditarArena() {
   const [horasCancelarAgendamento, setHorasCancelarAgendamento] = useState("");
   const [cidades, setCidades] = useState<{ id: number; nome: string }[]>([]);
   const [urlFoto, setUrlFoto] = useState<string | null>(DEFAULT_AVATAR_URL);
+
+  // Estado para dados originais
+  const [initialData, setInitialData] = useState({
+    nome: "",
+    telefone: "",
+    cep: "",
+    rua: "",
+    bairro: "",
+    numero: "",
+    estado: "",
+    cidade: "",
+    descricao: "",
+    complemento: "",
+    horasCancelarAgendamento: "",
+    urlFoto: DEFAULT_AVATAR_URL as string | null
+  });
+
   const [errors, setErrors] = useState<{
     telefone?: string;
     cep?: string;
@@ -86,6 +104,21 @@ export default function EditarArena() {
     estado: '',
     cidade: '',
   });
+
+  // Verifica se houve alterações
+  const hasChanges = 
+    nome !== initialData.nome ||
+    telefone !== initialData.telefone ||
+    cep !== initialData.cep ||
+    rua !== initialData.rua ||
+    bairro !== initialData.bairro ||
+    numero !== initialData.numero ||
+    estado !== initialData.estado ||
+    cidade !== initialData.cidade ||
+    descricao !== initialData.descricao ||
+    complemento !== initialData.complemento ||
+    horasCancelarAgendamento !== initialData.horasCancelarAgendamento ||
+    urlFoto !== initialData.urlFoto;
 
   const consultarCep = async (cep: string, setters: CepValues) => {
     if (!cep) {
@@ -144,7 +177,6 @@ export default function EditarArena() {
 
   const handleRemoveImage = () => {
     setUrlFoto(DEFAULT_AVATAR_URL);
-    Alert.alert('Sucesso', 'Foto removida.');
   };
 
   const selectImage = async () => {
@@ -187,18 +219,50 @@ export default function EditarArena() {
         const id = userData.id;
 
         const data = await getArenaById(id);
-        setNome(data.nome);
-        setTelefone(data.telefone);
-        setCep(data.endereco.cep);
-        setRua(data.endereco.rua);
-        setBairro(data.endereco.bairro);
-        setNumero(data.endereco.numero);
-        setEstado(data.endereco.estado);
-        setCidade(data.endereco.cidade);
-        setComplemento(data.endereco.complemento || "");
-        setHorasCancelarAgendamento(String(data.horasCancelarAgendamento ?? ""));
-        setDescricao(data.descricao || "");
-        setUrlFoto(data.urlFoto || null);
+        
+        // Dados formatados
+        const fetchedNome = data.nome;
+        const fetchedTelefone = data.telefone;
+        const fetchedCep = data.endereco.cep;
+        const fetchedRua = data.endereco.rua;
+        const fetchedBairro = data.endereco.bairro;
+        const fetchedNumero = data.endereco.numero;
+        const fetchedEstado = data.endereco.estado;
+        const fetchedCidade = data.endereco.cidade;
+        const fetchedComplemento = data.endereco.complemento || "";
+        const fetchedHoras = String(data.horasCancelarAgendamento ?? "");
+        const fetchedDescricao = data.descricao || "";
+        const fetchedUrlFoto = data.urlFoto || DEFAULT_AVATAR_URL;
+
+        // Setar estados
+        setNome(fetchedNome);
+        setTelefone(fetchedTelefone);
+        setCep(fetchedCep);
+        setRua(fetchedRua);
+        setBairro(fetchedBairro);
+        setNumero(fetchedNumero);
+        setEstado(fetchedEstado);
+        setCidade(fetchedCidade);
+        setComplemento(fetchedComplemento);
+        setHorasCancelarAgendamento(fetchedHoras);
+        setDescricao(fetchedDescricao);
+        setUrlFoto(fetchedUrlFoto);
+
+        // Salvar initialData
+        setInitialData({
+          nome: fetchedNome,
+          telefone: fetchedTelefone,
+          cep: fetchedCep,
+          rua: fetchedRua,
+          bairro: fetchedBairro,
+          numero: fetchedNumero,
+          estado: fetchedEstado,
+          cidade: fetchedCidade,
+          complemento: fetchedComplemento,
+          horasCancelarAgendamento: fetchedHoras,
+          descricao: fetchedDescricao,
+          urlFoto: fetchedUrlFoto
+        });
 
       } catch (error) {
         console.error(error);
@@ -278,7 +342,7 @@ export default function EditarArena() {
       const userData = JSON.parse(userDataString);
       const id = userData.id;
 
-      console.log("📤 Enviando dados para atualização:", {
+      const payload = {
         nome,
         telefone,
         endereco: {
@@ -295,29 +359,28 @@ export default function EditarArena() {
         descricao: descricao || "",
         horasCancelarAgendamento: Number(horasCancelarAgendamento) || 0,
         urlFoto: urlFoto === DEFAULT_AVATAR_URL ? "" : urlFoto || "",
-      });
+      };
 
-      await updateArena(id, {
+      await updateArena(id, payload);
+
+      // Atualiza o initialData após sucesso
+      setInitialData({
         nome,
         telefone,
-        endereco: {
-          cep,
-          estado,
-          cidade,
-          bairro,
-          rua,
-          numero,
-          complemento: complemento || "",
-          latitude,
-          longitude,
-        },
-        descricao: descricao || "",
-        horasCancelarAgendamento: Number(horasCancelarAgendamento) || 0,
-        urlFoto: urlFoto === DEFAULT_AVATAR_URL ? "" : urlFoto || "",
+        cep,
+        rua,
+        bairro,
+        numero,
+        estado,
+        cidade,
+        complemento,
+        horasCancelarAgendamento,
+        descricao,
+        urlFoto
       });
 
       Alert.alert("Sucesso", "Arena atualizada com sucesso!");
-      router.back();
+      // router.back(); // Opcional
 
     } catch (error: any) {
       console.error("❌ Erro completo:", error);
@@ -577,13 +640,17 @@ export default function EditarArena() {
               </Button>
               <Button
                 size="xl"
-                className="flex-1 bg-green-primary rounded-lg py-3"
+                className={`flex-1 rounded-lg py-3 bg-green-primary ${(!hasChanges || loading) ? 'opacity-50' : ''}`}
                 onPress={handleUpdateArena}
-                disabled={loading}
+                disabled={loading || !hasChanges}
               >
-                <ButtonText className="text-base text-white">
-                  {loading ? "Salvando..." : "Salvar alterações"}
-                </ButtonText>
+                 {loading ? (
+                    <ButtonSpinner className="text-white" />
+                  ) : (
+                    <ButtonText className="text-base text-white">
+                      Salvar alterações
+                    </ButtonText>
+                  )}
               </Button>
             </View>
           </VStack>

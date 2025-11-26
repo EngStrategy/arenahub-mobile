@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { getAtletaById, updateAtleta } from "@/services/api//entities/atleta"; // Assumindo que o caminho da api é similar
-import { Link, useRouter } from 'expo-router';
-import { Upload, Trash2, User } from 'lucide-react-native';
+import { getAtletaById, updateAtleta } from "@/services/api//entities/atleta";
+import { useRouter } from 'expo-router';
+import { Upload, Trash2 } from 'lucide-react-native';
 import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { InputTexto } from "@/components/forms/formInputs/InputTexto";
 import { InputNumero } from "@/components/forms/formInputs/InputNumero";
 import { FormControl } from '@/components/ui/form-control';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button'; // Adicionado ButtonSpinner
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
@@ -31,12 +31,27 @@ interface ErrorsState {
 export default function InformacoesPessoais() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    
+    // Estados do formulário
     const [nome, setNome] = useState("");
     const [telefone, setTelefone] = useState("");
     const [email, setEmail] = useState("");
     const [urlFoto, setUrlFoto] = useState<string | null>(DEFAULT_AVATAR_URL);
 
+    // Estado para guardar os dados originais vindos do Backend
+    const [initialData, setInitialData] = useState({
+        nome: "",
+        telefone: "",
+        urlFoto: DEFAULT_AVATAR_URL as string | null
+    });
+
     const [errors, setErrors] = useState<ErrorsState>({});
+
+    // Verifica se houve alguma alteração comparando o estado atual com o inicial
+    const hasChanges = 
+        nome !== initialData.nome || 
+        telefone !== initialData.telefone || 
+        urlFoto !== initialData.urlFoto;
 
     const getUserId = async (): Promise<string> => {
         const userDataString = await AsyncStorage.getItem('userData');
@@ -53,10 +68,18 @@ export default function InformacoesPessoais() {
                 const id = await getUserId();
                 const data = await getAtletaById(id);
 
+                const currentPhoto = data.urlFoto || DEFAULT_AVATAR_URL;
+
                 setNome(data.nome);
                 setTelefone(data.telefone);
                 setEmail(data.email);
-                setUrlFoto(data.urlFoto || DEFAULT_AVATAR_URL);
+                setUrlFoto(currentPhoto);
+
+                setInitialData({
+                    nome: data.nome,
+                    telefone: data.telefone,
+                    urlFoto: currentPhoto
+                });
 
             } catch (error) {
                 console.error(error);
@@ -75,7 +98,6 @@ export default function InformacoesPessoais() {
 
     const handleRemoveImage = () => {
         setUrlFoto(DEFAULT_AVATAR_URL);
-        Alert.alert('Sucesso', 'Foto removida. Salve as alterações para confirmar.');
     };
 
     const handleUpdateAtleta = async () => {
@@ -99,8 +121,15 @@ export default function InformacoesPessoais() {
                 urlFoto: urlFoto === DEFAULT_AVATAR_URL ? "" : urlFoto || "",
             });
 
+            // Atualiza o initialData com os novos dados salvos
+            setInitialData({
+                nome,
+                telefone,
+                urlFoto
+            });
+
             Alert.alert("Sucesso", "Informações atualizadas!");
-            router.back();
+            // Opcional: router.back() se quiser sair da tela, ou manter na tela com o botão desabilitado novamente
 
         } catch (error: any) {
             console.error(error);
@@ -111,7 +140,7 @@ export default function InformacoesPessoais() {
     };
 
     if (loading && !nome) {
-        return <Text className="flex-1 justify-center items-center">Carregando...</Text>
+        return <Text className="flex-1 justify-center items-center text-center mt-10">Carregando...</Text>
     }
 
     return (
@@ -175,7 +204,7 @@ export default function InformacoesPessoais() {
                             value={nome}
                             onChangeText={setNome}
                             onBlur={() => {
-                                const nomeError = validarNome(nome); // Crie essa função
+                                const nomeError = validarNome(nome);
                                 setErrors(prev => ({ ...prev, nome: nomeError }));
                             }}
                             error={errors.nome}
@@ -207,15 +236,20 @@ export default function InformacoesPessoais() {
                                     Cancelar
                                 </ButtonText>
                             </Button>
+                            
                             <Button
                                 size="xl"
-                                className="flex-1 bg-green-primary rounded-lg py-3"
+                                className={`flex-1 rounded-lg py-3 bg-green-primary ${(!hasChanges || loading) ? 'opacity-50' : ''}`}
                                 onPress={handleUpdateAtleta}
-                                disabled={loading}
+                                disabled={loading || !hasChanges}
                             >
-                                <ButtonText className="text-base text-white">
-                                    Salvar alterações
-                                </ButtonText>
+                                {loading ? (
+                                    <ButtonSpinner className="text-white" />
+                                ) : (
+                                    <ButtonText className="text-base text-white">
+                                        Salvar alterações
+                                    </ButtonText>
+                                )}
                             </Button>
                         </View>
                     </VStack>
