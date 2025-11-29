@@ -3,6 +3,9 @@ import Gradient from '@/assets/icons/Gradient';
 import Logo from '@/assets/icons/Logo';
 import { Box } from '@/components/ui/box';
 import { ScrollView } from 'react-native';
+import { ModalAvaliarAgendamento } from '@/components/modais/ModalAvaliarAgendamento';
+import { VStack } from '@/components/ui/vstack';
+import { useState } from 'react';
 import { Text } from '@/components/ui/text';
 import {
   Select,
@@ -38,6 +41,7 @@ const FeatureCard = ({ iconSvg: IconSvg, name, desc }: any) => {
 
 export default function Home() {
   const router = useRouter();
+  const [openAvaliacao, setOpenAvaliacao] = useState(false);
   return (
     <Box className="flex-1 bg-background-300 h-[100vh]">
       <Box className="absolute h-[500px] w-[500px] lg:w-[700px] lg:h-[700px]">
@@ -63,6 +67,20 @@ export default function Home() {
           >
             <ButtonText>Home</ButtonText>
           </Button>
+
+          <Button
+            size="md"
+            className="bg-primary-500 px-6 py-2 rounded-full"
+            onPress={() => setOpenAvaliacao(true)}>
+            <ButtonText>Avaliar Agendamento</ButtonText>
+          </Button>
+
+          <ModalAvaliarAgendamento
+            isOpen={openAvaliacao}
+            onClose={() => setOpenAvaliacao(false)}
+            agendamentoId={1}
+          />
+
 
           <Button
             size="md"
