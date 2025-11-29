@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getArenaById, updateArena } from "@/services/api//entities/arena";
-import { Link, useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Picker } from "@react-native-picker/picker";
 import { Trash2, Upload } from 'lucide-react-native';
 import apiCEP from "@/services/apiCEP";
@@ -10,12 +10,13 @@ import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { estados } from "@/data/estados";
-import { View, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ScrollView } from "react-native";
+import { View, Alert, ScrollView } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { InputTexto } from "@/components/forms/formInputs/InputTexto";
 import { InputNumero } from "@/components/forms/formInputs/InputNumero";
 import { InputTextArea } from "@/components/forms/formInputs/InputTextArea";
 import { FormControl } from '@/components/ui/form-control';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button'; 
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
@@ -38,11 +39,14 @@ interface CepValues {
   setEstado: (value: string) => void;
   setComplemento: (value: string) => void;
 }
+
 const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png";
 
 export default function EditarArena() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  
+  // Estados do formulário
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [cep, setCep] = useState("");
@@ -56,6 +60,23 @@ export default function EditarArena() {
   const [horasCancelarAgendamento, setHorasCancelarAgendamento] = useState("");
   const [cidades, setCidades] = useState<{ id: number; nome: string }[]>([]);
   const [urlFoto, setUrlFoto] = useState<string | null>(DEFAULT_AVATAR_URL);
+
+  // Estado para dados originais
+  const [initialData, setInitialData] = useState({
+    nome: "",
+    telefone: "",
+    cep: "",
+    rua: "",
+    bairro: "",
+    numero: "",
+    estado: "",
+    cidade: "",
+    descricao: "",
+    complemento: "",
+    horasCancelarAgendamento: "",
+    urlFoto: DEFAULT_AVATAR_URL as string | null
+  });
+
   const [errors, setErrors] = useState<{
     telefone?: string;
     cep?: string;
@@ -67,6 +88,8 @@ export default function EditarArena() {
     complemento?: string;
     descricao?: string;
     horasCancelarAgendamento?: string;
+    estado?: string;
+    cidade?: string;
   }>({
     telefone: '',
     cep: '',
@@ -78,7 +101,24 @@ export default function EditarArena() {
     complemento: '',
     descricao: '',
     horasCancelarAgendamento: '',
+    estado: '',
+    cidade: '',
   });
+
+  // Verifica se houve alterações
+  const hasChanges = 
+    nome !== initialData.nome ||
+    telefone !== initialData.telefone ||
+    cep !== initialData.cep ||
+    rua !== initialData.rua ||
+    bairro !== initialData.bairro ||
+    numero !== initialData.numero ||
+    estado !== initialData.estado ||
+    cidade !== initialData.cidade ||
+    descricao !== initialData.descricao ||
+    complemento !== initialData.complemento ||
+    horasCancelarAgendamento !== initialData.horasCancelarAgendamento ||
+    urlFoto !== initialData.urlFoto;
 
   const consultarCep = async (cep: string, setters: CepValues) => {
     if (!cep) {
@@ -117,18 +157,26 @@ export default function EditarArena() {
   };
 
   const atualizarLatitudeLongitude = async (cep: string) => {
-    const cleanCep = cep.replace(/\D/g, "");
-    const { data } = await apiLatitudeLongitude.get(`${cleanCep}`);
+    try {
+      const cleanCep = cep.replace(/\D/g, "");
+      const { data } = await apiLatitudeLongitude.get(`${cleanCep}`);
 
-    return {
-      latitude: data.lat,
-      longitude: data.lng,
-    };
+      if (!data || !data.lat || !data.lng) {
+        throw new Error("Coordenadas não encontradas");
+      }
+
+      return {
+        latitude: Number(data.lat),
+        longitude: Number(data.lng),
+      };
+    } catch (error) {
+      console.error("Erro ao buscar coordenadas:", error);
+      throw new Error("Não foi possível obter as coordenadas do CEP");
+    }
   };
 
   const handleRemoveImage = () => {
     setUrlFoto(DEFAULT_AVATAR_URL);
-    Alert.alert('Sucesso', 'Foto removida.');
   };
 
   const selectImage = async () => {
@@ -143,7 +191,6 @@ export default function EditarArena() {
         const { data } = await apiCidades.get(
           `/estados/${estado}/municipios`
         );
-        // O IBGE retorna uma lista de objetos [{ id, nome, microrregiao, ... }]
         setCidades(data);
       } catch (error) {
         console.error("Erro ao buscar cidades:", error);
@@ -153,7 +200,6 @@ export default function EditarArena() {
 
     fetchCidades();
   }, [estado]);
-
 
   const getUserId = async () => {
     const userDataString = await AsyncStorage.getItem('userData');
@@ -172,21 +218,52 @@ export default function EditarArena() {
         const userData = JSON.parse(userDataString);
         const id = userData.id;
 
-        const data = await getArenaById(id); // agora passa só o id, sem "/arenas/" aqui
-        setNome(data.nome);
-        setTelefone(data.telefone);
-        setCep(data.endereco.cep);
-        setRua(data.endereco.rua);
-        setBairro(data.endereco.bairro);
-        setNumero(data.endereco.numero);
-        setEstado(data.endereco.estado);
-        setCidade(data.endereco.cidade);
-        setComplemento(data.endereco.complemento || "");
-        setHorasCancelarAgendamento(String(data.horasCancelarAgendamento ?? ""));
-        setDescricao(data.descricao || "");
-        setUrlFoto(data.urlFoto || null);
+        const data = await getArenaById(id);
+        
+        // Dados formatados
+        const fetchedNome = data.nome;
+        const fetchedTelefone = data.telefone;
+        const fetchedCep = data.endereco.cep;
+        const fetchedRua = data.endereco.rua;
+        const fetchedBairro = data.endereco.bairro;
+        const fetchedNumero = data.endereco.numero;
+        const fetchedEstado = data.endereco.estado;
+        const fetchedCidade = data.endereco.cidade;
+        const fetchedComplemento = data.endereco.complemento || "";
+        const fetchedHoras = String(data.horasCancelarAgendamento ?? "");
+        const fetchedDescricao = data.descricao || "";
+        const fetchedUrlFoto = data.urlFoto || DEFAULT_AVATAR_URL;
 
-        // preencher os campos com os dados da arena...
+        // Setar estados
+        setNome(fetchedNome);
+        setTelefone(fetchedTelefone);
+        setCep(fetchedCep);
+        setRua(fetchedRua);
+        setBairro(fetchedBairro);
+        setNumero(fetchedNumero);
+        setEstado(fetchedEstado);
+        setCidade(fetchedCidade);
+        setComplemento(fetchedComplemento);
+        setHorasCancelarAgendamento(fetchedHoras);
+        setDescricao(fetchedDescricao);
+        setUrlFoto(fetchedUrlFoto);
+
+        // Salvar initialData
+        setInitialData({
+          nome: fetchedNome,
+          telefone: fetchedTelefone,
+          cep: fetchedCep,
+          rua: fetchedRua,
+          bairro: fetchedBairro,
+          numero: fetchedNumero,
+          estado: fetchedEstado,
+          cidade: fetchedCidade,
+          complemento: fetchedComplemento,
+          horasCancelarAgendamento: fetchedHoras,
+          descricao: fetchedDescricao,
+          urlFoto: fetchedUrlFoto
+        });
+
       } catch (error) {
         console.error(error);
         Alert.alert("Erro", "Não foi possível carregar os dados da arena.");
@@ -198,8 +275,8 @@ export default function EditarArena() {
     fetchArena();
   }, []);
 
-
   const handleUpdateArena = async () => {
+    // 1. Validar todos os campos
     const nomeError = validarNomeArena(nome);
     const telefoneError = validarTelefone(telefone);
     const cepError = validarCEP(cep);
@@ -207,9 +284,13 @@ export default function EditarArena() {
     const ruaError = validarRua(rua);
     const numeroError = validarNumero(numero);
     const complementoError = validarComplemento(complemento);
+    const horasError = validarHorasCancelarAgendamento(horasCancelarAgendamento);
 
-    setErrors(prev => ({
-      ...prev,
+    // Validações adicionais para campos obrigatórios
+    const estadoError = !estado ? "Estado é obrigatório" : "";
+    const cidadeError = !cidade ? "Cidade é obrigatória" : "";
+
+    setErrors({
       nome: nomeError,
       telefone: telefoneError,
       cep: cepError,
@@ -217,18 +298,51 @@ export default function EditarArena() {
       rua: ruaError,
       numero: numeroError,
       complemento: complementoError,
-    }));
+      horasCancelarAgendamento: horasError,
+      estado: estadoError,
+      cidade: cidadeError,
+    });
+
+    // 2. Verificar se há erros antes de continuar
+    if (
+      nomeError || 
+      telefoneError || 
+      cepError || 
+      bairroError || 
+      ruaError || 
+      numeroError || 
+      complementoError || 
+      horasError ||
+      estadoError ||
+      cidadeError
+    ) {
+      Alert.alert("Erro de Validação", "Por favor, corrija os campos inválidos antes de continuar.");
+      return;
+    }
 
     setLoading(true);
 
-    const { latitude, longitude } = await atualizarLatitudeLongitude(cep);
-
     try {
+      // 3. Garantir que latitude e longitude existam
+      const { latitude, longitude } = await atualizarLatitudeLongitude(cep);
+      
+      if (!latitude || !longitude) {
+        Alert.alert("Erro", "Não foi possível obter a localização. Verifique o CEP.");
+        setLoading(false);
+        return;
+      }
+
       const userDataString = await AsyncStorage.getItem('userData');
-      const userData = JSON.parse(userDataString!);
+      if (!userDataString) {
+        Alert.alert("Erro", "Usuário não encontrado. Faça login novamente.");
+        setLoading(false);
+        return;
+      }
+
+      const userData = JSON.parse(userDataString);
       const id = userData.id;
 
-      await updateArena(id, {
+      const payload = {
         nome,
         telefone,
         endereco: {
@@ -238,45 +352,66 @@ export default function EditarArena() {
           bairro,
           rua,
           numero,
-          complemento,
+          complemento: complemento || "",
           latitude,
           longitude,
         },
-        descricao,
-        horasCancelarAgendamento: Number(horasCancelarAgendamento),
+        descricao: descricao || "",
+        horasCancelarAgendamento: Number(horasCancelarAgendamento) || 0,
         urlFoto: urlFoto === DEFAULT_AVATAR_URL ? "" : urlFoto || "",
+      };
+
+      await updateArena(id, payload);
+
+      // Atualiza o initialData após sucesso
+      setInitialData({
+        nome,
+        telefone,
+        cep,
+        rua,
+        bairro,
+        numero,
+        estado,
+        cidade,
+        complemento,
+        horasCancelarAgendamento,
+        descricao,
+        urlFoto
       });
 
-      Alert.alert("Sucesso", "Arena atualizada!");
-      router.back();
+      Alert.alert("Sucesso", "Arena atualizada com sucesso!");
+      // router.back(); // Opcional
 
     } catch (error: any) {
-      console.error(error);
-      Alert.alert("Erro", error.response?.data?.message || "Erro ao atualizar arena");
+      console.error("❌ Erro completo:", error);
+      console.error("❌ Response data:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message 
+        || error.response?.data?.error 
+        || error.message 
+        || "Erro ao atualizar arena";
+      
+      Alert.alert("Erro", errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
           paddingBottom: 40,
           paddingHorizontal: 24,
-          paddingTop: 14,
         }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <FormControl className="pt-9 rounded-lg w-full flex-1">
+        <FormControl className="pt-6 rounded-lg w-full flex-1">
           <VStack className="w-full gap-4">
             <Heading className="text-2xl">Informações da arena</Heading>
-            <Text className="text-typography-500">Gerenciee suas informações pessoais e salve as alterações caso realize alguma mudança.</Text>
+            <Text className="text-typography-500">Gerencie suas informações pessoais e salve as alterações caso realize alguma mudança.</Text>
 
             <VStack space="sm">
               <Text className="text-sm font-medium text-typography-500">Foto de Perfil</Text>
@@ -319,7 +454,6 @@ export default function EditarArena() {
                 </VStack>
               </HStack>
             </VStack>
-
 
             <InputTexto
               label="Nome da arena"
@@ -375,13 +509,14 @@ export default function EditarArena() {
             <View className="flex-row w-full gap-x-4">
               {/* ESTADO */}
               <View className="flex-1">
-                <Text className="text-typography-500 mb-1">Estado</Text>
+                <Text className="text-typography-500 mb-1">Estado *</Text>
                 <View className="border border-gray-300 rounded-lg h-10 justify-center">
                   <Picker
                     selectedValue={estado}
                     onValueChange={(value) => {
                       setEstado(value);
                       setCidade("");
+                      setErrors(prev => ({ ...prev, estado: "" }));
                     }}
                     className="w-full"
                   >
@@ -391,16 +526,22 @@ export default function EditarArena() {
                     ))}
                   </Picker>
                 </View>
+                {errors.estado && (
+                  <Text className="text-red-500 text-xs mt-1">{errors.estado}</Text>
+                )}
               </View>
 
               {/* CIDADE */}
               <View className="flex-1">
-                <Text className="text-typography-500 mb-1">Cidade</Text>
+                <Text className="text-typography-500 mb-1">Cidade *</Text>
                 <View className="border border-gray-300 rounded-lg h-10 justify-center">
                   <Picker
                     selectedValue={cidade}
                     enabled={!!estado && !loading}
-                    onValueChange={(value) => setCidade(value)}
+                    onValueChange={(value) => {
+                      setCidade(value);
+                      setErrors(prev => ({ ...prev, cidade: "" }));
+                    }}
                     className="w-full"
                   >
                     <Picker.Item label="Cidade" value="" />
@@ -409,6 +550,9 @@ export default function EditarArena() {
                     ))}
                   </Picker>
                 </View>
+                {errors.cidade && (
+                  <Text className="text-red-500 text-xs mt-1">{errors.cidade}</Text>
+                )}
               </View>
             </View>
 
@@ -496,18 +640,22 @@ export default function EditarArena() {
               </Button>
               <Button
                 size="xl"
-                className="flex-1 bg-green-primary rounded-lg py-3"
+                className={`flex-1 rounded-lg py-3 bg-green-primary ${(!hasChanges || loading) ? 'opacity-50' : ''}`}
                 onPress={handleUpdateArena}
-                disabled={loading}
+                disabled={loading || !hasChanges}
               >
-                <ButtonText className="text-base text-white">
-                  Salvar alterações
-                </ButtonText>
+                 {loading ? (
+                    <ButtonSpinner className="text-white" />
+                  ) : (
+                    <ButtonText className="text-base text-white">
+                      Salvar alterações
+                    </ButtonText>
+                  )}
               </Button>
             </View>
           </VStack>
         </FormControl>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-};
+}

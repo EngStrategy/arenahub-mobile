@@ -3,8 +3,7 @@ import React, { useState, useEffect } from "react";
 import { registerArena } from '@/services/api/auth';
 import axios from "axios";
 import { useRouter } from 'expo-router';
-import { KeyboardAvoidingView, Platform, ScrollView, View, Alert } from "react-native";
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import { View, Alert } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FormControl } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
@@ -12,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Text } from '@/components/ui/text';
 import { Picker } from "@react-native-picker/picker";
 import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
 import {
   Select,
@@ -601,9 +600,13 @@ export const RegistroArena = ({ className }: { className?: string }) => {
             onPress={handleRegister}
             disabled={loading}
           >
-            <ButtonText className="text-base text-white">
-              Cadastrar arena
-            </ButtonText>
+            {loading ? (
+              <ButtonSpinner className="text-white" />
+            ) : (
+              <ButtonText className="text-base text-white">
+                Cadastrar arena
+              </ButtonText>
+            )}
           </Button>
         </VStack>
       </FormControl>

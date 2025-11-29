@@ -1,9 +1,8 @@
+// app/forgot-password/index.tsx
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,21 +12,25 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { forgotPassword } from '@/services/api/auth';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
+import { InputTexto } from '@/components/forms/formInputs/InputTexto';
 import { validarEmail } from '@/context/functions/validators';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSendEmail = async () => {
+    setEmailError('');
+
     if (!email.trim()) {
-      Alert.alert('Atenção', 'Por favor, insira seu email');
+      setEmailError('Por favor, insira seu email');
       return;
     }
 
     if (!validarEmail(email)) {
-      Alert.alert('Atenção', 'Por favor, insira um email válido');
+      setEmailError('Por favor, insira um email válido');
       return;
     }
 
@@ -36,7 +39,6 @@ export default function ForgotPasswordScreen() {
       await forgotPassword(email);
       Alert.alert('Sucesso', 'Código enviado para seu email!');
 
-      // Navegar para tela de verificação passando o email
       router.push({
         pathname: '/forgot-password/verify-code',
         params: { email },
@@ -64,63 +66,63 @@ export default function ForgotPasswordScreen() {
           </View>
         </View>
 
-        {/* Título e Subtítulo */}
-        <Text className="text-2xl font-semibold text-center mb-3 text-gray-800">
-          Esqueceu sua senha?
-        </Text>
-        <Text className="text-sm text-center text-gray-500 mb-8">
-          Insira seu email abaixo para receber um código de verificação!
-        </Text>
-
-        {/* Input de Email */}
-        <View className="mb-6">
-          <Text className="text-sm font-medium mb-2 text-gray-700">
-            Email
+        {/* Cabeçalho */}
+        <View className="mb-8">
+          <Text className="text-2xl font-bold text-center text-gray-900 mb-2">
+            Esqueceu a senha?
           </Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg p-4 text-base bg-white"
-            placeholder="Insira seu email"
-            placeholderTextColor="#9ca3af"
+          <Text className="text-base text-center text-gray-500 px-4">
+            Não se preocupe! Insira seu email e enviaremos um código para recuperação.
+          </Text>
+        </View>
+
+        {/* Formulário */}
+        <View className="mb-6">
+          <InputTexto
+            label="Email"
+            placeholder="exemplo@email.com"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => {
+              setEmail(text);
+              if (emailError) setEmailError('');
+            }}
             keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={!loading}
+            error={emailError}
           />
         </View>
 
-        {/* Botão Confirmar */}
-        <Button size="xl" className="w-50% flex-0.5 bg-green-primary rounded-lg py-3 mt-4"
+        {/* Botão Principal */}
+        <Button
+          size="xl"
+          className="bg-green-primary rounded-lg py-3 mb-4"
           onPress={handleSendEmail}
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ButtonSpinner className="text-white" /> 
           ) : (
             <ButtonText className="text-base text-white">
-              Confirmar
+              Entrar
             </ButtonText>
           )}
         </Button>
 
-        {/* Link de Voltar */}
-        <TouchableOpacity
-          className="flex-row items-center justify-start gap-1"
-          onPress={() => router.back()}
-          disabled={loading}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={16} color="#22c55e" />
-          <Button size="xl" className="justify-start p-0"
-            onPress={() => router.push('/login')}
+        {/* Botão Voltar */}
+        <View className="flex-row justify-center">
+          <Button
+            variant="link"
+            size="md"
+            onPress={() => router.back()}
+            disabled={loading}
+            className="flex-row items-center gap-2"
           >
-            <ButtonText className="text-base text-green-primary p-0"
-            >
-              Voltar para a página de login
+            <Ionicons name="arrow-back" size={18} color="#22c55e" />
+            <ButtonText className="text-green-primary font-medium text-base no-underline">
+              Voltar ao Login
             </ButtonText>
           </Button>
-        </TouchableOpacity>
+        </View>
+
       </ScrollView>
     </KeyboardAvoidingView>
   );

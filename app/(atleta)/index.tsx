@@ -8,10 +8,9 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { Text } from '@/components/ui/text';
 import { InputTexto } from '@/components/forms/formInputs/InputTexto';
-import { ArenaCard } from '@/components/ui/cards/arena-card';
+import { ArenaCard } from '@/components/cards/ArenaCard';
 import {
   getAllArenas,
-  GetArenaResponse,
   ArenaQueryParams,
 } from '@/services/api/entities/arena';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -19,6 +18,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { VStack } from '@/components/ui/vstack';
+import type { Arena } from '@/context/types/Arena';
 
 const sportLabels: Record<string, string> = {
   '': 'Todos os esportes',
@@ -99,7 +99,7 @@ export default function ArenasScreen() {
   const router = useRouter();
   const [cidade, setCidade] = useState('');
   const [esporte, setEsporte] = useState<SportKey>('');
-  const [arenas, setArenas] = useState<GetArenaResponse[]>([]);
+  const [arenas, setArenas] = useState<Arena[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(0);
@@ -168,8 +168,7 @@ export default function ArenasScreen() {
   };
 
   const handleArenaPress = (arenaId: string) => {
-    // router.push(`/quadras/${arenaId}`);
-    console.log(`Navegar para as quadra da arena com ID: ${arenaId}`);
+    router.push(`/quadras/${arenaId}`);
   };
 
   const renderFooter = () => {

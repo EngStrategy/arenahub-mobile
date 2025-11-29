@@ -1,9 +1,9 @@
 import { Text, View } from 'react-native';
 
-export default function JogosScreen() {
+export default function DashboardScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF' }}>
-      <Text>Tela de Perfil</Text>
+      <Text>Agendamentos de arena</Text>
     </View>
   );
 }

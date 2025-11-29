@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, KeyboardAvoidingView, Platform, Alert, View, TouchableOpacity, Text, TextInput, Switch, Image } from 'react-native';
+import { ScrollView, KeyboardAvoidingView, Platform, Alert, View, TouchableOpacity, Text, TextInput, Switch, Image, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Edit, Trash2, Upload, ChevronDown } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons'; 
 import { type Arena } from '@/context/types/Arena';
 import { type QuadraCreate } from '@/context/types/Quadra';
 import { TipoQuadra, MaterialFornecido, DuracaoReserva } from '@/context/types/Quadra';
@@ -14,7 +15,7 @@ import { MATERIAIS_OPTIONS, TIPO_QUADRA_OPTIONS, DURACAO_OPTIONS } from '@/const
 import { ModalCriarHorarios } from '@/components/modais/ModalCriarHorarios';
 import { ModalMultiSelect } from '@/components/modais/ModalMultiSelect';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ArenaCard from '@/components/cards/ArenaCard';
+import { ArenaCard } from '@/components/cards/ArenaCard';
 import { Spinner } from '@/components/ui/spinner';
 import { Picker } from '@react-native-picker/picker';
 
@@ -29,7 +30,8 @@ const FlexRow: React.FC<{ children: React.ReactNode; className?: string; space?:
 );
 
 export default function CadastrarQuadra() {
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false); // Loading do botão salvar
+    const [initialLoading, setInitialLoading] = useState(true); // Loading da tela
     const [arena, setArena] = useState<Arena | undefined>();
     const router = useRouter();
 
@@ -53,6 +55,7 @@ export default function CadastrarQuadra() {
     useEffect(() => {
         const fetchArena = async () => {
             try {
+                setInitialLoading(true);
                 const userData = await AsyncStorage.getItem('userData');
                 const arenaId = userData ? JSON.parse(userData).id : null;
                 const arenaData = await getArenaById(arenaId?.toString() || '');
@@ -61,6 +64,8 @@ export default function CadastrarQuadra() {
             } catch (error: unknown) {
                 console.error("Erro ao buscar dados da arena:", (error as Error).message);
                 Alert.alert("Erro", (error as Error).message);
+            } finally {
+                setInitialLoading(false);
             }
         };
 
@@ -89,6 +94,7 @@ export default function CadastrarQuadra() {
         }
 
         try {
+            setLoading(true);
             let urlParaSalvar = imageUrl ?? '';
 
             if (imageUrl && imageUrl !== DEFAULT_AVATAR_URL) {
@@ -122,7 +128,7 @@ export default function CadastrarQuadra() {
             await createQuadra(quadra);
 
             Alert.alert("Sucesso", "Quadra cadastrada com sucesso!");
-            router.push('/(tabs)');
+            router.push('/(arena)/quadras');
         } catch (error: any) {
             console.error("Erro no cadastro:", error);
             Alert.alert("Erro", error.message || 'Erro ao cadastrar quadra.');
@@ -227,8 +233,27 @@ export default function CadastrarQuadra() {
         return values.map(v => options.find(o => o.value === v)?.label || v).join(', ');
     };
 
+    // Efeito de carregamento inicial da tela
+    if (initialLoading) {
+        return (
+            <View className="flex-1 justify-center items-center bg-white">
+                <ActivityIndicator size="large" color="#10b981" />
+            </View>
+        );
+    }
+
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+            {/* TOP BAR COM ROUTER BACK */}
+            <View className="flex-row items-center px-4 py-3 border-b border-gray-100 bg-white z-10">
+                <Pressable onPress={() => router.back()} className="mr-4 p-1">
+                    <Ionicons name="arrow-back" size={24} color="#374151" />
+                </Pressable>
+                <Text className="text-lg font-bold text-gray-800 flex-1" numberOfLines={1}>
+                    Cadastrar quadra
+                </Text>
+            </View>
+
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 className="flex-1"
@@ -236,10 +261,9 @@ export default function CadastrarQuadra() {
                 <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
                     <View className="w-full max-w-3xl mx-auto px-6">
 
-                        {/* HEADER */}
-                        <FlexCol space={3} className="mt-2">
-                            <Text className="text-2xl font-bold">Cadastrar quadra</Text>
-
+                        {/* HEADER - removi o texto duplicado "Cadastrar quadra" daqui */}
+                        <FlexCol space={3} className="mt-4">
+                            
                             {/* ARENA CARD */}
                             {arena ? (<View className='mb-4'><ArenaCard arena={arena} showDescription={false} /></View>) : null}
 
@@ -377,7 +401,7 @@ export default function CadastrarQuadra() {
                             </FlexCol>
 
                             {/* BOTÕES */}
-                            <FlexRow space={2} className="justify-between mt-6">
+                            <FlexRow space={2} className="justify-between mt-6 mb-10">
                                 <TouchableOpacity onPress={() => router.back()} disabled={loading} className='flex-1 border border-gray-400 rounded-lg py-3 items-center'>
                                     <Text className="text-gray-700 font-semibold">Voltar</Text>
                                 </TouchableOpacity>
