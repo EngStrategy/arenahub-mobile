@@ -58,13 +58,30 @@ export function formatarCPF(value: string): string {
  * @returns A data formatada, por exemplo, "07 maio 2025".
  */
 export function formatarData(dataString: string): string {
-    const data = new Date(dataString + 'T00:00:00');
+    if (!dataString) return '';
 
-    const dia = data.toLocaleDateString('pt-BR', { day: '2-digit' });
-    const mes = data.toLocaleDateString('pt-BR', { month: 'long' });
-    const ano = data.toLocaleDateString('pt-BR', { year: 'numeric' });
+    // Verifica se já possui o separador de tempo 'T'
+    // Se NÃO tiver, adicionamos T00:00:00 para evitar problemas de fuso horário em datas puras
+    // Se JÁ tiver, usamos como está.
+    const dateToParse = dataString.includes('T') 
+        ? dataString 
+        : dataString + 'T00:00:00';
 
-    return `${dia} ${mes} ${ano}`;
+    const data = new Date(dateToParse);
+
+    // Validação de segurança
+    if (isNaN(data.getTime())) return 'Data inválida';
+
+    // Usando métodos nativos get... para garantir compatibilidade total no Android/iOS
+    const dia = data.getDate().toString().padStart(2, '0');
+    const meses = [
+        'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 
+        'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ];
+    const mes = meses[data.getMonth()];
+    const ano = data.getFullYear();
+
+    return `${dia} de ${mes} de ${ano}`;
 }
 
 //FORMATA O TELEFONE

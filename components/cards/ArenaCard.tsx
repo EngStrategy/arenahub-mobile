@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, Pressable, View } from 'react-native'; // Use Pressable
+import { Image, Pressable, View, TouchableOpacity } from 'react-native'; 
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
@@ -8,6 +8,7 @@ import type { Arena } from '@/context/types/Arena';
 interface ArenaCardProps {
   arena: Arena;
   onPress?: () => void;
+  onPressRating?: () => void;
   showDescription?: boolean;
   showEsportes?: boolean;
 }
@@ -29,6 +30,7 @@ const sportLabels: Record<string, string> = {
 export function ArenaCard({ 
   arena, 
   onPress, 
+  onPressRating,
   showDescription = false, 
   showEsportes = true 
 }: ArenaCardProps) {
@@ -118,15 +120,24 @@ export function ArenaCard({
               </Text>
             )}
 
-            <HStack className="items-center">
-              <Text className="text-yellow-500 mr-1">★</Text>
-              <Text className="text-sm text-gray-700 font-bold">
-                {arena.notaMedia?.toFixed(1) || '0.0'}
-              </Text>
-              <Text className="text-xs text-gray-500 ml-1">
-                ({arena.quantidadeAvaliacoes || 0} avaliações)
-              </Text>
-            </HStack>
+            {/* AVALIAÇÕES (Correção aqui: Removido o bg-gray-50 e bordas) */}
+            <TouchableOpacity 
+                onPress={onPressRating}
+                disabled={!onPressRating}
+                activeOpacity={0.6}
+                className="self-start mt-1" 
+            >
+                {/* Removi: bg-gray-50 px-2 py-1 rounded-md border border-gray-100 */}
+                <HStack className="items-center"> 
+                  <Text className="text-yellow-500 mr-1 text-xs">★</Text>
+                  <Text className="text-sm text-gray-700 font-bold">
+                    {arena.notaMedia?.toFixed(1) || '0.0'}
+                  </Text>
+                  <Text className="text-xs text-gray-500 ml-1 underline">
+                    ({arena.quantidadeAvaliacoes || 0} avaliações)
+                  </Text>
+                </HStack>
+            </TouchableOpacity>
           </VStack>
         </VStack>
       </HStack>
