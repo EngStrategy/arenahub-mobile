@@ -9,7 +9,7 @@ import { formatarData } from '@/context/functions/formatters';
 interface ModalAvaliacoesProps {
     visible: boolean;
     onClose: () => void;
-    quadras: Quadra[]; 
+    quadras: Quadra[];
     nomeArena: string;
 }
 
@@ -17,37 +17,41 @@ const DEFAULT_AVATAR = "https://i.imgur.com/hepj9ZS.png";
 
 export function ModalAvaliacoes({ visible, onClose, quadras, nomeArena }: ModalAvaliacoesProps) {
     const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
-    const [loading, setLoading] = useState(true);
+    
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (visible && quadras.length > 0) {
-            carregarTodasAvaliacoes();
+        if (visible) {
+            carregarDados();
         } else {
             setAvaliacoes([]);
         }
     }, [visible, quadras]);
 
-    const carregarTodasAvaliacoes = async () => {
-        setLoading(true);
+    const carregarDados = async () => {
+        setLoading(true); 
+
+        if (!quadras || quadras.length === 0) {
+            setAvaliacoes([]);
+            setLoading(false); 
+            return;
+        }
+
         try {
-            // Dispara requisições para todas as quadras ao mesmo tempo
             const promises = quadras.map(q => getAvaliacoesPorQuadra(q.id));
             const responses = await Promise.all(promises);
-
-            // Junta todas as avaliações em um único array
             const todasAvaliacoes = responses.flatMap(r => r.content);
 
-            // Ordena manualmente pela data (da mais recente para a mais antiga)
-            // O backend manda strings, então convertemos para Date para comparar
             todasAvaliacoes.sort((a, b) => 
                 new Date(b.dataAvaliacao).getTime() - new Date(a.dataAvaliacao).getTime()
             );
 
             setAvaliacoes(todasAvaliacoes);
         } catch (error) {
-            console.error("Erro ao agregar avaliações:", error);
+            console.error("Erro ao carregar avaliações:", error);
+            setAvaliacoes([]); 
         } finally {
-            setLoading(false);
+            setLoading(false); 
         }
     };
 
@@ -79,9 +83,7 @@ export function ModalAvaliacoes({ visible, onClose, quadras, nomeArena }: ModalA
         <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
             <View className="flex-1 bg-black/60 justify-end">
                 <TouchableOpacity style={{ flex: 1 }} onPress={onClose} />
-                
                 <View className="bg-white rounded-t-3xl h-[80%] w-full shadow-2xl">
-                    {/* Header */}
                     <View className="flex-row justify-between items-center p-6 border-b border-gray-100">
                         <View>
                             <Text className="text-xl font-bold text-gray-900">Avaliações</Text>
@@ -92,7 +94,6 @@ export function ModalAvaliacoes({ visible, onClose, quadras, nomeArena }: ModalA
                         </TouchableOpacity>
                     </View>
 
-                    {/* Conteúdo */}
                     {loading ? (
                         <View className="flex-1 justify-center items-center">
                             <ActivityIndicator size="large" color="#15A01A" />
