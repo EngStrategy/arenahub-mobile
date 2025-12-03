@@ -19,7 +19,7 @@ export async function avaliarAgendamento(
   payload: CriarAvaliacaoDTO
 ): Promise<AvaliacaoResponse> {
   const response = await api.post<AvaliacaoResponse>(
-    `/api/v1/agendamentos/${agendamentoId}/avaliacoes`,
+    `/agendamentos/${agendamentoId}/avaliacoes`,
     payload
   );
 
