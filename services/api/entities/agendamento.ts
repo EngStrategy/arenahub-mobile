@@ -1,6 +1,6 @@
 import api from '@/services/api';
 
-export interface CriarAvaliacaoDTO {
+export interface AvaliacaoRequest {
   nota: number;
   comentario?: string;
 }
@@ -16,7 +16,7 @@ export interface AvaliacaoResponse {
 
 export async function avaliarAgendamento(
   agendamentoId: number,
-  payload: CriarAvaliacaoDTO
+  payload: AvaliacaoRequest
 ): Promise<AvaliacaoResponse> {
   const response = await api.post<AvaliacaoResponse>(
     `/agendamentos/${agendamentoId}/avaliacoes`,
