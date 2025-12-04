@@ -12,6 +12,7 @@ import { Arena } from '@/context/types/Arena';
 import { getQuadrasByArena, getHorariosDisponiveisPorQuadra } from '@/services/api/entities/quadra';
 import { Quadra, HorariosDisponiveis } from '@/context/types/Quadra';
 import { ArenaCard } from '@/components/cards/ArenaCard';
+import { ModalAvaliacoes } from '@/components/modais/ModalAvaliacoes';
 
 // Utils
 import { addDuration, subDuration, getDuracaoEmMinutos } from '@/utils/time';
@@ -206,7 +207,7 @@ export default function QuadrasScreen() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [loadingHorarios, setLoadingHorarios] = useState(false);
-
+  const [showAvaliacoes, setShowAvaliacoes] = useState(false);
   const dates = useMemo(() => Array.from({ length: 30 }, (_, i) => addDays(new Date(), i)), []);
 
   // 1. Busca Inicial
@@ -332,6 +333,10 @@ export default function QuadrasScreen() {
               arena={arena as any} 
               showDescription={true} 
               showEsportes={false} 
+              onPressRating={() => {
+                  console.log("Clicou nas estrelas!"); 
+                  setShowAvaliacoes(true);
+              }}
             />
           </View>
         )}
@@ -410,6 +415,12 @@ export default function QuadrasScreen() {
           )}
         </View>
       </ScrollView>
+      <ModalAvaliacoes 
+        visible={showAvaliacoes}
+        onClose={() => setShowAvaliacoes(false)}
+        quadras={quadras} 
+        nomeArena={arena?.nome || ''}
+      />
     </SafeAreaView>
   );
 }

@@ -200,8 +200,8 @@ export default function EditarQuadra() {
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
                 <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
                     <View className="w-full max-w-3xl mx-auto px-6">
-                        <FlexCol space={3} className="mt-2">
-
+                        <FlexCol space={2} className="mt-2">
+                        <Text className="text-sm font-medium">Foto da Quadra</Text>
                             {/* FOTO */}
                             <FlexRow space={2} className='items-center'>
                                 <Image 
@@ -215,13 +215,13 @@ export default function EditarQuadra() {
                                 />
                                 <TouchableOpacity onPress={() => Alert.alert("Em breve", "Upload de imagem")} className="py-2 px-3 border border-gray-400 rounded-lg flex-row items-center">
                                     <Upload size={16} color='black' />
-                                    <Text className="ml-2 text-gray-700">Alterar foto</Text>
+                                    <Text className="ml-2 text-gray-700">Escolher foto</Text>
                                 </TouchableOpacity>
                             </FlexRow>
 
                             <FlexCol space={4}>
                                 <View>
-                                    <Text className="text-sm font-medium mb-1">Nome</Text>
+                                    <Text className="text-sm font-medium mb-1">Nome da Quadra</Text>
                                     <TextInput className={`p-3 border rounded-lg ${formErrors.nomeQuadra ? 'border-red-500' : 'border-gray-300'}`} value={nomeQuadra} onChangeText={setNomeQuadra} />
                                 </View>
 
@@ -234,7 +234,7 @@ export default function EditarQuadra() {
                                 </View>
                                 
                                  <View>
-                                    <Text className="text-sm font-medium mb-1">Locação de objetos</Text>
+                                    <Text className="text-sm font-medium mb-1">Materiais Fornecidos</Text>
                                     <TouchableOpacity onPress={() => setIsModalMateriaisVisible(true)} className="p-3 border border-gray-300 rounded-lg flex-row justify-between items-center">
                                         <Text className={`flex-1 ${materiaisFornecidos.length ? 'text-black' : 'text-gray-400'}`}>{getFormattedLabels(materiaisFornecidos, MATERIAIS_OPTIONS) || 'Selecione'}</Text>
                                         <ChevronDown size={18} color="gray" />
@@ -242,7 +242,7 @@ export default function EditarQuadra() {
                                 </View>
 
                                 <View>
-                                    <Text className="text-sm font-medium mb-1">Duração de cada horário</Text>
+                                    <Text className="text-sm font-medium mb-1">Duração de cada reserva</Text>
                                     <View className="border border-gray-300 rounded-lg justify-center h-12 overflow-hidden">
                                          <Picker selectedValue={duracaoReserva} onValueChange={setDuracaoReserva}>
                                             {DURACAO_OPTIONS.map(opt => <Picker.Item key={opt.value} label={opt.label} value={opt.value} />)}
