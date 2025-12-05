@@ -6,6 +6,10 @@ import { Text } from '@/components/ui/text';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { InputSenha } from '@/components/forms/formInputs/InputSenha';
+import { InputTexto } from '@/components/forms/formInputs/InputTexto';
+import { validarEmail, validarPassword } from '@/context/functions/validators';
+import { PasswordStrengthIndicator } from '@/components/forms/passwordStrengthIndicador';
 
 import {
   Alert,
@@ -15,8 +19,6 @@ import {
   View,
 } from 'react-native';
 
-import { InputTexto } from '@/components/forms/formInputs/InputTexto';
-import { InputSenha } from '@/components/forms/formInputs/InputSenha';
 
 
 export default function LoginScreen() {
@@ -61,7 +63,7 @@ export default function LoginScreen() {
       const userData = JSON.stringify({
         id: response.userId,
         name: response.name,
-        role: response.role, 
+        role: response.role,
         imageUrl: response.imageUrl,
         statusAssinatura: response.statusAssinatura,
       });
@@ -115,47 +117,47 @@ export default function LoginScreen() {
           Faça login para continuar.
         </Text>
 
-        <VStack space="md" className='mb-4'>
-          <InputTexto
-            label="Email"
-            placeholder="Insira seu email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            error={errors.email}
-          />
-        </VStack>
+        <InputTexto
+          label="Email"
+          placeholder="Insira seu email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          onBlur={() => {
+            const emailError = validarEmail(email) ? '' : 'Email inválido.';
+            setErrors(prev => ({ ...prev, email: emailError }));
+          }}
+          error={errors.email}
+        />
 
-        <VStack space="md">
-          <InputSenha
-            label="Senha"
-            placeholder="Insira sua senha"
-            value={password}
-            onChangeText={setPassword}
-            error={errors.password}
-          />
-        </VStack>
+        <InputSenha
+          label="Senha"
+          value={password}
+          onChangeText={setPassword}
+          onBlur={() => {
+            const passwordError = validarPassword(password);
+            setErrors((prev) => ({ ...prev, password: passwordError }));
+          }}
+          error={errors.password}
+        />
 
-        <Button
-          size="xl"
-          variant="link" 
-          action="primary" 
-          className="justify-end p-0"
+        <Button size="xl" className="justify-end p-0 bg-transparent"
           onPress={() => router.push('/forgot-password')}
         >
-          <ButtonText
-            className="text-base text-green-primary p-0"
-          >
+          <ButtonText className="text-base text-green-primary p-0">
             Esqueceu sua senha?
           </ButtonText>
         </Button>
 
+        {/* Botão Entrar */}
+
+
         <Button
           size="xl"
-          action="positive"
-          className="bg-green-primary rounded-lg py-3 mt-4" 
+          className="bg-green-primary rounded-lg py-3 mt-4"
           onPress={handleLogin}
           disabled={loading}
+          android_ripple={{ color: 'transparent' }}
         >
           {loading ? (
             <ButtonSpinner className="text-white" /> 

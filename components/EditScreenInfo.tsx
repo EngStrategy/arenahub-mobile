@@ -1,77 +1,39 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
 
 import { ExternalLink } from './ExternalLink';
-import { MonoText } from './StyledText';
-import { Text, View } from './Themed';
-
-import Colors from '@/constants/Colors';
+import { Box } from '@/components/ui/box';
+import { Text } from '@/components/ui/text';
 
 export default function EditScreenInfo({ path }: { path: string }) {
   return (
-    <View>
-      <View style={styles.getStartedContainer}>
-        <Text
-          style={styles.getStartedText}
-          lightColor="rgba(0,0,0,0.8)"
-          darkColor="rgba(255,255,255,0.8)">
+    <Box>
+      <Box className="items-center mx-4">
+        <Text className="text-center text-typography-950">
           Open up the code for this screen:
         </Text>
+        <Box className="rounded-sm p-2 my-2 bg-secondary-200">
+          <Text className="text-sm leading-5 text-center font-SpaceMono">
+            {path}
+          </Text>
+        </Box>
 
-        <View
-          style={[styles.codeHighlightContainer, styles.homeScreenFilename]}
-          darkColor="rgba(255,255,255,0.05)"
-          lightColor="rgba(0,0,0,0.05)">
-          <MonoText>{path}</MonoText>
-        </View>
-
-        <Text
-          style={styles.getStartedText}
-          lightColor="rgba(0,0,0,0.8)"
-          darkColor="rgba(255,255,255,0.8)">
-          Change any of the text, save the file, and your app will automatically update.
+        <Text className="text-center text-typography-950">
+          Change any of the text, save the file, and your app will automatically
+          update.
         </Text>
-      </View>
+      </Box>
 
-      <View style={styles.helpContainer}>
+      <Box className="mt-4 mx-5 items-center">
         <ExternalLink
-          style={styles.helpLink}
-          href="https://docs.expo.io/get-started/create-a-new-app/#opening-the-app-on-your-phonetablet">
-          <Text style={styles.helpLinkText} lightColor={Colors.light.tint}>
-            Tap here if your app doesn't automatically update after making changes
+          style={{ paddingVertical: 15 }}
+          href="https://docs.expo.io/get-started/create-a-new-app/#opening-the-app-on-your-phonetablet"
+        >
+          <Text className="text-center">
+            Tap here if your app doesn't automatically update after making
+            changes
           </Text>
         </ExternalLink>
-      </View>
-    </View>
+      </Box>
+    </Box>
   );
 }
-
-const styles = StyleSheet.create({
-  getStartedContainer: {
-    alignItems: 'center',
-    marginHorizontal: 50,
-  },
-  homeScreenFilename: {
-    marginVertical: 7,
-  },
-  codeHighlightContainer: {
-    borderRadius: 3,
-    paddingHorizontal: 4,
-  },
-  getStartedText: {
-    fontSize: 17,
-    lineHeight: 24,
-    textAlign: 'center',
-  },
-  helpContainer: {
-    marginTop: 15,
-    marginHorizontal: 20,
-    alignItems: 'center',
-  },
-  helpLink: {
-    paddingVertical: 15,
-  },
-  helpLinkText: {
-    textAlign: 'center',
-  },
-});

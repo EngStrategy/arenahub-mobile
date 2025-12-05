@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { registerArena } from '@/services/api/auth';
-import axios from "axios";
 import { useRouter } from 'expo-router';
 import { View, Alert } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,9 +8,22 @@ import { FormControl } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
 import { Switch } from '@/components/ui/switch';
 import { Text } from '@/components/ui/text';
-import { Picker } from "@react-native-picker/picker";
 import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
+import {
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectIcon,
+  SelectPortal,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectScrollView,
+  SelectDragIndicatorWrapper,
+  SelectItem,
+} from '@/components/ui/select';
+import { ChevronDownIcon } from '@/components/ui/icon';
 import { PasswordStrengthIndicator } from "@/components/forms/passwordStrengthIndicador";
 import apiCNPJ from "@/services/apiCNPJ";
 import apiCEP from "@/services/apiCEP";
@@ -38,6 +50,8 @@ import {
   validarEmail,
   validarPassword
 } from "@/context/functions/validators";
+import { mudarEstado } from "@/context/functions/mudarEstado";
+
 interface CnpjValues {
   setNome: (value: string) => void;
   setEstado: (value: string) => void;
@@ -452,42 +466,57 @@ export const RegistroArena = ({ className }: { className?: string }) => {
           />
 
           <View className="flex-row w-full gap-x-4">
-            {/* ESTADO */}
             <View className="flex-1">
-              <Text className="text-typography-500 mb-1">Estado</Text>
-              <View className="border border-gray-300 rounded-lg h-10 justify-center">
-                <Picker
-                  selectedValue={estado}
-                  onValueChange={(value) => {
-                    setEstado(value);
-                    setCidade("");
-                  }}
-                  className="w-full"
-                >
-                  <Picker.Item label="Estado" value="" />
-                  {estados.map((uf) => (
-                    <Picker.Item key={uf.sigla} label={uf.nome} value={uf.sigla} />
-                  ))}
-                </Picker>
-              </View>
+              <Text>Estado</Text>
+              <Select
+                selectedValue={estado}
+                onValueChange={(value: string) => {
+                  setEstado(value);
+                  setCidade("");
+                }}
+              >
+                <SelectTrigger variant="outline" size="md" className="justify-between">
+                  <SelectInput placeholder="Estado" />
+                  <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                </SelectTrigger>
+                <SelectPortal>
+                  <SelectBackdrop />
+                  <SelectContent className="max-h-80">
+                    <SelectScrollView>
+                    {estados.map((uf) => (
+                      <SelectItem key={uf.sigla} label={uf.nome} value={uf.sigla} />
+                    ))}
+                    </SelectScrollView>
+                  </SelectContent>
+                </SelectPortal>
+              </Select>
             </View>
 
-            {/* CIDADE */}
             <View className="flex-1">
-              <Text className="text-typography-500 mb-1">Cidade</Text>
-              <View className="border border-gray-300 rounded-lg h-10 justify-center">
-                <Picker
-                  selectedValue={cidade}
-                  enabled={!!estado && !loading}
-                  onValueChange={(value) => setCidade(value)}
-                  className="w-full"
-                >
-                  <Picker.Item label="Cidade" value="" />
-                  {cidades.map((c) => (
-                    <Picker.Item key={c.id} label={c.nome} value={c.nome} />
-                  ))}
-                </Picker>
-              </View>
+              <Text>Cidade</Text>
+              <Select
+                selectedValue={cidade}
+                onValueChange={(value: string) => setCidade(value)}
+              >
+                <SelectTrigger variant="outline" size="md" className="justify-between">
+                  <SelectInput placeholder="Cidade" />
+                  <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                </SelectTrigger>
+                <SelectPortal>
+                  <SelectBackdrop />
+                  <SelectContent className="max-h-80">
+                    <SelectScrollView>
+                    {cidades.length === 0 ? (
+                      <SelectItem label="Nenhuma cidade" value="" isDisabled />
+                    ) : (
+                      cidades.map((c) => (
+                        <SelectItem key={c.id} label={c.nome} value={c.nome} />
+                      ))
+                    )}
+                    </SelectScrollView>
+                  </SelectContent>
+                </SelectPortal>
+              </Select>
             </View>
           </View>
 
