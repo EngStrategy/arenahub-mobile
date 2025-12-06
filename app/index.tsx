@@ -1,47 +1,18 @@
-import React from 'react';
+
 import Gradient from '@/assets/icons/Gradient';
 import Logo from '@/assets/icons/Logo';
 import { Box } from '@/components/ui/box';
-import { ScrollView } from 'react-native';
 import { ModalAvaliarAgendamento } from '@/components/modais/ModalAvaliarAgendamento';
-import { VStack } from '@/components/ui/vstack';
+import { ModalAvaliacoes } from '@/components/modais/ModalAvaliacoes';
 import { useState } from 'react';
 import { Text } from '@/components/ui/text';
-import {
-  Select,
-  SelectTrigger,
-  SelectInput,
-  SelectIcon,
-  SelectPortal,
-  SelectBackdrop,
-  SelectContent,
-  SelectDragIndicator,
-  SelectDragIndicatorWrapper,
-  SelectItem,
-} from '@/components/ui/select';
-import { ChevronDownIcon } from '@/components/ui/icon';
 import { Button, ButtonText } from '@/components/ui/button';
 import { useRouter } from 'expo-router';
-import { Icon } from '@/components/ui/icon';
-
-const FeatureCard = ({ iconSvg: IconSvg, name, desc }: any) => {
-  return (
-    <Box
-      className="flex-column md:flex-1 m-2 p-4 rounded-lg bg-background-0/40"
-      key={name}
-    >
-      <Box className="items-center flex flex-row">
-        <Icon as={IconSvg} />
-        <Text className="font-medium ml-2 text-xl">{name}</Text>
-      </Box>
-      <Text className="mt-2">{desc}</Text>
-    </Box>
-  );
-};
 
 export default function Home() {
   const router = useRouter();
   const [openAvaliacao, setOpenAvaliacao] = useState(false);
+  const [openAvaliacoes, setOpenAvaliacoes] = useState(false);
   return (
     <Box className="flex-1 bg-background-300 h-[100vh]">
       <Box className="absolute h-[500px] w-[500px] lg:w-[700px] lg:h-[700px]">
@@ -81,6 +52,19 @@ export default function Home() {
             agendamentoId={1}
           />
 
+          <Button
+            size="md"
+            className="bg-primary-500 px-6 py-2 rounded-full"
+            onPress={() => setOpenAvaliacoes(true)}>
+            <ButtonText>Ver avaliações</ButtonText>
+          </Button>
+
+          <ModalAvaliacoes
+            visible={openAvaliacoes}
+            onClose={() => setOpenAvaliacoes(false)}
+            quadras={[]}
+            nomeArena="Arena EngStrategy"
+          />
 
           <Button
             size="md"
@@ -100,26 +84,6 @@ export default function Home() {
             }}
           >
             <ButtonText>Register</ButtonText>
-          </Button>
-
-          <Button
-            size="md"
-            className="bg-primary-500 px-6 py-2 rounded-full"
-            onPress={() => {
-              router.push('/editar-atleta');
-            }}
-          >
-            <ButtonText>Editar Atleta</ButtonText>
-          </Button>
-
-          <Button
-            size="md"
-            className="bg-primary-500 px-6 py-2 rounded-full"
-            onPress={() => {
-              router.push('/editar-arena');
-            }}
-          >
-            <ButtonText>Editar Arena</ButtonText>
           </Button>
 
           <Button
