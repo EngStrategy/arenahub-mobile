@@ -55,7 +55,7 @@ interface CepValues {
 
 const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png";
 
-export default function InformacoesPessoaisArena() {
+export default function EditarArena() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
