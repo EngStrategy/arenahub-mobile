@@ -4,15 +4,28 @@ import Logo from '@/assets/icons/Logo';
 import { Box } from '@/components/ui/box';
 import { ModalAvaliarAgendamento } from '@/components/modais/ModalAvaliarAgendamento';
 import { ModalAvaliacoes } from '@/components/modais/ModalAvaliacoes';
-import { useState } from 'react';
+import {ModalExcluirConta } from '@/components/modais/ModalExcluirConta';
+import { useEffect, useState } from 'react';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
 import { useRouter } from 'expo-router';
+import { getUserId } from '@/context/functions/getUserId';
 
 export default function Home() {
   const router = useRouter();
   const [openAvaliacao, setOpenAvaliacao] = useState(false);
   const [openAvaliacoes, setOpenAvaliacoes] = useState(false);
+  const [openExcluirConta, setOpenExcluirConta] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const userId = await getUserId();
+      setUserId(userId);
+    };
+
+    fetchUserId();
+  }, []);
+
   return (
     <Box className="flex-1 bg-background-300 h-[100vh]">
       <Box className="absolute h-[500px] w-[500px] lg:w-[700px] lg:h-[700px]">
@@ -64,6 +77,18 @@ export default function Home() {
             onClose={() => setOpenAvaliacoes(false)}
             quadras={[]}
             nomeArena="Arena EngStrategy"
+          />
+
+          <Button
+            size="md"
+            className="bg-primary-500 px-6 py-2 rounded-full"
+            onPress={() => setOpenExcluirConta(true)}>
+            <ButtonText>Excluir conta (Arena)</ButtonText>
+          </Button>
+
+          <ModalExcluirConta
+            isOpen={openExcluirConta}
+            onClose={() => setOpenExcluirConta(false)}
           />
 
           <Button

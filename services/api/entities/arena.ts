@@ -144,3 +144,11 @@ export const updatePasswordArena = async (senhaAtual: string, novaSenha: string,
         throw new Error(message);
     }
 };
+
+/** * Excluir conta da arena
+ * Endpoint: DELETE /api/v1/arenas/{id}
+ */
+
+export const deleteArena = async (id: number): Promise<void> => {
+    await api.delete(`/arenas/${id}`);
+};

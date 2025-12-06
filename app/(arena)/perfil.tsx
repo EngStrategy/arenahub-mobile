@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { getArenaById, updateArena } from "@/services/api//entities/arena";
 import { useRouter } from 'expo-router';
-import { Picker } from "@react-native-picker/picker";
+import { ChevronDownIcon } from '@/components/ui/icon';
+import {
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectIcon,
+  SelectPortal,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectScrollView,
+  SelectDragIndicatorWrapper,
+  SelectItem,
+} from '@/components/ui/select';
 import { Trash2, Upload } from 'lucide-react-native';
 import apiCEP from "@/services/apiCEP";
 import apiCidades from "@/services/apiCidades";
@@ -200,13 +213,6 @@ export default function EditarArena() {
 
     fetchCidades();
   }, [estado]);
-
-  const getUserId = async () => {
-    const userDataString = await AsyncStorage.getItem('userData');
-    if (!userDataString) throw new Error('Usuário não encontrado');
-    const userData = JSON.parse(userDataString);
-    return userData.id;
-  };
 
   useEffect(() => {
     const fetchArena = async () => {
@@ -506,55 +512,60 @@ export default function EditarArena() {
               error={errors.cep}
             />
 
-            <View className="flex-row w-full gap-x-4">
-              {/* ESTADO */}
-              <View className="flex-1">
-                <Text className="text-typography-500 mb-1">Estado *</Text>
-                <View className="border border-gray-300 rounded-lg h-10 justify-center">
-                  <Picker
-                    selectedValue={estado}
-                    onValueChange={(value) => {
-                      setEstado(value);
-                      setCidade("");
-                      setErrors(prev => ({ ...prev, estado: "" }));
-                    }}
-                    className="w-full"
-                  >
-                    <Picker.Item label="Estado" value="" />
+             <View className="flex-row w-full gap-x-4">
+            <View className="flex-1">
+              <Text>Estado</Text>
+              <Select
+                selectedValue={estado}
+                onValueChange={(value: string) => {
+                  setEstado(value);
+                  setCidade("");
+                }}
+              >
+                <SelectTrigger variant="outline" size="md" className="justify-between">
+                  <SelectInput placeholder="Estado" />
+                  <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                </SelectTrigger>
+                <SelectPortal>
+                  <SelectBackdrop />
+                  <SelectContent className="max-h-80">
+                    <SelectScrollView>
                     {estados.map((uf) => (
-                      <Picker.Item key={uf.sigla} label={uf.nome} value={uf.sigla} />
+                      <SelectItem key={uf.sigla} label={uf.nome} value={uf.sigla} />
                     ))}
-                  </Picker>
-                </View>
-                {errors.estado && (
-                  <Text className="text-red-500 text-xs mt-1">{errors.estado}</Text>
-                )}
-              </View>
-
-              {/* CIDADE */}
-              <View className="flex-1">
-                <Text className="text-typography-500 mb-1">Cidade *</Text>
-                <View className="border border-gray-300 rounded-lg h-10 justify-center">
-                  <Picker
-                    selectedValue={cidade}
-                    enabled={!!estado && !loading}
-                    onValueChange={(value) => {
-                      setCidade(value);
-                      setErrors(prev => ({ ...prev, cidade: "" }));
-                    }}
-                    className="w-full"
-                  >
-                    <Picker.Item label="Cidade" value="" />
-                    {cidades.map((c) => (
-                      <Picker.Item key={c.id} label={c.nome} value={c.nome} />
-                    ))}
-                  </Picker>
-                </View>
-                {errors.cidade && (
-                  <Text className="text-red-500 text-xs mt-1">{errors.cidade}</Text>
-                )}
-              </View>
+                    </SelectScrollView>
+                  </SelectContent>
+                </SelectPortal>
+              </Select>
             </View>
+
+            <View className="flex-1">
+              <Text>Cidade</Text>
+              <Select
+                selectedValue={cidade}
+                onValueChange={(value: string) => setCidade(value)}
+              >
+                <SelectTrigger variant="outline" size="md" className="justify-between">
+                  <SelectInput placeholder="Cidade" />
+                  <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                </SelectTrigger>
+                <SelectPortal>
+                  <SelectBackdrop />
+                  <SelectContent className="max-h-80">
+                    <SelectScrollView>
+                    {cidades.length === 0 ? (
+                      <SelectItem label="Nenhuma cidade" value="" isDisabled />
+                    ) : (
+                      cidades.map((c) => (
+                        <SelectItem key={c.id} label={c.nome} value={c.nome} />
+                      ))
+                    )}
+                    </SelectScrollView>
+                  </SelectContent>
+                </SelectPortal>
+              </Select>
+            </View>
+          </View>
 
             <InputTexto
               label="Bairro"
