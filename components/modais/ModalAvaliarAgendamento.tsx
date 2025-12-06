@@ -8,11 +8,17 @@ import { HStack } from "@/components/ui/hstack";
 import React, { useState } from "react";
 import { avaliarAgendamento } from "@/services/api/entities/agendamento";
 
+interface ModalAvaliarAgendamentoProps {
+    isOpen: boolean;
+    onClose: () => void;
+    agendamentoId: number;
+}
+
 export function ModalAvaliarAgendamento({
-    isOpen,
+    isOpen ,
     onClose,
     agendamentoId,
-}) {
+}: ModalAvaliarAgendamentoProps) {
     const [nota, setNota] = useState(0);
     const [comentario, setComentario] = useState("");
     const [loading, setLoading] = useState(false);
@@ -22,7 +28,7 @@ export function ModalAvaliarAgendamento({
 
         setLoading(true);
         try {
-            await avaliarAgendamento(agendamentoId, {
+            await avaliarAgendamento(agendamentoId,{
                 nota,
                 comentario,
             });
