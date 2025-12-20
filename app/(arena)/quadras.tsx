@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, ScrollView } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getQuadrasByArena } from '@/services/api/entities/quadra';
+import { getQuadrasByArena, deleteQuadra } from '@/services/api/entities/quadra';
 import { Quadra } from '@/context/types/Quadra';
 import { QuadraCard } from '@/components/cards/QuadraCard';
 import { Spinner } from '@/components/ui/spinner';
@@ -50,9 +50,62 @@ export default function MinhasQuadras() {
         router.push(`/editar-quadra/${id}`);
     };
 
+    const executarExclusao = async (id: number) => {
+        try {
+            console.log("Iniciando requisição de exclusão para ID:", id);
+            setLoading(true); 
+            await deleteQuadra(id);
+            
+            if (Platform.OS === 'web') {
+                window.alert("Quadra excluída com sucesso.");
+            } else {
+                Alert.alert("Sucesso", "Quadra excluída com sucesso.");
+            }
+            
+            fetchDados(); 
+        } catch (error: any) {
+            console.error("Erro ao excluir quadra no backend:", error);
+            
+            const mensagemErro = error.response?.data?.message || 
+                               "Não foi possível excluir a quadra. Tente novamente.";
+            
+            if (Platform.OS === 'web') {
+                window.alert(`Erro: ${mensagemErro}`);
+            } else {
+                Alert.alert("Não foi possível excluir", mensagemErro);
+            }
+        } finally {
+            setLoading(false); 
+        }
+    };
+
     const handleDelete = (id: number) => {
-        console.log("Deletar quadra", id);
-        Alert.alert("Aviso", "Funcionalidade de exclusão em breve.");
+        console.log("PAI: handleDelete chamado para o ID:", id);
+
+        if (Platform.OS === 'web') {
+            const confirmacao = window.confirm("Tem certeza que deseja excluir esta quadra? Esta ação é irreversível.");
+            if (confirmacao) {
+                executarExclusao(id);
+            }
+            return;
+        }
+        Alert.alert(
+            "Excluir Quadra",
+            "Tem certeza que deseja excluir esta quadra? Esta ação é irreversível.",
+            [
+                {
+                    text: "Cancelar",
+                    style: "cancel",
+                    onPress: () => console.log("Exclusão cancelada pelo usuário")
+                },
+                {
+                    text: "Excluir",
+                    style: "destructive",
+                    onPress: () => executarExclusao(id)
+                }
+            ],
+            { cancelable: true }
+        );
     };
 
     return (
@@ -113,7 +166,6 @@ export default function MinhasQuadras() {
                 </View>
             </ScrollView>
 
-            {/* --- BOTÃO FLUTUANTE --- */}
             <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={() => router.push('/cadastrar-quadra')}

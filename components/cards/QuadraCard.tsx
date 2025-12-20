@@ -92,7 +92,10 @@ export const QuadraCard = ({ quadra, onEdit, onDelete }: QuadraCardProps) => {
                 </TouchableOpacity>
                 
                 <TouchableOpacity 
-                    onPress={() => onDelete(quadra.id)}
+                    onPress={() => {
+                        console.log("Clicou na lixeira!"); 
+                        onDelete(quadra.id);
+                    }}
                     className="bg-red-50 p-2 rounded-lg items-center justify-center"
                 >
                     <Trash2 size={16} color="#EF4444" />
