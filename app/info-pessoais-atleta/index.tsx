@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { getAtletaById, updateAtleta } from "@/services/api//entities/atleta";
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router'; 
 import { Upload, Trash2 } from 'lucide-react-native';
-import { Heading } from "@/components/ui/heading";
+import { Ionicons } from '@expo/vector-icons'; 
 import { HStack } from "@/components/ui/hstack";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Alert, ScrollView } from "react-native";
+import { View, Alert, ScrollView, Pressable } from "react-native"; 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { InputTexto } from "@/components/forms/formInputs/InputTexto";
 import { InputNumero } from "@/components/forms/formInputs/InputNumero";
 import { FormControl } from '@/components/ui/form-control';
-import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button'; // Adicionado ButtonSpinner
+import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { formatarTelefone } from "@/context/functions/formatters";
 
 import {
-    validarNome, 
+    validarNome,
     validarTelefone
-} from "@/context/functions/validators"; 
+} from "@/context/functions/validators";
 
-const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png"; 
+const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png";
 
 interface ErrorsState {
     nome?: string;
@@ -31,7 +31,7 @@ interface ErrorsState {
 export default function InformacoesPessoaisAtleta() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    
+
     // Estados do formulário
     const [nome, setNome] = useState("");
     const [telefone, setTelefone] = useState("");
@@ -48,16 +48,16 @@ export default function InformacoesPessoaisAtleta() {
     const [errors, setErrors] = useState<ErrorsState>({});
 
     // Verifica se houve alguma alteração comparando o estado atual com o inicial
-    const hasChanges = 
-        nome !== initialData.nome || 
-        telefone !== initialData.telefone || 
+    const hasChanges =
+        nome !== initialData.nome ||
+        telefone !== initialData.telefone ||
         urlFoto !== initialData.urlFoto;
 
     const getUserId = async (): Promise<string> => {
         const userDataString = await AsyncStorage.getItem('userData');
         if (!userDataString) throw new Error('Usuário não encontrado');
         const userData = JSON.parse(userDataString);
-        return userData.id; 
+        return userData.id;
     };
 
     // Carregar dados do usuário
@@ -129,7 +129,6 @@ export default function InformacoesPessoaisAtleta() {
             });
 
             Alert.alert("Sucesso", "Informações atualizadas!");
-            // Opcional: router.back() se quiser sair da tela, ou manter na tela com o botão desabilitado novamente
 
         } catch (error: any) {
             console.error(error);
@@ -145,14 +144,26 @@ export default function InformacoesPessoaisAtleta() {
 
     return (
         <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+ 
+            <Stack.Screen options={{ headerShown: false }} />
+
+            <View className="flex-row items-center px-4 py-3 border-b border-gray-100 bg-white z-10">
+                <Pressable onPress={() => router.back()} className="mr-4 p-1">
+                    <Ionicons name="arrow-back" size={24} color="#374151" />
+                </Pressable>
+                <Text className="text-lg font-bold text-gray-800 flex-1" numberOfLines={1}>
+                    Informações Pessoais
+                </Text>
+            </View>
+
             <ScrollView
                 contentContainerStyle={{ flexGrow: 1, paddingBottom: 40, paddingHorizontal: 24, }}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
             >
-                <FormControl className="pt-6 rounded-lg w-full">
+                <FormControl className="pt-4 rounded-lg w-full">
                     <VStack className="w-full gap-4">
-                        <Heading className="text-2xl">Informações pessoais</Heading>
+
                         <Text className="text-typography-500">Gerencie suas informações pessoais e salve as alterações caso realize alguma mudança.</Text>
 
                         {/* --- Seção de Foto de Perfil --- */}
@@ -236,7 +247,7 @@ export default function InformacoesPessoaisAtleta() {
                                     Cancelar
                                 </ButtonText>
                             </Button>
-                            
+
                             <Button
                                 size="xl"
                                 className={`flex-1 rounded-lg py-3 bg-green-primary ${(!hasChanges || loading) ? 'opacity-50' : ''}`}

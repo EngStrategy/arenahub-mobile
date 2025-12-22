@@ -9,7 +9,6 @@ import { useRouter } from 'expo-router';
 import { InputSenha } from '@/components/forms/formInputs/InputSenha';
 import { InputTexto } from '@/components/forms/formInputs/InputTexto';
 import { validarEmail, validarPassword } from '@/context/functions/validators';
-import { PasswordStrengthIndicator } from '@/components/forms/passwordStrengthIndicador';
 
 import {
   Alert,
@@ -18,8 +17,6 @@ import {
   ScrollView,
   View,
 } from 'react-native';
-
-
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -117,7 +114,8 @@ export default function LoginScreen() {
           Faça login para continuar.
         </Text>
 
-        <InputTexto
+        <VStack className='gap-4'>
+          <InputTexto
           label="Email"
           placeholder="Insira seu email"
           value={email}
@@ -140,6 +138,7 @@ export default function LoginScreen() {
           }}
           error={errors.password}
         />
+        </VStack>
 
         <Button size="xl" className="justify-end p-0 bg-transparent"
           onPress={() => router.push('/forgot-password')}
@@ -150,8 +149,6 @@ export default function LoginScreen() {
         </Button>
 
         {/* Botão Entrar */}
-
-
         <Button
           size="xl"
           className="bg-green-primary rounded-lg py-3 mt-4"

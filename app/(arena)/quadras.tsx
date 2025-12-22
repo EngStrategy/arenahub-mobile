@@ -120,7 +120,7 @@ export default function MinhasQuadras() {
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
             >
-                <View className="pt-6 w-full flex-1 gap-4">
+                <View className="pt-6 w-full flex-1 gap-2">
 
                     <Heading className="text-2xl mb-1">Minhas quadras</Heading>
                     <Text className="text-typography-500 mb-2">

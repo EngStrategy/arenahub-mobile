@@ -11,21 +11,24 @@ export default function ArenaTabLayout() {
         tabBarInactiveTintColor: 'gray',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: '#e5e5e5',
         },
+
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
           if (route.name === 'index') {
-            iconName = focused ? 'home' : 'home-outline'; 
-          } else if (route.name === 'quadras') {
+            iconName = focused ? 'home' : 'home-outline';
+          } 
+          else if (route.name === 'quadras') {
             iconName = focused ? 'business' : 'business-outline'; 
-          } else if (route.name === 'agendamentos') {
+          } 
+          else if (route.name === 'agendamentos') {
             iconName = focused ? 'calendar' : 'calendar-outline';
-          } else if (route.name === 'perfil') {
+          } 
+          else if (route.name === 'perfil') {
             iconName = focused ? 'person' : 'person-outline';
-          } else {
+          } 
+          else {
             iconName = 'alert-circle';
           }
 
@@ -33,7 +36,6 @@ export default function ArenaTabLayout() {
         },
       })}
     >
-      {/* Aba 1: Início (Dashboard da Arena) */}
       <Tabs.Screen
         name="index"
         options={{
@@ -41,7 +43,6 @@ export default function ArenaTabLayout() {
         }}
       />
 
-      {/* Aba 2: Gestão de Quadras */}
       <Tabs.Screen
         name="quadras"
         options={{
@@ -49,15 +50,13 @@ export default function ArenaTabLayout() {
         }}
       />
 
-      {/* Aba 3: Agenda da Arena */}
       <Tabs.Screen
-        name="agendamentos" 
+        name="agendamentos"
         options={{
-          title: 'Agendamentos', 
+          title: 'Agendamentos',
         }}
       />
 
-      {/* Aba 4: Perfil da Arena */}
       <Tabs.Screen
         name="perfil"
         options={{

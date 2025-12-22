@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getArenaById, updateArena } from "@/services/api//entities/arena";
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router'; // Adicionado Stack
 import { ChevronDownIcon } from '@/components/ui/icon';
 import {
   Select,
@@ -16,14 +16,14 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { Trash2, Upload } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons'; 
 import apiCEP from "@/services/apiCEP";
 import apiCidades from "@/services/apiCidades";
 import apiLatitudeLongitude from "@/services/apiLatitudeLongitude";
-import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { estados } from "@/data/estados";
-import { View, Alert, ScrollView } from "react-native";
+import { View, Alert, ScrollView, Pressable } from "react-native"; 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { InputTexto } from "@/components/forms/formInputs/InputTexto";
 import { InputNumero } from "@/components/forms/formInputs/InputNumero";
@@ -386,7 +386,6 @@ export default function EditarArena() {
       });
 
       Alert.alert("Sucesso", "Arena atualizada com sucesso!");
-      // router.back(); // Opcional
 
     } catch (error: any) {
       console.error("❌ Erro completo:", error);
@@ -405,6 +404,18 @@ export default function EditarArena() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+
+      <Stack.Screen options={{ headerShown: false }} />
+
+      <View className="flex-row items-center px-4 py-3 border-b border-gray-100 bg-white z-10">
+        <Pressable onPress={() => router.back()} className="mr-4 p-1">
+          <Ionicons name="arrow-back" size={24} color="#374151" />
+        </Pressable>
+        <Text className="text-lg font-bold text-gray-800 flex-1" numberOfLines={1}>
+          Informações Pessoais
+        </Text>
+      </View>
+
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
@@ -414,10 +425,9 @@ export default function EditarArena() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <FormControl className="pt-6 rounded-lg w-full flex-1">
+        <FormControl className="pt-4 rounded-lg w-full flex-1">
           <VStack className="w-full gap-4">
-            <Heading className="text-2xl">Informações da arena</Heading>
-            <Text className="text-typography-500">Gerencie suas informações pessoais e salve as alterações caso realize alguma mudança.</Text>
+            <Text className="text-typography-500">Gerencie as informações da sua arena e salve as alterações realizadas.</Text>
 
             <VStack space="sm">
               <Text className="text-sm font-medium text-typography-500">Foto de Perfil</Text>

@@ -1,16 +1,18 @@
-
+// app/alterar-senha/index.tsx
 import React, { useState } from "react";
-import { updatePassword } from "@/services/api//entities/atleta"; // Assumindo o caminho
+import { updatePassword } from "@/services/api/entities/atleta"; 
 import { updatePasswordArena } from "@/services/api/entities/arena";
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router'; // Adicionado Stack
 import { Heading } from "@/components/ui/heading";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, KeyboardAvoidingView, Platform, Alert, ScrollView } from "react-native";
+import { View, KeyboardAvoidingView, Platform, Alert, ScrollView, Pressable } from "react-native"; // Adicionado Pressable
 import { InputSenha } from "@/components/forms/formInputs/InputSenha";
 import { FormControl } from '@/components/ui/form-control';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
+import { SafeAreaView } from 'react-native-safe-area-context'; // Adicionado
+import { Ionicons } from '@expo/vector-icons'; // Adicionado
 
 interface ErrorsState {
     senhaAtual?: string;
@@ -85,8 +87,8 @@ export default function AlterarSenha() {
                 [
                     {
                         text: "OK", onPress: async () => {
-                            await AsyncStorage.removeItem('userData'); // ou 'token'
-                            router.replace('/login'); // Redireciona para o login
+                            await AsyncStorage.removeItem('userData'); 
+                            router.replace('/login'); 
                         }
                     }
                 ]
@@ -101,86 +103,98 @@ export default function AlterarSenha() {
     };
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-            className="flex-1"
-        >
-            <ScrollView
-                contentContainerStyle={{ flexGrow: 1, paddingBottom: 40, paddingHorizontal: 24, paddingTop: 14 }}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
+        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+
+            <Stack.Screen options={{ headerShown: false }} />
+
+            <View className="flex-row items-center px-4 py-3 border-b border-gray-100 bg-white z-10">
+                <Pressable onPress={() => router.back()} className="mr-4 p-1">
+                    <Ionicons name="arrow-back" size={24} color="#374151" />
+                </Pressable>
+                <Text className="text-lg font-bold text-gray-800 flex-1" numberOfLines={1}>
+                    Alterar Senha
+                </Text>
+            </View>
+
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+                className="flex-1"
             >
-                
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 40, paddingHorizontal: 24 }}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    
+                    <FormControl className="pt-4 rounded-lg w-full">
+                        <VStack className="w-full gap-4">
+                            <Text className="text-typography-500">Use pelo menos 8 caracteres. Não use a senha de outro site ou algo muito óbvio.</Text>
 
-                <FormControl className="pt-9 rounded-lg w-full">
-                    <VStack className="w-full gap-4">
-                        <Heading className="text-2xl">Alterar senha</Heading>
-                        <Text className="text-typography-500">Use pelo menos 8 caracteres. Não use a senha de outro site ou algo muito óbvio.</Text>
+                            <InputSenha
+                                label="Senha atual"
+                                placeholder="Digite sua senha atual"
+                                value={senhaAtual}
+                                onChangeText={setSenhaAtual}
+                                error={errors.senhaAtual}
+                                onBlur={() => setErrors(prev => ({ ...prev, senhaAtual: '' }))}
+                            />
 
-                        <InputSenha
-                            label="Senha atual"
-                            placeholder="Digite sua senha atual"
-                            value={senhaAtual}
-                            onChangeText={setSenhaAtual}
-                            error={errors.senhaAtual}
-                            onBlur={() => setErrors(prev => ({ ...prev, senhaAtual: '' }))} // Limpa o erro
-                        />
+                            <InputSenha
+                                label="Nova senha"
+                                placeholder="Digite a nova senha"
+                                value={novaSenha}
+                                onChangeText={setNovaSenha}
+                                error={errors.novaSenha}
+                                onBlur={() => {
+                                    if (novaSenha.length > 0 && novaSenha.length < 8) {
+                                        setErrors(prev => ({ ...prev, novaSenha: 'Mínimo 8 caracteres.' }));
+                                    } else {
+                                        setErrors(prev => ({ ...prev, novaSenha: '' }));
+                                    }
+                                }}
+                            />
 
-                        <InputSenha
-                            label="Nova senha"
-                            placeholder="Digite a nova senha"
-                            value={novaSenha}
-                            onChangeText={setNovaSenha}
-                            error={errors.novaSenha}
-                            onBlur={() => {
-                                if (novaSenha.length > 0 && novaSenha.length < 8) {
-                                    setErrors(prev => ({ ...prev, novaSenha: 'Mínimo 8 caracteres.' }));
-                                } else {
-                                    setErrors(prev => ({ ...prev, novaSenha: '' }));
-                                }
-                            }}
-                        />
+                            <InputSenha
+                                label="Confirmar nova senha"
+                                placeholder="Confirme a nova senha"
+                                value={confirmarSenha}
+                                onChangeText={setConfirmarSenha}
+                                error={errors.confirmarSenha}
+                                onBlur={() => {
+                                    if (confirmarSenha.length > 0 && novaSenha !== confirmarSenha) {
+                                        setErrors(prev => ({ ...prev, confirmarSenha: 'As senhas não coincidem.' }));
+                                    } else {
+                                        setErrors(prev => ({ ...prev, confirmarSenha: '' }));
+                                    }
+                                }}
+                            />
 
-                        <InputSenha
-                            label="Confirmar nova senha"
-                            placeholder="Confirme a nova senha"
-                            value={confirmarSenha}
-                            onChangeText={setConfirmarSenha}
-                            error={errors.confirmarSenha}
-                            onBlur={() => {
-                                if (confirmarSenha.length > 0 && novaSenha !== confirmarSenha) {
-                                    setErrors(prev => ({ ...prev, confirmarSenha: 'As senhas não coincidem.' }));
-                                } else {
-                                    setErrors(prev => ({ ...prev, confirmarSenha: '' }));
-                                }
-                            }}
-                        />
-
-                        <View className="flex-row w-full gap-5 mt-4">
-                            <Button
-                                size="xl"
-                                className="flex-1 bg-gray-300 rounded-lg py-3"
-                                onPress={() => router.back()}
-                                disabled={loading}
-                            >
-                                <ButtonText className="text-base text-black">
-                                    Cancelar
-                                </ButtonText>
-                            </Button>
-                            <Button
-                                size="xl"
-                                className="flex-1 bg-green-primary rounded-lg py-3"
-                                onPress={handleAlterarSenha}
-                                disabled={loading}
-                            >
-                                <ButtonText className="text-base text-white">
-                                    Alterar senha
-                                </ButtonText>
-                            </Button>
-                        </View>
-                    </VStack>
-                </FormControl>
-            </ScrollView>
-        </KeyboardAvoidingView>
+                            <View className="flex-row w-full gap-5 mt-4">
+                                <Button
+                                    size="xl"
+                                    className="flex-1 bg-gray-300 rounded-lg py-3"
+                                    onPress={() => router.back()}
+                                    disabled={loading}
+                                >
+                                    <ButtonText className="text-base text-black">
+                                        Cancelar
+                                    </ButtonText>
+                                </Button>
+                                <Button
+                                    size="xl"
+                                    className="flex-1 bg-green-primary rounded-lg py-3"
+                                    onPress={handleAlterarSenha}
+                                    disabled={loading}
+                                >
+                                    <ButtonText className="text-base text-white">
+                                        Alterar senha
+                                    </ButtonText>
+                                </Button>
+                            </View>
+                        </VStack>
+                    </FormControl>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 };
