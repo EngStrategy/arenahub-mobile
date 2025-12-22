@@ -26,3 +26,8 @@ export const getDuracaoEmMinutos = (duracaoEnum: string) => {
     default: return 60;
   }
 };
+
+export const formatTimeDisplay = (time: string) => {
+  if (!time) return '';
+  return time.slice(0, 5);
+};
