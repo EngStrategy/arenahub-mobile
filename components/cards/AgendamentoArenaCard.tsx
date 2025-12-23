@@ -44,7 +44,7 @@ export function AgendamentoArenaCard({ data, onAction, isHistoryView }: Props) {
   };
 
   return (
-    <View className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+    <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
       
       {/* Cabeçalho: Data e Status */}
       <View className="flex-row justify-between items-start mb-3">
