@@ -12,7 +12,7 @@ import { Arena } from '@/context/types/Arena';
 import { getQuadrasByArena, getHorariosDisponiveisPorQuadra } from '@/services/api/entities/quadra';
 import { Quadra, HorariosDisponiveis } from '@/context/types/Quadra';
 import { ArenaCard } from '@/components/cards/ArenaCard';
-import { ModalAvaliacoes } from '@/components/modais/ModalAvaliacoes';
+import { ModalAvaliacoes } from '@/components/modals/ModalAvaliacoes';
 
 // Utils
 import { addDuration, subDuration, getDuracaoEmMinutos } from '@/utils/time';

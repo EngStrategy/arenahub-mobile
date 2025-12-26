@@ -10,8 +10,8 @@ import { formatarDiaSemanaCompleto } from '@/context/functions/mapeamentoDiaSema
 import { getQuadraById, updateQuadra } from '@/services/api/entities/quadra'; 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MATERIAIS_OPTIONS, TIPO_QUADRA_OPTIONS, DURACAO_OPTIONS } from '@/constants/Quadra';
-import { ModalCriarHorarios } from '@/components/modais/ModalCriarHorarios';
-import { ModalMultiSelect } from '@/components/modais/ModalMultiSelect';
+import { ModalCriarHorarios } from '@/components/modals/ModalCriarHorarios';
+import { ModalMultiSelect } from '@/components/modals/ModalMultiSelect';
 import { Spinner } from '@/components/ui/spinner';
 import { Picker } from '@react-native-picker/picker';
 

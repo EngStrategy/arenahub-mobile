@@ -62,7 +62,7 @@ export default function AgendamentosScreen() {
   useEffect(() => {
     if (isMountedRef.current) {
       setPage(0);
-      setAgendamentos([]); // Limpa a lista visualmente para mostrar o loading
+      setAgendamentos([]); 
       fetchAgendamentos(0, true);
     }
   }, [viewType]);
@@ -71,7 +71,7 @@ export default function AgendamentosScreen() {
   useEffect(() => {
     if (isMountedRef.current) {
       setPage(0);
-      setAgendamentos([]); // Limpa a lista visualmente para mostrar o loading
+      setAgendamentos([]); 
       fetchAgendamentos(0, true);
     }
   }, [selectedQuadraId, startDate, endDate]);
@@ -357,7 +357,6 @@ export default function AgendamentosScreen() {
     </View>
   );
 
-  // Renderiza o Loading ou a Mensagem de Vazio
   const renderEmptyComponent = () => {
     if (loading && !refreshing) {
       return (
@@ -380,7 +379,7 @@ export default function AgendamentosScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white relative" edges={['top']}>
       <FlatList
-        data={loading && !refreshing ? [] : agendamentos} // Se estiver carregando, passamos lista vazia para forçar o renderEmptyComponent
+        data={loading && !refreshing ? [] : agendamentos} 
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={ListHeader}
         renderItem={({ item }) => (
@@ -392,7 +391,7 @@ export default function AgendamentosScreen() {
         )}
         contentContainerStyle={{
             paddingHorizontal: 24, 
-            paddingBottom: 100,
+            paddingBottom: 24,
             gap: 16 
         }}
         refreshControl={
