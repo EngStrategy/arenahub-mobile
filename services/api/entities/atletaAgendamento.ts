@@ -1,8 +1,10 @@
-import api from '@/services/api';
+import { api } from '@/services/api';
 
-export type StatusAgendamento = "PENDENTE" | "PAGO" | "CANCELADO" | "FINALIZADO" | "AGUARDANDO_PAGAMENTO";
+export type StatusAgendamento = "PENDENTE" | "PAGO" | "CANCELADO" | "FINALIZADO" | "AGUARDANDO_PAGAMENTO" | "AUSENTE" | "ACEITO" | "RECUSADO";
 export type TipoAgendamentoFilter = "NORMAL" | "FIXO" | "AMBOS";
-export type TipoStatusParticipacao = "PENDENTE" | "ACEITO" | "RECUSADO";
+export type TipoStatusParticipacao = "PENDENTE" | "ACEITO" | "RECUSADO" | "CANCELADO";
+export type PeriodoAgendamentoFixo = "UM_MES" | "TRES_MESES" | "SEIS_MESES";
+export type StatusDisponibilidade = "DISPONIVEL" | "INDISPONIVEL" | "MANUTENCAO";
 
 export interface Avaliacao {
     idAvaliacao: number;
@@ -28,6 +30,8 @@ export interface AgendamentoAtleta {
     possuiSolicitacoes: boolean;
     avaliacao: Avaliacao | null;
     avaliacaoDispensada: boolean;
+    agendamentoFixoId?: number;
+    numeroJogadoresNecessarios?: number;
 }
 
 export interface ParticipacaoJogoAberto {
@@ -43,6 +47,16 @@ export interface ParticipacaoJogoAberto {
     status: TipoStatusParticipacao;
 }
 
+export interface SolicitacaoJogoAberto {
+    id: number;
+    agendamentoId: number;
+    solicitanteId: string;
+    nomeSolicitante: string;
+    telefoneSolicitante: string;
+    fotoSolicitante: string;
+    status: "PENDENTE" | "ACEITO" | "RECUSADO";
+}
+
 export interface AgendamentoAtletaQueryParams {
     page?: number;
     size?: number;
@@ -54,6 +68,14 @@ export interface AgendamentoAtletaQueryParams {
     status?: StatusAgendamento;
 }
 
+export interface JogosAbertosQueryParams extends AgendamentoAtletaQueryParams {
+    cidade?: string;
+    esporte?: string;
+    latitude?: number;
+    longitude?: number;
+    raioKm?: number;
+}
+
 interface PaginatedResponse<T> {
     content: T[];
     totalElements: number;
@@ -61,7 +83,7 @@ interface PaginatedResponse<T> {
     number: number;
 }
 
-// === ENDPOINTS ===
+// === ENDPOINTS AGENDAMENTOS ===
 
 export const getAllAgendamentosAtleta = async (
     params: AgendamentoAtletaQueryParams = {}
@@ -72,19 +94,59 @@ export const getAllAgendamentosAtleta = async (
     return response.data;
 };
 
-export const getMinhasParticipacoes = async (): Promise<ParticipacaoJogoAberto[]> => {
-    const response = await api.get<ParticipacaoJogoAberto[]>('/jogos-abertos/minhas-participacoes');
+export const cancelarAgendamento = async (agendamentoId: number): Promise<void> => {
+    await api.delete(`/agendamentos/${agendamentoId}`);
+};
+
+export const cancelarAgendamentoFixo = async (agendamentoFixoId: number): Promise<void> => {
+    await api.delete(`/agendamentos/fixo/${agendamentoFixoId}`);
+};
+
+export const listarAgendamentosFixosFilhos = async (agendamentoFixoId: number): Promise<AgendamentoAtleta[]> => {
+    const response = await api.get<AgendamentoAtleta[]>(`/agendamentos/fixo/${agendamentoFixoId}/filhos`);
     return response.data;
 };
 
-export const sairJogoAberto = async (solicitacaoId: number): Promise<void> => {
-    await api.delete(`/jogos-abertos/solicitacoes/${solicitacaoId}/sair`);
+// === ENDPOINTS AVALIAÇÕES ===
+
+export const criarOuDispensarAvaliacao = async (
+    agendamentoId: number,
+    avaliacao?: { nota?: number; comentario?: string }
+): Promise<void> => {
+    await api.post(`/agendamentos/${agendamentoId}/avaliacoes`, avaliacao);
 };
 
 export const dispensarAvaliacao = async (agendamentoId: number): Promise<void> => {
     await api.post(`/agendamentos/${agendamentoId}/avaliacoes`, {});
 };
 
-export const cancelarAgendamento = async (agendamentoId: number): Promise<void> => {
-    await api.delete(`/agendamentos/${agendamentoId}`);
+// === ENDPOINTS JOGOS ABERTOS (PARTICIPAÇÕES) ===
+
+export const getMinhasParticipacoes = async (): Promise<ParticipacaoJogoAberto[]> => {
+    const response = await api.get<ParticipacaoJogoAberto[]>('/jogos-abertos/minhas-participacoes');
+    return response.data;
+};
+
+export const solicitarEntrada = async (agendamentoId: number): Promise<void> => {
+    await api.post(`/jogos-abertos/${agendamentoId}/solicitar-entrada`, {});
+};
+
+export const sairJogoAberto = async (solicitacaoId: number): Promise<void> => {
+    await api.delete(`/jogos-abertos/solicitacoes/${solicitacaoId}/sair`);
+};
+
+/**
+ * Busca as solicitações pendentes de um agendamento público que EU criei
+ */
+export const getSolicitacoesJogo = async (agendamentoId: number): Promise<SolicitacaoJogoAberto[]> => {
+    const response = await api.get(`/jogos-abertos/${agendamentoId}/solicitacoes`);
+    return response.data;
+};
+
+export const aceitarSolicitacao = async (solicitacaoId: number): Promise<void> => {
+    await api.patch(`/jogos-abertos/solicitacoes/${solicitacaoId}`, { aceitar: true });
+};
+
+export const recusarSolicitacao = async (solicitacaoId: number): Promise<void> => {
+    await api.patch(`/jogos-abertos/solicitacoes/${solicitacaoId}`, { aceitar: false });
 };

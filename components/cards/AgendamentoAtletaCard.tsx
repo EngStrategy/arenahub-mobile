@@ -184,14 +184,14 @@ export function AgendamentoAtletaCard({
                             </TouchableOpacity>
                         )}
 
-                        {/* Botão Ver Solicitações (Apenas Público) */}
+                        {/* Botão Solicitações (Apenas Público) */}
                         {data.publico && (
                             <TouchableOpacity 
                                 onPress={() => onVerSolicitacoes(data.id)}
                                 className="flex-1 bg-blue-600 py-2.5 rounded-lg flex-row justify-center items-center shadow-sm"
                             >
                                 <UserPlus size={18} color="white" />
-                                <Text className="text-white font-bold ml-2 text-sm">Ver Solicitações</Text>
+                                <Text className="text-white font-bold ml-2 text-sm">Solicitações</Text>
                                 {data.possuiSolicitacoes && (
                                     <View className="w-2 h-2 bg-red-500 rounded-full absolute top-2 right-4" />
                                 )}
