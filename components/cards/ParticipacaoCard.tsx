@@ -50,7 +50,7 @@ export function ParticipacaoCard({ data, onSair }: Props) {
     const deveExibirOpcao = (data.status === 'PENDENTE' || data.status === 'ACEITO') && podeCancelarOuSair;
 
     return (
-        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+        <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
              <View className="flex-row justify-between items-start mb-3">
                 <View className="flex-row items-center bg-gray-50 px-2 py-1 rounded-md">
                     <Calendar size={14} color="#4B5563" />
@@ -79,7 +79,7 @@ export function ParticipacaoCard({ data, onSair }: Props) {
                 </View>
             </View>
 
-            <View className="flex-row justify-between items-center border-t border-gray-100 pt-3 mb-3">
+            <View className="flex-row justify-between items-center border-t border-gray-100 pt-3">
                 <View className="flex-row items-center">
                     <Clock size={16} color="#15A01A" />
                     <Text className="ml-2 text-gray-700 font-medium">
@@ -97,7 +97,7 @@ export function ParticipacaoCard({ data, onSair }: Props) {
             {deveExibirOpcao && (
                 <TouchableOpacity 
                     onPress={handleActionPress}
-                    className="bg-red-50 py-2 rounded-lg flex-row justify-center items-center mt-1 border border-red-100"
+                    className="bg-red-50 py-2 rounded-lg flex-row justify-center items-center mt-4 border border-red-100"
                 >
                     <LogOut size={16} color="#DC2626" />
                     <Text className="text-red-600 font-bold ml-2">{labelBotao}</Text>

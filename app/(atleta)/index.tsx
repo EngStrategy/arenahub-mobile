@@ -3,9 +3,10 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
-  Platform,
+  TouchableOpacity,
+  Modal,
+  View,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { Text } from '@/components/ui/text';
 import { InputTexto } from '@/components/forms/formInputs/InputTexto';
 import { ArenaCard } from '@/components/cards/ArenaCard';
@@ -18,6 +19,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { VStack } from '@/components/ui/vstack';
+import { ChevronDown } from 'lucide-react-native';
 import type { Arena } from '@/context/types/Arena';
 
 const sportLabels: Record<string, string> = {
@@ -34,6 +36,11 @@ const sportLabels: Record<string, string> = {
 };
 
 type SportKey = keyof typeof sportLabels;
+
+const SPORT_OPTIONS = Object.entries(sportLabels).map(([value, label]) => ({
+  label,
+  value: value as SportKey,
+}));
 
 const ArenasListHeader = React.memo(
   ({
@@ -53,6 +60,8 @@ const ArenasListHeader = React.memo(
     onCidadeChange: (text: string) => void;
     onEsporteChange: (value: SportKey) => void;
   }) => {
+    const [showSportModal, setShowSportModal] = useState(false);
+
     return (
       <VStack>
         {/* 1. Header reutilizável */}
@@ -67,22 +76,18 @@ const ArenasListHeader = React.memo(
           />
 
           <VStack className="mt-3">
-            <VStack className="border border-gray-300 rounded-lg h-12 justify-center">
-              <Picker
-                selectedValue={esporte}
-                onValueChange={value => onEsporteChange(value as SportKey)}
-                style={Platform.OS === 'ios' ? { height: 150 } : {}}
-                className="w-full"
-              >
-                {Object.entries(sportLabels).map(([key, label]) => (
-                  <Picker.Item key={key} label={label} value={key} />
-                ))}
-              </Picker>
-            </VStack>
+            <TouchableOpacity
+              onPress={() => setShowSportModal(true)}
+              className="border border-gray-300 rounded-lg h-12 px-3 flex-row items-center justify-between"
+            >
+              <Text className="text-gray-700">
+                {sportLabels[esporte]}
+              </Text>
+              <ChevronDown size={20} color="#6b7280" />
+            </TouchableOpacity>
           </VStack>
 
           {/* 3. Contador de resultados */}
-          {/* Mostra o total *após* o carregamento inicial */}
           {!loading && page === 0 && (
             <Text className="text-sm text-gray-600 mt-3">
               {totalElements}{' '}
@@ -90,6 +95,51 @@ const ArenasListHeader = React.memo(
             </Text>
           )}
         </VStack>
+
+        {/* Modal de seleção de esporte */}
+        <Modal
+          visible={showSportModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowSportModal(false)}
+        >
+          <TouchableOpacity
+            className="flex-1 bg-black/30 justify-center items-center"
+            activeOpacity={1}
+            onPress={() => setShowSportModal(false)}
+          >
+            <View className="bg-white w-[80%] rounded-xl p-4 shadow-lg max-h-[70%]">
+              <Text className="text-lg font-bold text-gray-800 mb-4 text-center">
+                Selecionar Esporte
+              </Text>
+              <FlatList
+                data={SPORT_OPTIONS}
+                keyExtractor={(item) => item.value}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    className={`py-3 border-b border-gray-100 ${
+                      esporte === item.value ? 'bg-green-50' : ''
+                    }`}
+                    onPress={() => {
+                      onEsporteChange(item.value);
+                      setShowSportModal(false);
+                    }}
+                  >
+                    <Text
+                      className={`text-center font-medium ${
+                        esporte === item.value
+                          ? 'text-green-600'
+                          : 'text-gray-600'
+                      }`}
+                    >
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </TouchableOpacity>
+        </Modal>
       </VStack>
     );
   }
@@ -172,7 +222,6 @@ export default function ArenasScreen() {
   };
 
   const renderFooter = () => {
-    // Mostra o loader de "carregar mais" apenas se não for o load inicial
     if (!loading || (loading && page === 0)) return null;
     return (
       <VStack className="py-4">
@@ -182,7 +231,6 @@ export default function ArenasScreen() {
   };
 
   const renderEmpty = () => {
-    // Se estiver carregando (no page 0), mostre o loader
     if (loading && page === 0) {
       return (
         <VStack className="flex-1 items-center justify-center py-20">
@@ -192,7 +240,6 @@ export default function ArenasScreen() {
       );
     }
 
-    // Se não estiver carregando e não houver arenas, mostre a mensagem
     if (!loading && arenas.length === 0) {
       return (
         <VStack className="flex-1 items-center justify-center py-20">
@@ -203,13 +250,9 @@ export default function ArenasScreen() {
       );
     }
 
-    // Caso contrário (ex: carregando mais páginas), não mostre nada
     return null;
   };
 
-  // Criamos o *elemento* do header aqui, uma única vez por renderização.
-  // Como `setCidade` e `setEsporte` são estáveis, o `React.memo`
-  // fará com que o componente só atualize as props, sem desmontar.
   const listHeaderComponent = (
     <ArenasListHeader
       cidade={cidade}
