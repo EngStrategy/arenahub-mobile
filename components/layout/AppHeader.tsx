@@ -12,7 +12,7 @@ export function AppHeader() {
   };
 
   return (
-    <View className="bg-white px-5 pt-4 pb-3 flex-row border-b border-gray-200 items-center justify-between">
+    <View className="bg-white px-7 pt-4 pb-3 flex-row border-b border-gray-200 items-center justify-between">
       <Image
         source={logo}
         style={{

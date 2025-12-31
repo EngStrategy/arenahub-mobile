@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, Image, ScrollView, Pressable, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, Image, ScrollView, Pressable, ActivityIndicator, FlatList, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { format, addDays, isSameDay } from 'date-fns';
@@ -13,6 +13,7 @@ import { getQuadrasByArena, getHorariosDisponiveisPorQuadra } from '@/services/a
 import { Quadra, HorariosDisponiveis } from '@/context/types/Quadra';
 import { ArenaCard } from '@/components/cards/ArenaCard';
 import { ModalAvaliacoes } from '@/components/modals/ModalAvaliacoes';
+import { ModalConfirmacaoReserva } from '@/components/modals/ModalConfirmacaoReserva';
 
 // Utils
 import { addDuration, subDuration, getDuracaoEmMinutos } from '@/utils/time';
@@ -42,7 +43,6 @@ const QuadraCard = ({
   const noite = slots.filter(h => parseInt(h.horarioInicio.split(':')[0]) >= 18);
   const temHorarios = slots.length > 0;
 
-  // Cálculo de Vizinhos Válidos
   const duration = getDuracaoEmMinutos(quadra.duracaoReserva);
   const currentQuadraSelection = selectedSlots
     .filter(s => s.startsWith(`${quadra.id}|`))
@@ -208,7 +208,27 @@ export default function QuadrasScreen() {
   const [loading, setLoading] = useState(true);
   const [loadingHorarios, setLoadingHorarios] = useState(false);
   const [showAvaliacoes, setShowAvaliacoes] = useState(false);
+  const [showConfirmacao, setShowConfirmacao] = useState(false);
   const dates = useMemo(() => Array.from({ length: 30 }, (_, i) => addDays(new Date(), i)), []);
+  
+  const selectedSlotsData = useMemo(() => {
+    if (selectedSlots.length === 0) return [];
+    const quadraId = parseInt(selectedSlots[0].split('|')[0]);
+    const currentSlots = horarios[quadraId] || [];
+    
+    return selectedSlots.map(s => {
+      const hora = s.split('|')[1];
+      return currentSlots.find(slot => slot.horarioInicio === hora);
+    }).filter(Boolean) as HorariosDisponiveis[];
+  }, [selectedSlots, horarios]);
+
+  const totalResumo = selectedSlotsData.reduce((acc, curr) => acc + curr.valor, 0);
+
+  const handleReservaSuccess = () => {
+    setSelectedSlots([]);
+    setShowConfirmacao(false);
+    router.push('/(atleta)/agendamentos'); 
+  };
 
   // 1. Busca Inicial
   useEffect(() => {
@@ -216,15 +236,19 @@ export default function QuadrasScreen() {
       try {
         setLoading(true);
         if (!arenaId) return;
+      
         const [arenaData, quadrasData] = await Promise.all([
           getArenaById(arenaId),
           getQuadrasByArena(arenaId)
         ]);
+      
         setArena(arenaData);
         setQuadras(quadrasData);
-      } catch (error) {
+      } 
+      catch (error) {
         console.error("Erro ao carregar dados:", error);
-      } finally {
+      } 
+      finally {
         setLoading(false);
       }
     };
@@ -238,17 +262,22 @@ export default function QuadrasScreen() {
       setSelectedSlots([]); 
       try {
         setLoadingHorarios(true);
+        
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
         const promises = quadras.map(q => getHorariosDisponiveisPorQuadra(q.id, dateStr));
         const results = await Promise.all(promises);
         const novosHorarios: Record<number, HorariosDisponiveis[]> = {};
+        
         quadras.forEach((q, index) => {
           novosHorarios[q.id] = results[index];
         });
+        
         setHorarios(novosHorarios);
-      } catch (error) {
+      } 
+      catch (error) {
         console.error("Erro ao buscar horários:", error);
-      } finally {
+      } 
+      finally {
         setLoadingHorarios(false);
       }
     };
@@ -264,6 +293,7 @@ export default function QuadrasScreen() {
     if (selectedSlots.length > 0) {
       const firstSelected = selectedSlots[0];
       const currentQuadraId = firstSelected.split('|')[0];
+      
       if (currentQuadraId !== String(quadra.id)) {
         setSelectedSlots([slotId]);
         return;
@@ -288,10 +318,12 @@ export default function QuadrasScreen() {
       const indexClicked = sortedSlots.indexOf(slotId);
       const newSelection = sortedSlots.slice(0, indexClicked); 
       setSelectedSlots(newSelection);
-    } else {
+    } 
+    else {
       if (selectedSlots.length === 0) {
         setSelectedSlots([slotId]);
-      } else {
+      } 
+      else {
         const firstSlotTime = sortedSlots[0].split('|')[1];
         const lastSlotTime = sortedSlots[sortedSlots.length - 1].split('|')[1];
         const prevTime = subDuration(firstSlotTime, duration);
@@ -299,7 +331,8 @@ export default function QuadrasScreen() {
 
         if (slot.horarioInicio === nextTime) {
           setSelectedSlots(prev => [...prev, slotId]);
-        } else if (slot.horarioInicio === prevTime) {
+        } 
+        else if (slot.horarioInicio === prevTime) {
           setSelectedSlots(prev => [...prev, slotId]);
         }
       }
@@ -415,6 +448,50 @@ export default function QuadrasScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* BARRA DE RESUMO DA RESERVA */}
+      {selectedSlots.length > 0 && (
+        <View className="absolute bottom-6 left-4 right-4 shadow-xl z-50">
+          <TouchableOpacity 
+            onPress={() => setShowConfirmacao(true)}
+            activeOpacity={0.9}
+            className="bg-green-600 flex-row items-center justify-between px-6 py-4 rounded-2xl"
+          >
+            <View className="flex-row items-center">
+              <View className="bg-white/20 p-2 rounded-lg mr-3">
+                  <Ionicons name="calendar" size={20} color="white" />
+              </View>
+              <View>
+                <Text className="text-white font-bold text-base">
+                  {totalResumo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </Text>
+                <Text className="text-green-100 text-xs">
+                  {selectedSlots.length} {selectedSlots.length > 1 ? 'horários selecionados' : 'horário selecionado'}
+                </Text>
+              </View>
+            </View>
+            
+            <View className="flex-row items-center">
+              <Text className="text-white font-bold mr-1">Continuar</Text>
+              <Ionicons name="chevron-forward" size={18} color="white" />
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* MODAL DE CONFIRMAÇÃO */}
+      {selectedSlotsData.length > 0 && (
+        <ModalConfirmacaoReserva 
+          visible={showConfirmacao}
+          onClose={() => setShowConfirmacao(false)}
+          data={selectedDate}
+          quadra={quadras.find(q => q.id === parseInt(selectedSlots[0].split('|')[0]))!}
+          slotsSelecionados={selectedSlotsData}
+          onSuccess={handleReservaSuccess}
+        />
+      )}
+
+      {/* MODAL DE CONFIRMAÇÃO */}
       <ModalAvaliacoes 
         visible={showAvaliacoes}
         onClose={() => setShowAvaliacoes(false)}

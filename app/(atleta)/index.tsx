@@ -68,7 +68,7 @@ const ArenasListHeader = React.memo(
         <AppHeader />
 
         {/* 2. Filtros */}
-        <VStack className="bg-white px-4 pb-3 border-gray-200">
+        <VStack className="bg-white px-7 pb-3 border-gray-200">
           <InputTexto
             placeholder="Buscar por cidade..."
             value={cidade}
@@ -271,7 +271,7 @@ export default function ArenasScreen() {
         data={arenas}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <VStack className="px-4">
+          <VStack className="px-7">
             <ArenaCard
               arena={item}
               onPress={() => handleArenaPress(item.id)}

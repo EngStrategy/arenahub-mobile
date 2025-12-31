@@ -25,6 +25,17 @@ export interface AgendamentoArena {
   urlFotoAtleta: string;
 }
 
+export interface AgendamentoCreate {
+  quadraId: number;
+  dataAgendamento: string;
+  slotHorarioIds: number[];
+  esporte: string;
+  periodoFixo?: "UM_MES" | "TRES_MESES" | "SEIS_MESES";
+  numeroJogadoresNecessarios: number;
+  isFixo: boolean;
+  isPublico: boolean;
+}
+
 interface PaginatedResponse<T> {
   content: T[];
   totalElements: number;
@@ -76,3 +87,8 @@ export async function avaliarAgendamento(
 
   return response.data;
 }
+
+export const createAgendamento = async (payload: AgendamentoCreate): Promise<any> => {
+  const response = await api.post('/agendamentos', payload);
+  return response.data;
+};
