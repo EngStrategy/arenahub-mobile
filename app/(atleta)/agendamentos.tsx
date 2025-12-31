@@ -125,11 +125,13 @@ const handleVerSolicitacoes = async (id: number) => {
         // Fetch Participações
         const data = await getMinhasParticipacoes();
         if (isMountedRef.current) setParticipacoes(data);
-      } else {
+      } 
+      else {  
         // Fetch Agendamentos
-        const statusParam: StatusAgendamento | undefined = viewType === 'historico'
-          ? 'FINALIZADO'
-          : undefined;
+        const statusParam: StatusAgendamento | undefined = 
+        viewType === 'historico' ? 'FINALIZADO' : 
+        viewType === 'ativos' ? 'PENDENTE' : 
+        undefined;
 
         const params: AgendamentoAtletaQueryParams = {
           page: pageNumber,
