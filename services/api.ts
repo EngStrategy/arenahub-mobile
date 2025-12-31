@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ⚠️ ALTERE AQUI PARA SEU IP LOCAL
 const API_BASE_URL = __DEV__
-  ? 'http://192.168.1.29:8080/api/v1'  // Desenvolvimento (IP do seu PC)
+  ? 'http://192.168.10.128:8080/api/v1'  // Desenvolvimento (IP do seu PC)
   : 'https://api.arenahub.app/api/v1'; // Produção
 
 export const api = axios.create({

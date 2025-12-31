@@ -81,7 +81,7 @@ export function AgendamentoAtletaCard({
     };
 
     return (
-        <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 relative mb-4">
+        <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 relative">
             
             {/* Cabeçalho: Data e Status */}
             <View className="flex-row justify-between items-start mb-3">
