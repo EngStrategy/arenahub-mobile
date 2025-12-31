@@ -3,12 +3,8 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
-  TouchableOpacity,
-  Modal,
-  View,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { InputTexto } from '@/components/forms/formInputs/InputTexto';
 import { ArenaCard } from '@/components/cards/ArenaCard';
 import {
   getAllArenas,
@@ -19,28 +15,8 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { VStack } from '@/components/ui/vstack';
-import { ChevronDown } from 'lucide-react-native';
+import { GenericFilter, SportKey } from '@/components/filters/GenericFilter';
 import type { Arena } from '@/context/types/Arena';
-
-const sportLabels: Record<string, string> = {
-  '': 'Todos os esportes',
-  FUTEBOL_SOCIETY: 'Futebol Society',
-  FUTEBOL_SETE: 'Futebol 7',
-  FUTEBOL_ONZE: 'Futebol 11',
-  FUTSAL: 'Futsal',
-  BEACHTENNIS: 'Beach Tennis',
-  VOLEI: 'Vôlei',
-  FUTEVOLEI: 'Futevôlei',
-  BASQUETE: 'Basquete',
-  HANDEBOL: 'Handebol',
-};
-
-type SportKey = keyof typeof sportLabels;
-
-const SPORT_OPTIONS = Object.entries(sportLabels).map(([value, label]) => ({
-  label,
-  value: value as SportKey,
-}));
 
 const ArenasListHeader = React.memo(
   ({
@@ -60,86 +36,26 @@ const ArenasListHeader = React.memo(
     onCidadeChange: (text: string) => void;
     onEsporteChange: (value: SportKey) => void;
   }) => {
-    const [showSportModal, setShowSportModal] = useState(false);
-
     return (
       <VStack>
-        {/* 1. Header reutilizável */}
+        {/* Header reutilizável */}
         <AppHeader />
 
-        {/* 2. Filtros */}
-        <VStack className="bg-white px-7 pb-3 border-gray-200">
-          <InputTexto
-            placeholder="Buscar por cidade..."
-            value={cidade}
-            onChangeText={onCidadeChange}
-          />
-
-          <VStack className="mt-3">
-            <TouchableOpacity
-              onPress={() => setShowSportModal(true)}
-              className="border border-gray-300 rounded-lg h-12 px-3 flex-row items-center justify-between"
-            >
-              <Text className="text-gray-700">
-                {sportLabels[esporte]}
-              </Text>
-              <ChevronDown size={20} color="#6b7280" />
-            </TouchableOpacity>
-          </VStack>
-
-          {/* 3. Contador de resultados */}
-          {!loading && page === 0 && (
-            <Text className="text-sm text-gray-600 mt-3">
-              {totalElements}{' '}
-              {totalElements === 1 ? 'arena encontrada' : 'arenas encontradas'}
-            </Text>
-          )}
-        </VStack>
-
-        {/* Modal de seleção de esporte */}
-        <Modal
-          visible={showSportModal}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowSportModal(false)}
-        >
-          <TouchableOpacity
-            className="flex-1 bg-black/30 justify-center items-center"
-            activeOpacity={1}
-            onPress={() => setShowSportModal(false)}
-          >
-            <View className="bg-white w-[80%] rounded-xl p-4 shadow-lg max-h-[70%]">
-              <Text className="text-lg font-bold text-gray-800 mb-4 text-center">
-                Selecionar Esporte
-              </Text>
-              <FlatList
-                data={SPORT_OPTIONS}
-                keyExtractor={(item) => item.value}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    className={`py-3 border-b border-gray-100 ${
-                      esporte === item.value ? 'bg-green-50' : ''
-                    }`}
-                    onPress={() => {
-                      onEsporteChange(item.value);
-                      setShowSportModal(false);
-                    }}
-                  >
-                    <Text
-                      className={`text-center font-medium ${
-                        esporte === item.value
-                          ? 'text-green-600'
-                          : 'text-gray-600'
-                      }`}
-                    >
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          </TouchableOpacity>
-        </Modal>
+        {/* Filtros */}
+        <GenericFilter
+          cidade={cidade}
+          esporte={esporte}
+          loading={loading}
+          totalElements={totalElements}
+          showResults={!loading && page === 0}
+          onCidadeChange={onCidadeChange}
+          onEsporteChange={onEsporteChange}
+          cidadePlaceholder="Buscar por cidade..."
+          resultsLabel={{
+            singular: 'arena encontrada',
+            plural: 'arenas encontradas',
+          }}
+        />
       </VStack>
     );
   }
