@@ -18,6 +18,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ArenaCard } from '@/components/cards/ArenaCard';
 import { Spinner } from '@/components/ui/spinner';
 import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadToImgur } from "@/utils/uploadToImgur";
 
 const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png";
 
@@ -95,10 +97,13 @@ export default function CadastrarQuadra() {
 
         try {
             setLoading(true);
-            let urlParaSalvar = imageUrl ?? '';
 
-            if (imageUrl && imageUrl !== DEFAULT_AVATAR_URL) {
-                urlParaSalvar = await uploadToImgur(null);
+            let urlParaSalvar = '';
+
+            if (imageUrl && imageUrl.startsWith('file://')) {
+                urlParaSalvar = await uploadToImgur(imageUrl);
+            } else if (imageUrl && imageUrl !== DEFAULT_AVATAR_URL) {
+                urlParaSalvar = imageUrl;
             }
 
             const quadra: QuadraCreate = {
@@ -138,18 +143,22 @@ export default function CadastrarQuadra() {
     };
 
     const selectImage = async () => {
-        setLoading(true);
-        try {
-            await new Promise(resolve => setTimeout(resolve, 800));
-            const MOCK_URI = "https://i.imgur.com/zCznLJY.png";
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        
+        if (status !== 'granted') {
+            Alert.alert("Erro", "Permissão para galeria é necessária.");
+            return;
+        }
 
-            setImageUrl(MOCK_URI);
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.7,
+        });
 
-        } catch (error) {
-            console.error("Error selecting image:", error);
-            Alert.alert("Erro", "Não foi possível selecionar a imagem.");
-        } finally {
-            setLoading(false);
+        if (!result.canceled) {
+            setImageUrl(result.assets[0].uri);
         }
     };
 
@@ -265,7 +274,7 @@ export default function CadastrarQuadra() {
                         <FlexCol space={3} className="mt-4">
                             
                             {/* ARENA CARD */}
-                            {arena ? (<View className='mb-4'><ArenaCard arena={arena} showDescription={false} /></View>) : null}
+                            {arena ? (<View className='mb-4'><ArenaCard arena={arena} /></View>) : null}
 
                             {/* FOTO DA QUADRA */}
                             <FlexCol space={2}>
