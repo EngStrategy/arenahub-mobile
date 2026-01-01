@@ -30,13 +30,8 @@ export const getAtletaById = async (id: string): Promise<Atleta> => {
  * Endpoint: PATCH /api/v1/atletas/{id}
  */
 export const updateAtleta = async (id: string, data: Partial<Atleta>): Promise<Atleta> => {
-    try {
-        const response = await api.put<Atleta>(`/atletas/${id}`, data);
-        return response.data;
-    } catch (error: any) {
-        const message = error.response?.data?.message || 'Erro ao atualizar dados do atletaaa';
-        throw new Error(message);
-    }
+    const response = await api.put<Atleta>(`/atletas/${id}`, data);
+    return response.data;
 };
 
 /**

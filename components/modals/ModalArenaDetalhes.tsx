@@ -1,5 +1,4 @@
 import React from 'react';
-import { View, ScrollView } from 'react-native';
 import {
     Modal,
     ModalBackdrop,
@@ -14,7 +13,7 @@ import { Text } from '@/components/ui/text';
 import { Heading } from '@/components/ui/heading';
 import { Icon } from '@/components/ui/icon';
 import { Box } from '@/components/ui/box';
-import { Info, Clock, Calendar, X, MapPin } from 'lucide-react-native';
+import { Info, Clock, Calendar, X } from 'lucide-react-native';
 import type { Arena } from '@/context/types/Arena';
 
 type ModalArenaDetalhesProps = {
@@ -23,7 +22,6 @@ type ModalArenaDetalhesProps = {
     arena: Arena;
 };
 
-// Mapeamento para exibição amigável (PascalCase conforme solicitado anteriormente)
 const sportLabels: Record<string, string> = {
     FUTEBOL_SOCIETY: 'Futebol Society',
     FUTEBOL_SETE: 'Futebol 7',

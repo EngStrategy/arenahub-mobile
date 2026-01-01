@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getArenaById, updateArena } from "@/services/api//entities/arena";
-import { useRouter, Stack } from 'expo-router'; // Adicionado Stack
+import { useRouter, Stack } from 'expo-router'; 
 import { ChevronDownIcon } from '@/components/ui/icon';
 import {
   Select,

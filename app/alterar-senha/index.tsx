@@ -1,9 +1,7 @@
-// app/alterar-senha/index.tsx
 import React, { useState } from "react";
 import { updatePassword } from "@/services/api/entities/atleta"; 
 import { updatePasswordArena } from "@/services/api/entities/arena";
-import { useRouter, Stack } from 'expo-router'; // Adicionado Stack
-import { Heading } from "@/components/ui/heading";
+import { useRouter, Stack } from 'expo-router'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, KeyboardAvoidingView, Platform, Alert, ScrollView, Pressable } from "react-native"; // Adicionado Pressable
 import { InputSenha } from "@/components/forms/formInputs/InputSenha";
@@ -11,8 +9,8 @@ import { FormControl } from '@/components/ui/form-control';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { SafeAreaView } from 'react-native-safe-area-context'; // Adicionado
-import { Ionicons } from '@expo/vector-icons'; // Adicionado
+import { SafeAreaView } from 'react-native-safe-area-context'; 
+import { Ionicons } from '@expo/vector-icons'; 
 
 interface ErrorsState {
     senhaAtual?: string;
