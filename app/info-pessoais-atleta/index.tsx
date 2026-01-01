@@ -9,7 +9,6 @@ import { View, Alert, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { InputTexto } from "@/components/forms/formInputs/InputTexto";
 import { InputNumero } from "@/components/forms/formInputs/InputNumero";
-import { FormControl } from '@/components/ui/form-control';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
@@ -151,12 +150,26 @@ export default function InformacoesPessoaisAtleta() {
                             />
                             <VStack space="xs">
                                 <HStack space="sm">
-                                    <Button size="sm" variant="outline" onPress={selectImage} isDisabled={loading}>
-                                        <Upload size={16} color="black" />
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        action="secondary"
+                                        isDisabled={loading}
+                                        onPress={selectImage}
+                                    >
+                                        <Upload size={16} color='black' />
+                                        <ButtonText className="ml-2">Escolher foto</ButtonText>
                                     </Button>
                                     {urlFoto !== DEFAULT_AVATAR_URL && (
-                                        <Button size="sm" variant="outline" action="negative" onPress={() => setUrlFoto(DEFAULT_AVATAR_URL)} isDisabled={loading}>
+                                        <Button 
+                                            size="sm" 
+                                            variant="outline" 
+                                            action="negative" 
+                                            onPress={() => setUrlFoto(DEFAULT_AVATAR_URL)} 
+                                            isDisabled={loading}
+                                        >
                                             <Trash2 size={16} color="red" />
+                                            <ButtonText className="ml-2">Remover</ButtonText>
                                         </Button>
                                     )}
                                 </HStack>

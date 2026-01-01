@@ -33,6 +33,8 @@ import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
+import * as ImagePicker from 'expo-image-picker'; 
+import { uploadToImgur } from "@/utils/uploadToImgur"; 
 import { formatarCEP, formatarTelefone } from "@/context/functions/formatters";
 import {
   validarBairro,
@@ -193,7 +195,22 @@ export default function EditarArena() {
   };
 
   const selectImage = async () => {
-    Alert.alert("Seleção de Imagem", "Esta funcionalidade será implementada na próxima etapa com uma biblioteca de seleção de imagens.");
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert("Erro", "Permissão para galeria é necessária.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setUrlFoto(result.assets[0].uri);
+    }
   };
 
   useEffect(() => {
@@ -332,6 +349,14 @@ export default function EditarArena() {
       // 3. Garantir que latitude e longitude existam
       const { latitude, longitude } = await atualizarLatitudeLongitude(cep);
 
+      let finalImageUrl = urlFoto;
+
+      if (urlFoto && urlFoto.startsWith('file://')) {
+          finalImageUrl = await uploadToImgur(urlFoto);
+      } else if (urlFoto === DEFAULT_AVATAR_URL) {
+          finalImageUrl = ""; 
+      }
+
       if (!latitude || !longitude) {
         Alert.alert("Erro", "Não foi possível obter a localização. Verifique o CEP.");
         setLoading(false);
@@ -364,13 +389,14 @@ export default function EditarArena() {
         },
         descricao: descricao || "",
         horasCancelarAgendamento: Number(horasCancelarAgendamento) || 0,
-        urlFoto: urlFoto === DEFAULT_AVATAR_URL ? "" : urlFoto || "",
+        urlFoto: finalImageUrl || "",
       };
 
       await updateArena(id, payload);
 
       // Atualiza o initialData após sucesso
       setInitialData({
+        ...initialData, 
         nome,
         telefone,
         cep,
@@ -382,7 +408,7 @@ export default function EditarArena() {
         complemento,
         horasCancelarAgendamento,
         descricao,
-        urlFoto
+        urlFoto: finalImageUrl 
       });
 
       Alert.alert("Sucesso", "Arena atualizada com sucesso!");
@@ -430,7 +456,7 @@ export default function EditarArena() {
             <Text className="text-typography-500">Gerencie as informações da sua arena e salve as alterações realizadas.</Text>
 
             <VStack space="sm">
-              <Text className="text-sm font-medium text-typography-500">Foto de Perfil</Text>
+              <Text className="text-sm font-medium text-gray-500">Foto de Perfil</Text>
               <HStack space="md" className='flex items-center'>
                 <Image
                   source={{ uri: urlFoto ?? DEFAULT_AVATAR_URL }}
