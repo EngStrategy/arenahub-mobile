@@ -9,6 +9,10 @@ import {
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { LogBox } from 'react-native'; 
+
+// Desativar alertas visuais (Overlay de Erros/Avisos)
+LogBox.ignoreAllLogs();
 
 export {
   ErrorBoundary,
@@ -31,6 +35,10 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  if (!loaded) {
+    return null;
+  }
 
   return (
     <GluestackUIProvider>
