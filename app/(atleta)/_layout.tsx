@@ -11,7 +11,7 @@ export default function TabLayout() {
 
           if (route.name === 'index') {
             iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'jogos') {
+          } else if (route.name === 'jogos-abertos') {
             iconName = focused ? 'globe' : 'globe-outline'; 
           } else if (route.name === 'agendamentos') {
             iconName = focused ? 'calendar' : 'calendar-outline'; 
@@ -41,7 +41,7 @@ export default function TabLayout() {
 
       {/* Aba 2: Jogos Abertos */}
       <Tabs.Screen
-        name="jogos"
+        name="jogos-abertos"
         options={{
           title: 'Jogos Abertos',
         }}

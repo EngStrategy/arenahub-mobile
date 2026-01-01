@@ -45,6 +45,9 @@ export interface ParticipacaoJogoAberto {
     horarioFim: string;
     esporte: string;
     status: TipoStatusParticipacao;
+    nomeDono: string;
+    telefoneDono: string;
+    urlFotoDono: string;
 }
 
 export interface SolicitacaoJogoAberto {
@@ -55,6 +58,23 @@ export interface SolicitacaoJogoAberto {
     telefoneSolicitante: string;
     fotoSolicitante: string;
     status: "PENDENTE" | "ACEITO" | "RECUSADO";
+}
+
+export interface JogoAberto {
+  agendamentoId: number;
+  data: string;
+  horarioInicio: string;
+  horarioFim: string;
+  vagasDisponiveis: number;
+  esporte: string;
+  nomeArena: string;
+  nomeQuadra: string;
+  cidade: string;
+  urlFotoArena: string;
+  urlFotoAtleta: string;
+  nomeAtleta: string;
+  telefoneAtleta: string;
+  jaSolicitado: boolean;
 }
 
 export interface AgendamentoAtletaQueryParams {
@@ -68,7 +88,11 @@ export interface AgendamentoAtletaQueryParams {
     status?: StatusAgendamento;
 }
 
-export interface JogosAbertosQueryParams extends AgendamentoAtletaQueryParams {
+export interface JogosAbertosQueryParams {
+    page?: number;
+    size?: number;
+    sort?: string;
+    direction?: "asc" | "desc";
     cidade?: string;
     esporte?: string;
     latitude?: number;
@@ -81,6 +105,7 @@ interface PaginatedResponse<T> {
     totalElements: number;
     totalPages: number;
     number: number;
+    last: boolean;
 }
 
 // === ENDPOINTS AGENDAMENTOS ===
@@ -120,7 +145,16 @@ export const dispensarAvaliacao = async (agendamentoId: number): Promise<void> =
     await api.post(`/agendamentos/${agendamentoId}/avaliacoes`, {});
 };
 
-// === ENDPOINTS JOGOS ABERTOS (PARTICIPAÇÕES) ===
+// === ENDPOINTS JOGOS ABERTOS ===
+
+export const getAllJogosAbertos = async (
+    params: JogosAbertosQueryParams = {}
+): Promise<PaginatedResponse<JogoAberto>> => {
+    const response = await api.get<PaginatedResponse<JogoAberto>>('/jogos-abertos', {
+        params,
+    });
+    return response.data;
+};
 
 export const getMinhasParticipacoes = async (): Promise<ParticipacaoJogoAberto[]> => {
     const response = await api.get<ParticipacaoJogoAberto[]>('/jogos-abertos/minhas-participacoes');

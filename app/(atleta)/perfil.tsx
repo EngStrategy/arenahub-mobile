@@ -63,7 +63,7 @@ export default function MenuPerfilAtletaScreen() {
             >
                 <View className="pt-6 w-full flex-1 gap-2">
                     
-                    <Heading className="text-2xl mb-1">Meu perfil</Heading>
+                    <Heading className="text-2xl mb-1">Meu Perfil</Heading>
                     <Text className="text-typography-500 mb-4">
                         Gerencie suas informações pessoais e configurações de segurança.
                     </Text>
