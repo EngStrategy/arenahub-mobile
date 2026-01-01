@@ -190,6 +190,7 @@ export default function ArenasScreen() {
           <VStack className="px-7">
             <ArenaCard
               arena={item}
+              showAddress={true}
               onPress={() => handleArenaPress(item.id)}
             />
           </VStack>
