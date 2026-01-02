@@ -3,9 +3,8 @@ import { ScrollView, KeyboardAvoidingView, Platform, Alert, View, TouchableOpaci
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Edit, Upload, ChevronDown } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { type QuadraCreate } from '@/context/types/Quadra';
-import { TipoQuadra, MaterialFornecido, DuracaoReserva } from '@/context/types/Quadra';
-import { horariosDaSemanaCompleta, HorarioFuncionamentoCreate, DiaDaSemana } from '@/context/types/Horario';
+import { TipoQuadra, MaterialFornecido } from '@/context/types/Quadra';
+import { horariosDaSemanaCompleta } from '@/context/types/Horario';
 import { formatarDiaSemanaCompleto } from '@/context/functions/mapeamentoDiaSemana';
 import { getQuadraById, updateQuadra } from '@/services/api/entities/quadra'; 
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,6 +13,8 @@ import { ModalCriarHorarios } from '@/components/modals/ModalCriarHorarios';
 import { ModalMultiSelect } from '@/components/modals/ModalMultiSelect';
 import { Spinner } from '@/components/ui/spinner';
 import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadToImgur } from "@/utils/uploadToImgur";
 
 const fallbackSrc = require('@/assets/images/imagem-default.png');
 
@@ -40,7 +41,6 @@ export default function EditarQuadra() {
     const [iluminacaoNoturna, setIluminacaoNoturna] = useState(false);
     const [descricao, setDescricao] = useState('');
     
-    // Inicializa como null. Se tiver foto, preenchemos no useEffect.
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     
     const [horarios, setHorarios] = useState(horariosDaSemanaCompleta);
@@ -65,7 +65,6 @@ export default function EditarQuadra() {
                 setIluminacaoNoturna(quadraData.iluminacaoNoturna);
                 setDescricao(quadraData.descricao || '');
                 
-                // Se vier string vazia ou nulo, setamos null para usar o fallback no render
                 setImageUrl(quadraData.urlFotoQuadra || null);
 
                 
@@ -101,11 +100,37 @@ export default function EditarQuadra() {
         loadData();
     }, [id]);
 
+    const selectImage = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert("Erro", "Permissão para galeria é necessária.");
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.7,
+        });
+
+        if (!result.canceled) {
+            setImageUrl(result.assets[0].uri);
+        }
+    };
+
     const handleSave = async () => {
         if (!validateForm()) return;
 
         setSaving(true);
         try {
+
+            let finalImageUrl = imageUrl;
+
+            if (imageUrl && imageUrl.startsWith('file://')) {
+                finalImageUrl = await uploadToImgur(imageUrl);
+            }
+
             const payload: any = {
                 nomeQuadra,
                 tipoQuadra: tipoQuadra as TipoQuadra[], 
@@ -113,9 +138,7 @@ export default function EditarQuadra() {
                 cobertura,
                 iluminacaoNoturna,
                 descricao,
-                // Envia a URL se existir, ou string vazia (nunca envia o objeto require do fallback)
-                urlFotoQuadra: imageUrl || '',
-                
+                urlFotoQuadra: finalImageUrl || '',
                 horariosFuncionamento: horarios
                     .filter(dia => dia.intervalosDeHorario.length > 0)
                     .map(item => ({
@@ -205,15 +228,14 @@ export default function EditarQuadra() {
                             {/* FOTO */}
                             <FlexRow space={2} className='items-center'>
                                 <Image 
-                                    // Lógica de fallback visual:
-                                    // Se tem URL válida, usa { uri: imageUrl }
-                                    // Se não tem (ou deu erro), usa fallbackSrc
                                     source={imageUrl ? { uri: imageUrl } : fallbackSrc} 
                                     className="w-16 h-16 rounded-full border border-gray-300" 
-                                    // Se a URL remota falhar (404, etc), reseta para null para mostrar o fallback
                                     onError={() => setImageUrl(null)}
                                 />
-                                <TouchableOpacity onPress={() => Alert.alert("Em breve", "Upload de imagem")} className="py-2 px-3 border border-gray-400 rounded-lg flex-row items-center">
+                                <TouchableOpacity 
+                                    onPress={selectImage}
+                                    className="py-2 px-3 border border-gray-400 rounded-lg flex-row items-center"
+                                >
                                     <Upload size={16} color='black' />
                                     <Text className="ml-2 text-gray-700">Escolher foto</Text>
                                 </TouchableOpacity>

@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
-import { Image, Pressable, View, TouchableOpacity } from 'react-native'; 
+import { Image, Pressable, View, TouchableOpacity } from 'react-native';
+import { MapPin, Star } from 'lucide-react-native'; 
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import type { Arena } from '@/context/types/Arena';
+import { ModalArenaDetalhes } from '@/components/modals/ModalArenaDetalhes'; 
+import { Info } from 'lucide-react-native';
 
 interface ArenaCardProps {
   arena: Arena;
   onPress?: () => void;
   onPressRating?: () => void;
-  showDescription?: boolean;
+  showDetailsButton?: boolean;
+  showAddress?: boolean;
+  showFullAddress?: boolean;
   showEsportes?: boolean;
 }
 
@@ -27,120 +32,126 @@ const sportLabels: Record<string, string> = {
   HANDEBOL: 'Handebol',
 };
 
-export function ArenaCard({ 
-  arena, 
-  onPress, 
+export function ArenaCard({
+  arena,
+  onPress,
   onPressRating,
-  showDescription = false, 
-  showEsportes = true 
+  showDetailsButton = false,
+  showAddress = false,
+  showFullAddress = false,
+  showEsportes = true,
 }: ArenaCardProps) {
   const [imageError, setImageError] = useState(false);
-
-  const imageSource =
-    imageError || !arena.urlFoto ? fallbackSrc : { uri: arena.urlFoto };
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const imageSource = imageError || !arena.urlFoto ? fallbackSrc : { uri: arena.urlFoto };
 
   const esportesFormatados = arena.esportes
-    ? arena.esportes.map(esporte => sportLabels[esporte] || esporte)
+    ? arena.esportes.map((esporte) => sportLabels[esporte] || esporte)
     : [];
 
   let esportesLabel = '';
-  const count = esportesFormatados.length;
 
-  if (count === 1) {
-    esportesLabel = esportesFormatados[0];
-  } else if (count === 2) {
-    esportesLabel = esportesFormatados.join(' e ');
-  } else if (count > 2) {
-    const todosMenosOUltimo = esportesFormatados.slice(0, -1);
-    const ultimo = esportesFormatados[count - 1];
-    esportesLabel = todosMenosOUltimo.join(', ') + ' e ' + ultimo;
+  if (esportesFormatados.length > 0) {
+    esportesLabel = esportesFormatados.join(', '); 
   }
 
-  const endereco = arena.endereco
+  const enderecoResumido = arena.endereco
     ? `${arena.endereco.cidade} - ${arena.endereco.estado}`
     : '';
 
   const enderecoCompleto = arena.endereco
-    ? `${arena.endereco.rua}, ${arena.endereco.numero} - ${arena.endereco.bairro} - ${arena.endereco.cep}`
+    ? `${arena.endereco.rua}, ${arena.endereco.numero}, ${arena.endereco.bairro}`
     : '';
 
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={!onPress}
-      className={`
-        bg-white rounded-lg overflow-hidden mb-4 
-        border border-transparent 
-        active:border-gray-200 active:opacity-70
-      `}
-    >
-      <HStack>
-        {/* Imagem da Arena */}
-        <Image
-          source={imageSource}
-          style={{
-            width: 128,
-            height: 128,
-          }}
-          className="bg-gray-100"
-          resizeMode="contain"
-          onError={() => setImageError(true)}
-        />
+    <>
+      <Pressable
+        onPress={onPress}
+        disabled={!onPress}
+        className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 mb-4 active:opacity-90"
+      >
+        <HStack className="items-start space-x-3">
+          {/* Imagem da Arena */}
+          <Image
+            source={imageSource}
+            className="w-28 h-28 rounded-lg bg-gray-100"
+            resizeMode="cover"
+            onError={() => setImageError(true)}
+          />
 
-        {/* Informações da Arena */}
-        <VStack className="flex-1 p-3 justify-between">
-          <VStack>
-            <Text className="text-base font-semibold text-gray-900 mb-1" numberOfLines={1}>
-              {arena.nome}
-            </Text>
-
-            <Text className="text-sm text-gray-600 mb-0.5" numberOfLines={1}>
-              {endereco}
-            </Text>
-
-            {showDescription && arena.descricao ? (
-               <Text className="text-xs text-gray-500 mt-1" numberOfLines={3}>
-                 {arena.descricao}
-               </Text>
-            ) : (
-               <Text className="text-xs text-gray-500 mb-2" numberOfLines={2}>
-                 {enderecoCompleto}
-               </Text>
-            )}
-          </VStack>
-
-          {/* Rodapé (Esportes e Avaliações) */}
-          <VStack>
-            {showEsportes && esportesLabel && (
-              <Text
-                className="text-xs font-medium text-green-600 mb-1"
-                numberOfLines={1}
+          {/* Informações da Arena */}
+          <VStack className="flex-1 ml-3">
+            <View className="flex-row justify-between items-start">
+              <Text className="text-base font-bold text-gray-800 flex-1 mr-2" numberOfLines={1}>
+                {arena.nome}
+              </Text>
+              
+              {/* Avaliação no canto superior direito */}
+              <TouchableOpacity 
+                onPress={onPressRating}
+                disabled={!onPressRating}
+                className="flex-row items-center bg-yellow-50 px-2 py-0.5 rounded-md"
               >
-                {esportesLabel}
+                <Star size={12} color="#EAB308" fill="#EAB308" />
+                <Text className="text-xs font-bold text-yellow-700 ml-1">
+                  {arena.notaMedia?.toFixed(1) || '0.0'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Localização com Ícone */}
+            <HStack className="items-center mt-1">
+              <MapPin size={12} color="#6B7280" />
+              <Text className="text-xs text-gray-500 ml-1 font-medium">
+                {enderecoResumido}
+              </Text>
+            </HStack>
+
+            {/* Endereço limitado */}
+            {showAddress && arena.endereco && (
+              <Text className="text-[11px] text-gray-500 mt-1" numberOfLines={1}>
+                {enderecoCompleto}
               </Text>
             )}
 
-            {/* AVALIAÇÕES (Correção aqui: Removido o bg-gray-50 e bordas) */}
-            <TouchableOpacity 
-                onPress={onPressRating}
-                disabled={!onPressRating}
-                activeOpacity={0.6}
-                className="self-start mt-1" 
-            >
-                {/* Removi: bg-gray-50 px-2 py-1 rounded-md border border-gray-100 */}
-                <HStack className="items-center"> 
-                  <Text className="text-yellow-500 mr-1 text-xs">★</Text>
-                  <Text className="text-sm text-gray-700 font-bold">
-                    {arena.notaMedia?.toFixed(1) || '0.0'}
-                  </Text>
-                  <Text className="text-xs text-gray-500 ml-1 underline">
-                    ({arena.quantidadeAvaliacoes || 0} avaliações)
-                  </Text>
-                </HStack>
-            </TouchableOpacity>
+            {/* Endereço sem limite */}
+            {showFullAddress && arena.endereco && (
+              <Text className="text-[11px] text-gray-500 mt-1" numberOfLines={3}>
+                {enderecoCompleto}
+              </Text>
+            )}
+
+            {/* Badges de Esportes */}
+            {showEsportes && esportesLabel !== '' && (
+              <View className="mt-2">
+                <Text className="text-[10px] font-bold text-green-700" numberOfLines={2}>
+                  {esportesLabel}
+                </Text>
+              </View>
+            )}
+
+            {/* Botão Ver Detalhes */}
+            {showDetailsButton && (
+              <TouchableOpacity 
+                onPress={() => setIsDetailsOpen(true)}
+                className="mt-1 self-end flex-row items-center py-1"
+              >
+                <Info size={14} color="#0077E6" />
+                <Text className="text-xs text-primary-600 font-bold ml-1">
+                  Ver detalhes 
+                </Text>
+              </TouchableOpacity>
+            )}
           </VStack>
-        </VStack>
-      </HStack>
-    </Pressable>
+        </HStack>
+      </Pressable>
+
+      {/* Renderização do Modal */}
+      <ModalArenaDetalhes 
+        isOpen={isDetailsOpen} 
+        onClose={() => setIsDetailsOpen(false)} 
+        arena={arena} 
+      />
+    </>
   );
 }

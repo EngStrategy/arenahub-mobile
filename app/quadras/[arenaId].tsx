@@ -364,7 +364,8 @@ export default function QuadrasScreen() {
           <View className="px-4 pt-4 pb-2">
             <ArenaCard 
               arena={arena as any} 
-              showDescription={true} 
+              showDetailsButton={true} 
+              showFullAddress={true}
               showEsportes={false} 
               onPressRating={() => {
                   console.log("Clicou nas estrelas!"); 
