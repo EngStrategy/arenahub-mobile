@@ -8,9 +8,7 @@ export const createQuadra = async (newQuadra: QuadraCreate): Promise<Quadra> => 
     return response.data;
 };
 
-// Busca todas as quadras de uma arena específica
 export const getQuadrasByArena = async (arenaId: string): Promise<Quadra[]> => {
-  // O endpoint retorna um array direto conforme seu exemplo JSON
   const response = await api.get<Quadra[]>(`/quadras/arena/${arenaId}`);
   return response.data;
 };
@@ -20,9 +18,18 @@ export const getQuadraById = async (id: number): Promise<Quadra> => {
     return response.data;
 };
 
-export const updateQuadra = async (id: number, data: Partial<QuadraCreate>): Promise<Quadra> => {
-    const response = await api.put<Quadra>(`/quadras/${id}`, data);
-    return response.data;
+export const updateQuadra = async (id: number, data: Partial<Quadra>): Promise<Quadra> => {
+    try {
+        const response = await api.put<Quadra>(`/quadras/${id}`, data);
+        return response.data;
+    } catch (error: any) {
+        const message = 
+            error.response?.data?.message || 
+            error.message || 
+            'Erro ao atualizar quadra';
+        
+        throw new Error(message);
+    }
 };
 
 export const deleteQuadra = async (id: number): Promise<void> => {

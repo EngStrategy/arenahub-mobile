@@ -43,7 +43,6 @@ api.interceptors.request.use(
 
 // 💬 Interceptor para debug de respostas
 api.interceptors.response.use(
-
   async (response) => {
     const token = await AsyncStorage.getItem('userToken');
     if (token) {
@@ -55,13 +54,7 @@ api.interceptors.response.use(
   (error) => {
     console.error('❌ Response Error:', error.response?.status, error.message);
     console.error('📄 Error Data:', error.response?.data);
-
-    const message =
-      error.response?.data?.message ||
-      error.response?.data ||
-      'Erro ao processar requisição';
-
-    return Promise.reject(new Error(message));
+    return Promise.reject(error); 
   }
 );
 

@@ -93,8 +93,7 @@ export default function AlterarSenha() {
             );
 
         } catch (error: any) {
-            console.error(error);
-            Alert.alert("Erro", error.response?.data?.message || "Erro ao alterar a senha.");
+                Alert.alert('Aviso', error.message);
         } finally {
             setLoading(false);
         }
