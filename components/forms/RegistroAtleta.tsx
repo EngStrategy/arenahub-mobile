@@ -7,7 +7,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { PasswordStrengthIndicator } from "@/components/forms/passwordStrengthIndicador";
-import { ScrollView } from "react-native";
+import { Alert, ScrollView } from "react-native";
 import { formatarTelefone } from "@/context/functions/formatters";
 import { InputTexto } from "./formInputs/InputTexto";
 import { InputNumero } from "./formInputs/InputNumero";
@@ -70,9 +70,11 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
         params: { email },
       });
 
-    } catch (error: any) {
-      alert(error.message);
-    } finally {
+    } 
+    catch (error: any) {
+        Alert.alert('Aviso', error.message);
+    } 
+    finally {
       setLoading(false);
     }
   };

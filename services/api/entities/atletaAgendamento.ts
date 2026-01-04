@@ -162,7 +162,17 @@ export const getMinhasParticipacoes = async (): Promise<ParticipacaoJogoAberto[]
 };
 
 export const solicitarEntrada = async (agendamentoId: number): Promise<void> => {
+  try {
     await api.post(`/jogos-abertos/${agendamentoId}/solicitar-entrada`, {});
+  } 
+  catch (error: any) {
+    const message = 
+      error.response?.data?.message || 
+      error.message || 
+      'Erro ao solicitar entrada';
+    
+    throw new Error(message);
+  }
 };
 
 export const sairJogoAberto = async (solicitacaoId: number): Promise<void> => {

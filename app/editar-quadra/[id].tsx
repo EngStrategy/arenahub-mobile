@@ -50,6 +50,7 @@ export default function EditarQuadra() {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isModalTipoQuadraVisible, setIsModalTipoQuadraVisible] = useState(false);
     const [isModalMateriaisVisible, setIsModalMateriaisVisible] = useState(false);
+    const [dadosOriginais, setDadosOriginais] = useState<any>(null);
 
     useEffect(() => {
         const loadData = async () => {
@@ -64,10 +65,8 @@ export default function EditarQuadra() {
                 setCobertura(quadraData.cobertura);
                 setIluminacaoNoturna(quadraData.iluminacaoNoturna);
                 setDescricao(quadraData.descricao || '');
-                
                 setImageUrl(quadraData.urlFotoQuadra || null);
 
-                
                 const horariosMapeados = horariosDaSemanaCompleta.map(diaDefault => {
                     const diaBackend = quadraData.horariosFuncionamento.find(h => h.diaDaSemana === diaDefault.diaDaSemana);
                     
@@ -86,8 +85,19 @@ export default function EditarQuadra() {
                     return diaDefault;
                 });
                 
-                
                 setHorarios(horariosMapeados);
+
+                setDadosOriginais({
+                    nomeQuadra: quadraData.nomeQuadra,
+                    tipoQuadra: quadraData.tipoQuadra,
+                    materiaisFornecidos: quadraData.materiaisFornecidos,
+                    duracaoReserva: quadraData.duracaoReserva,
+                    cobertura: quadraData.cobertura,
+                    iluminacaoNoturna: quadraData.iluminacaoNoturna,
+                    descricao: quadraData.descricao || '',
+                    urlFotoQuadra: quadraData.urlFotoQuadra || null,
+                    horariosFuncionamento: horariosMapeados
+                });
 
             } catch (error) {
                 console.error(error);
@@ -119,49 +129,102 @@ export default function EditarQuadra() {
         }
     };
 
-    const handleSave = async () => {
+    const handleUpdate = async () => {
         if (!validateForm()) return;
 
         setSaving(true);
         try {
-
             let finalImageUrl = imageUrl;
 
+            // Upload da imagem se necessário
             if (imageUrl && imageUrl.startsWith('file://')) {
                 finalImageUrl = await uploadToImgur(imageUrl);
             }
 
-            const payload: any = {
-                nomeQuadra,
-                tipoQuadra: tipoQuadra as TipoQuadra[], 
-                materiaisFornecidos: materiaisFornecidos as MaterialFornecido[],
-                cobertura,
-                iluminacaoNoturna,
-                descricao,
-                urlFotoQuadra: finalImageUrl || '',
-                horariosFuncionamento: horarios
-                    .filter(dia => dia.intervalosDeHorario.length > 0)
-                    .map(item => ({
-                        diaDaSemana: item.diaDaSemana,
-                        intervalosDeHorario: item.intervalosDeHorario.map(h => ({
-                            id: h.id, 
-                            inicio: h.inicio,
-                            fim: h.fim,
-                            valor: Number(h.valor) || 0,
-                            status: h.status ?? 'DISPONIVEL',
-                        })),
+            // Construir payload apenas com campos alterados
+            const payload: any = {};
+
+            if (nomeQuadra !== dadosOriginais.nomeQuadra) {
+                payload.nomeQuadra = nomeQuadra;
+            }
+
+            if (JSON.stringify(tipoQuadra) !== JSON.stringify(dadosOriginais.tipoQuadra)) {
+                payload.tipoQuadra = tipoQuadra;
+            }
+
+            if (JSON.stringify(materiaisFornecidos) !== JSON.stringify(dadosOriginais.materiaisFornecidos)) {
+                payload.materiaisFornecidos = materiaisFornecidos;
+            }
+
+            if (duracaoReserva !== dadosOriginais.duracaoReserva) {
+                payload.duracaoReserva = duracaoReserva;
+            }
+
+            if (cobertura !== dadosOriginais.cobertura) {
+                payload.cobertura = cobertura;
+            }
+
+            if (iluminacaoNoturna !== dadosOriginais.iluminacaoNoturna) {
+                payload.iluminacaoNoturna = iluminacaoNoturna;
+            }
+
+            if (descricao !== dadosOriginais.descricao) {
+                payload.descricao = descricao;
+            }
+
+            // Sempre incluir a URL da foto no payload
+            payload.urlFotoQuadra = finalImageUrl || '';
+
+            // Verificar se horários mudaram
+            const horariosFormatados = horarios
+                .filter(dia => dia.intervalosDeHorario.length > 0)
+                .map(item => ({
+                    diaDaSemana: item.diaDaSemana,
+                    intervalosDeHorario: item.intervalosDeHorario.map(h => ({
+                        id: h.id,
+                        inicio: h.inicio,
+                        fim: h.fim,
+                        valor: Number(h.valor) || 0,
+                        status: h.status ?? 'DISPONIVEL',
                     })),
-            };
+                }));
+
+            const horariosOriginaisFormatados = dadosOriginais.horariosFuncionamento
+                .filter((dia: any) => dia.intervalosDeHorario.length > 0)
+                .map((item: any) => ({
+                    diaDaSemana: item.diaDaSemana,
+                    intervalosDeHorario: item.intervalosDeHorario.map((h: any) => ({
+                        id: h.id,
+                        inicio: h.inicio,
+                        fim: h.fim,
+                        valor: Number(h.valor) || 0,
+                        status: h.status ?? 'DISPONIVEL',
+                    })),
+                }));
+
+            // Só adiciona se houver alteração nos horários
+            if (JSON.stringify(horariosFormatados) !== JSON.stringify(horariosOriginaisFormatados)) {
+                payload.horariosFuncionamento = horariosFormatados;
+            }
+
+            // Se não há alterações, não enviar requisição
+            if (Object.keys(payload).length === 0) {
+                Alert.alert("Aviso", "Nenhuma alteração foi detectada.");
+                setSaving(false);
+                return;
+            }
 
             await updateQuadra(Number(id), payload);
             
             Alert.alert("Sucesso", "Quadra atualizada com sucesso!");
             router.back();
         } catch (error: any) {
-            console.error("Erro update:", error);
-            if(error.response?.data) console.log(JSON.stringify(error.response.data, null, 2));
+            const message = 
+                error.response?.data?.message || 
+                error.message || 
+                'Erro ao atualizar quadra';
             
-            Alert.alert("Erro", error.message || "Erro ao atualizar quadra.");
+            Alert.alert("Aviso", message);
         } finally {
             setSaving(false);
         }
@@ -284,7 +347,7 @@ export default function EditarQuadra() {
                                 <TouchableOpacity onPress={() => router.back()} className='flex-1 bg-gray-200 rounded-lg py-3 items-center'>
                                     <Text className="text-gray-800 font-bold">Cancelar</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={handleSave} disabled={saving} className='flex-1 bg-green-600 rounded-lg py-3 items-center'>
+                                <TouchableOpacity onPress={handleUpdate} disabled={saving} className='flex-1 bg-green-600 rounded-lg py-3 items-center'>
                                     {saving ? <Spinner color="white" /> : <Text className="text-white font-bold">Salvar alterações</Text>}
                                 </TouchableOpacity>
                             </FlexRow>

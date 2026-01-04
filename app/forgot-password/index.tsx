@@ -102,7 +102,7 @@ export default function ForgotPasswordScreen() {
             <ButtonSpinner className="text-white" /> 
           ) : (
             <ButtonText className="text-base text-white">
-              Entrar
+              Enviar código
             </ButtonText>
           )}
         </Button>
