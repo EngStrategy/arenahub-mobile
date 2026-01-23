@@ -1,6 +1,7 @@
 import { api } from '@/services/api';
 
-export type StatusAgendamento = "PENDENTE" | "PAGO" | "CANCELADO" | "FINALIZADO" | "AGUARDANDO_PAGAMENTO" | "AUSENTE" | "ACEITO" | "RECUSADO";
+// === TIPOS E ENUMS ===
+export type StatusAgendamento = "PENDENTE" | "AUSENTE" | "CANCELADO" | "PAGO" | "ACEITO" | "RECUSADO" | "FINALIZADO" | "AGUARDANDO_PAGAMENTO";
 export type TipoAgendamentoFilter = "NORMAL" | "FIXO" | "AMBOS";
 export type TipoStatusParticipacao = "PENDENTE" | "ACEITO" | "RECUSADO" | "CANCELADO";
 export type PeriodoAgendamentoFixo = "UM_MES" | "TRES_MESES" | "SEIS_MESES";
@@ -34,6 +35,18 @@ export interface AgendamentoAtleta {
     numeroJogadoresNecessarios?: number;
 }
 
+export interface AgendamentoCreate {
+    quadraId: number;
+    dataAgendamento: string;
+    slotHorarioIds: Array<number>;
+    esporte: string;
+    periodoFixo?: PeriodoAgendamentoFixo;
+    numeroJogadoresNecessarios: number;
+    isFixo?: boolean;
+    isPublico?: boolean;
+    cpfCnpjPagamento?: string;
+}
+
 export interface ParticipacaoJogoAberto {
     solicitacaoId: number;
     agendamentoId: number;
@@ -61,22 +74,23 @@ export interface SolicitacaoJogoAberto {
 }
 
 export interface JogoAberto {
-  agendamentoId: number;
-  data: string;
-  horarioInicio: string;
-  horarioFim: string;
-  vagasDisponiveis: number;
-  esporte: string;
-  nomeArena: string;
-  nomeQuadra: string;
-  cidade: string;
-  urlFotoArena: string;
-  urlFotoAtleta: string;
-  nomeAtleta: string;
-  telefoneAtleta: string;
-  jaSolicitado: boolean;
+    agendamentoId: number;
+    data: string;
+    horarioInicio: string;
+    horarioFim: string;
+    vagasDisponiveis: number;
+    esporte: string;
+    nomeArena: string;
+    nomeQuadra: string;
+    cidade: string;
+    urlFotoArena: string;
+    urlFotoAtleta: string;
+    nomeAtleta: string;
+    telefoneAtleta: string;
+    jaSolicitado: boolean;
 }
 
+// === INTERFACES DE PARAMS ===
 export interface AgendamentoAtletaQueryParams {
     page?: number;
     size?: number;
@@ -113,9 +127,7 @@ interface PaginatedResponse<T> {
 export const getAllAgendamentosAtleta = async (
     params: AgendamentoAtletaQueryParams = {}
 ): Promise<PaginatedResponse<AgendamentoAtleta>> => {
-    const response = await api.get<PaginatedResponse<AgendamentoAtleta>>('/agendamentos/meus-agendamentos', {
-        params,
-    });
+    const response = await api.get<PaginatedResponse<AgendamentoAtleta>>('/agendamentos/meus-agendamentos', { params });
     return response.data;
 };
 
@@ -129,6 +141,16 @@ export const cancelarAgendamentoFixo = async (agendamentoFixoId: number): Promis
 
 export const listarAgendamentosFixosFilhos = async (agendamentoFixoId: number): Promise<AgendamentoAtleta[]> => {
     const response = await api.get<AgendamentoAtleta[]>(`/agendamentos/fixo/${agendamentoFixoId}/filhos`);
+    return response.data;
+};
+
+export const getAgendamentosAvaliacoesPendentes = async (): Promise<AgendamentoAtleta[]> => {
+    const response = await api.get<AgendamentoAtleta[]>('/agendamentos/avaliacoes-pendentes');
+    return response.data;
+};
+
+export const getAgendamentoStatus = async (agendamentoId: number): Promise<{ status: StatusAgendamento }> => {
+    const response = await api.get<{ status: StatusAgendamento }>(`/agendamentos/${agendamentoId}/status`);
     return response.data;
 };
 
@@ -150,9 +172,7 @@ export const dispensarAvaliacao = async (agendamentoId: number): Promise<void> =
 export const getAllJogosAbertos = async (
     params: JogosAbertosQueryParams = {}
 ): Promise<PaginatedResponse<JogoAberto>> => {
-    const response = await api.get<PaginatedResponse<JogoAberto>>('/jogos-abertos', {
-        params,
-    });
+    const response = await api.get<PaginatedResponse<JogoAberto>>('/jogos-abertos', { params });
     return response.data;
 };
 
@@ -162,17 +182,12 @@ export const getMinhasParticipacoes = async (): Promise<ParticipacaoJogoAberto[]
 };
 
 export const solicitarEntrada = async (agendamentoId: number): Promise<void> => {
-  try {
-    await api.post(`/jogos-abertos/${agendamentoId}/solicitar-entrada`, {});
-  } 
-  catch (error: any) {
-    const message = 
-      error.response?.data?.message || 
-      error.message || 
-      'Erro ao solicitar entrada';
-    
-    throw new Error(message);
-  }
+    try {
+        await api.post(`/jogos-abertos/${agendamentoId}/solicitar-entrada`, {});
+    } catch (error: any) {
+        const message = error.response?.data?.message || error.message || 'Erro ao solicitar entrada';
+        throw new Error(message);
+    }
 };
 
 export const sairJogoAberto = async (solicitacaoId: number): Promise<void> => {
@@ -183,7 +198,7 @@ export const sairJogoAberto = async (solicitacaoId: number): Promise<void> => {
  * Busca as solicitações pendentes de um agendamento público que EU criei
  */
 export const getSolicitacoesJogo = async (agendamentoId: number): Promise<SolicitacaoJogoAberto[]> => {
-    const response = await api.get(`/jogos-abertos/${agendamentoId}/solicitacoes`);
+    const response = await api.get<SolicitacaoJogoAberto[]>(`/jogos-abertos/${agendamentoId}/solicitacoes`);
     return response.data;
 };
 

@@ -1,11 +1,9 @@
-// services/api.ts
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ⚠️ ALTERE AQUI PARA SEU IP LOCAL
 const API_BASE_URL = __DEV__
-  ? 'http://192.168.10.128:8080/api/v1'  // Desenvolvimento (IP do seu PC)
-  : 'https://api.arenahub.app/api/v1'; // Produção
+  ? process.env.EXPO_PUBLIC_ARENAHUB_API_URL
+  : 'https://api.arenahub.app/api/v1';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -54,7 +52,7 @@ api.interceptors.response.use(
   (error) => {
     console.error('❌ Response Error:', error.response?.status, error.message);
     console.error('📄 Error Data:', error.response?.data);
-    return Promise.reject(error); 
+    return Promise.reject(error);
   }
 );
 
