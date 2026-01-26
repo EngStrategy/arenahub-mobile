@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { Modal, View, Text, TouchableOpacity, ScrollView, Switch, Alert, ActivityIndicator } from 'react-native';
+import { useState, useMemo } from 'react';
+import { Modal, View, Text, TouchableOpacity, ScrollView, Switch, ActivityIndicator } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Quadra, HorariosDisponiveis } from '@/context/types/Quadra';
 import { createAgendamento } from '@/services/api/entities/agendamento';
 import { formatarEsporte } from '@/constants/Quadra';
+import { showToast } from '../layout/ToastView'; 
 
 interface Props {
   visible: boolean;
@@ -39,6 +40,12 @@ export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsS
     return base * multiplicador;
   }, [slotsSelecionados, isFixo, periodoFixo]);
 
+  const getPeriodoLabel = (periodo: "UM_MES" | "TRES_MESES" | "SEIS_MESES"): string => {
+    if (periodo === 'UM_MES') return '1 Mês';
+    if (periodo === 'TRES_MESES') return '3 Meses';
+    return '6 Meses';
+  };
+
   const handleConfirmar = async () => {
     setLoading(true);
     try {
@@ -54,10 +61,10 @@ export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsS
       };
 
       await createAgendamento(payload);
-      Alert.alert("Sucesso", "Reserva realizada com sucesso!");
+      showToast("Sucesso", "Reserva realizada com sucesso!", "success");
       onSuccess();
     } catch (error: any) {
-      Alert.alert("Erro", error.response?.data?.message || "Não foi possível realizar a reserva.");
+      showToast("Erro", error.response?.data?.message || "Não foi possível realizar a reserva.", "error");
     } finally {
       setLoading(false);
     }
@@ -122,7 +129,7 @@ export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsS
                       className={`flex-1 mx-1 p-2 rounded-lg border items-center ${periodoFixo === p ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300'}`}
                     >
                       <Text className={`text-xs ${periodoFixo === p ? 'text-white font-bold' : 'text-gray-600'}`}>
-                        {p === 'UM_MES' ? '1 Mês' : p === 'TRES_MESES' ? '3 Meses' : '6 Meses'}
+                        {getPeriodoLabel(p)}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -131,7 +138,7 @@ export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsS
 
               <View className="flex-row justify-between items-center bg-gray-50 p-4 rounded-xl mt-4">
                 <View className="flex-1 pr-4">
-                  <Text className="font-bold text-gray-800">Tá faltando gente?</Text>
+                  <Text className="font-bold text-gray-800">Jogo Aberto</Text>
                   <Text className="text-xs text-gray-500">Tornar reserva pública para outros atletas</Text>
                 </View>
                 <Switch 

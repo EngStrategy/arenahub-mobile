@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, FlatList, TouchableOpacity, RefreshControl, Modal, ActivityIndicator, Alert
+  View, Text, FlatList, TouchableOpacity, RefreshControl, Modal, ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Filter, X, Calendar as CalendarIcon, Check } from 'lucide-react-native';
@@ -20,13 +20,18 @@ import {
   getSolicitacoesJogo,
   aceitarSolicitacao,
   recusarSolicitacao,
-  SolicitacaoJogoAberto
+  SolicitacaoJogoAberto,
+  listarAgendamentosFixosFilhos,
+  cancelarAgendamentoFixo
 } from '@/services/api/entities/atletaAgendamento';
 
 import { AgendamentoAtletaCard } from '@/components/cards/AgendamentoAtletaCard';
 import { ParticipacaoCard } from '@/components/cards/ParticipacaoCard';
 import { Heading } from '@/components/ui/heading';
 import { ModalAvaliarAgendamento } from '@/components/modals/ModalAvaliarAgendamento';
+import { ModalGerenciarFixo } from '@/components/modals/ModalGerenciarFixo';
+import { showToast } from '@/components/layout/ToastView';
+import { AlertDialogView } from '@/components/layout/AlertDialogView';
 
 type ViewType = 'ativos' | 'historico' | 'participacoes';
 
@@ -48,7 +53,7 @@ export default function MeusAgendamentosScreen() {
   const [tipoAgendamento, setTipoAgendamento] = useState<TipoAgendamentoFilter>('AMBOS');
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-    
+
   // === Pickers de Data ===
   const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
   const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
@@ -63,6 +68,21 @@ export default function MeusAgendamentosScreen() {
   const [vagasAtuais, setVagasAtuais] = useState(0);
   const [agendamentoAtivoId, setAgendamentoAtivoId] = useState<number | null>(null);
 
+  // === Modal Gerenciar Fixo ===
+  const [modalFixoOpen, setModalFixoOpen] = useState(false);
+  const [filhosLoading, setFilhosLoading] = useState(false);
+  const [agendamentosFilhos, setAgendamentosFilhos] = useState<AgendamentoAtleta[]>([]);
+  const [selectedFixoId, setSelectedFixoId] = useState<number>(0);
+
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => { },
+    confirmText: '',
+    isLoading: false
+  });
+
   const isMountedRef = useRef(true);
 
   // === Carregamento inicial e troca de abas ===
@@ -75,27 +95,27 @@ export default function MeusAgendamentosScreen() {
     };
   }, [viewType, tipoAgendamento, startDate, endDate]);
 
-const handleVerSolicitacoes = async (id: number) => {
+  const handleVerSolicitacoes = async (id: number) => {
     setAgendamentoAtivoId(id);
     setModalSolicitacoesOpen(true);
     setSolicitacoesLoading(true);
-    
+
     const agendamentoAtual = agendamentos.find(ag => ag.id === id);
-    
+
     try {
-        const data = await getSolicitacoesJogo(id);
-        setSolicitacoes(data);
-        
-        setVagasAtuais(agendamentoAtual?.numeroJogadoresNecessarios ?? 0); 
+      const data = await getSolicitacoesJogo(id);
+      setSolicitacoes(data);
+
+      setVagasAtuais(agendamentoAtual?.numeroJogadoresNecessarios ?? 0);
 
     } catch (error) {
-        Alert.alert("Erro", "Não foi possível carregar as solicitações.");
-        setModalSolicitacoesOpen(false);
-        console.error("Erro ao buscar solicitações", error);
+      showToast("Erro", "Não foi possível carregar as solicitações.", "error");
+      setModalSolicitacoesOpen(false);
+      console.error("Erro ao buscar solicitações", error);
     } finally {
-        setSolicitacoesLoading(false);
+      setSolicitacoesLoading(false);
     }
-};
+  };
 
   const handleAcceptSolicitacao = async (solicitacaoId: number) => {
     if (!agendamentoAtivoId) return;
@@ -125,13 +145,13 @@ const handleVerSolicitacoes = async (id: number) => {
         // Fetch Participações
         const data = await getMinhasParticipacoes();
         if (isMountedRef.current) setParticipacoes(data);
-      } 
-      else {  
+      }
+      else {
         // Fetch Agendamentos
-        const statusParam: StatusAgendamento | undefined = 
-        viewType === 'historico' ? 'FINALIZADO' : 
-        viewType === 'ativos' ? 'PENDENTE' : 
-        undefined;
+        const statusParam: StatusAgendamento | undefined =
+          viewType === 'historico' ? 'FINALIZADO' :
+            viewType === 'ativos' ? 'PENDENTE' :
+              undefined;
 
         const params: AgendamentoAtletaQueryParams = {
           page: pageNumber,
@@ -160,13 +180,30 @@ const handleVerSolicitacoes = async (id: number) => {
 
     } catch (error) {
       console.error("Erro ao buscar dados", error);
-      Alert.alert("Erro", "Não foi possível carregar os dados.");
+      showToast("Erro", "Não foi possível carregar os dados.", "error");
     } finally {
       if (isMountedRef.current) {
         setLoading(false);
         setRefreshing(false);
         setLoadingMore(false);
       }
+    }
+  };
+
+  // Função para abrir o modal de gerenciar agendamento fixo
+  const handleGerenciarFixo = async (fixoId: number) => {
+    setSelectedFixoId(fixoId);
+    setModalFixoOpen(true);
+    setFilhosLoading(true);
+    try {
+      const data = await listarAgendamentosFixosFilhos(fixoId);
+      setAgendamentosFilhos(data);
+    } catch (error: any) {
+      showToast("Erro", error.response?.data?.message || "Falha ao carregar datas da recorrência.", "error");
+      console.error("Erro ao buscar agendamentos filhos", error);
+      setModalFixoOpen(false);
+    } finally {
+      setFilhosLoading(false);
     }
   };
 
@@ -193,47 +230,106 @@ const handleVerSolicitacoes = async (id: number) => {
     handleRefresh();
   };
 
-  const handleDispensarAvaliacao = async (id: number) => {
-    Alert.alert("Dispensar", "Deseja dispensar a avaliação deste jogo?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Dispensar", onPress: async () => {
-          try {
-            await dispensarAvaliacao(id);
-            setAgendamentos(prev => prev.map(ag =>
-              ag.id === id ? { ...ag, avaliacaoDispensada: true } : ag
-            ));
-          } catch (error) {
-            Alert.alert("Erro", "Falha ao dispensar.");
-            console.error("Erro ao dispensar avaliação", error);
-          }
-        }
-      }
-    ])
+  const handleDispensarAvaliacao = (id: number) => {
+    setAlertConfig({
+      isOpen: true,
+      title: 'Dispensar Avaliação',
+      description: 'Deseja realmente dispensar a avaliação deste jogo? Ela não aparecerá mais no seu histórico.',
+      confirmText: 'Dispensar',
+      isLoading: false,
+      onConfirm: () => confirmarDispensar(id)
+    });
   };
 
-  // === Lógica de Cancelamento ===
+  const confirmarDispensar = async (id: number) => {
+    setAlertConfig(prev => ({ ...prev, isLoading: true }));
+    try {
+      await dispensarAvaliacao(id);
+      setAgendamentos(prev => prev.map(ag => ag.id === id ? { ...ag, avaliacaoDispensada: true } : ag));
+      showToast("Sucesso", "Avaliação dispensada.", "success");
+      setAlertConfig(prev => ({ ...prev, isOpen: false }));
+    } catch (error: any) {
+      showToast("Erro", error.response?.data?.message || "Não foi possível dispensar a avaliação.", "error");
+    } finally {
+      setAlertConfig(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
   const handleCancelarAgendamento = async (id: number) => {
+    setAlertConfig({
+      isOpen: true,
+      title: 'Cancelar Agendamento',
+      description: 'Deseja realmente cancelar este agendamento? Esta ação pode estar sujeita às regras de cancelamento da arena.',
+      confirmText: 'Sim, Cancelar',
+      isLoading: false,
+      onConfirm: () => executarCancelamentoIndividual(id)
+    });
+  };
+
+  // Cancelar Individual - Dentro do Modal Fixo
+  const handleCancelarIndividualNoModal = async (id: number, dataFormatada: string) => {
+    setAlertConfig({
+      isOpen: true,
+      title: 'Cancelar Agendamento',
+      description: `Deseja cancelar o agendamento do dia ${dataFormatada}?`,
+      confirmText: 'Sim, Cancelar',
+      isLoading: false,
+      onConfirm: () => executarCancelamentoIndividual(id)
+    });
+  };
+
+  const executarCancelamentoIndividual = async (id: number) => {
+    setAlertConfig(prev => ({ ...prev, isLoading: true }));
     try {
       await cancelarAgendamento(id);
-      Alert.alert("Sucesso", "Agendamento cancelado com sucesso.");
-
-      setAgendamentos(prev => prev.filter(ag => ag.id !== id));
+      setAgendamentosFilhos(prev => prev.map(ag => ag.id === id ? { ...ag, status: 'CANCELADO' } : ag));
+      setAgendamentos(prev => prev.map(ag => ag.id === id ? { ...ag, status: 'CANCELADO' } : ag));
+      showToast("Sucesso", "Agendamento cancelado.");
+      setAlertConfig(prev => ({ ...prev, isOpen: false }));
     } catch (error: any) {
-      const backendMessage = error.response?.data?.message;
-      const displayMessage = backendMessage || "Não foi possível cancelar o agendamento.";
+      showToast("Erro", error.response?.data?.message || "Erro ao cancelar.", "error");
+    } finally {
+      setAlertConfig(prev => ({ ...prev, isLoading: false }));
+    }
+  };
 
-      Alert.alert("Aviso", displayMessage);
+  // Cancelar Total - Recorrência
+  const handleCancelarFixoTotal = async (fixoId: number) => {
+    setAlertConfig({
+      isOpen: true,
+      title: 'CANCELAR RECORRÊNCIA',
+      description: 'Tem certeza que deseja cancelar TODOS os agendamentos futuros desta série? Esta ação não pode ser desfeita.',
+      confirmText: 'Cancelar Tudo',
+      isLoading: false,
+      onConfirm: () => executarCancelamentoTotal(fixoId)
+    });
+  };
+
+  const executarCancelamentoTotal = async (fixoId: number) => {
+    setAlertConfig(prev => ({ ...prev, isLoading: true }));
+    try {
+      await cancelarAgendamentoFixo(fixoId);
+      setModalFixoOpen(false);
+      setAgendamentos(prev => prev.filter(ag => ag.agendamentoFixoId !== fixoId));
+      showToast("Sucesso", "Recorrência removida.");
+      setAlertConfig(prev => ({ ...prev, isOpen: false }));
+    } catch (error) {
+      showToast("Erro", "Erro ao cancelar recorrência.", "error");
+    } finally {
+      setAlertConfig(prev => ({ ...prev, isLoading: false }));
     }
   };
 
   const handleSairParticipacao = async (solicitacaoId: number) => {
     try {
       await sairJogoAberto(solicitacaoId);
-      Alert.alert("Sucesso", "Você saiu do jogo.");
+      showToast("Sucesso", "Você saiu do jogo.", "success");
       setParticipacoes(prev => prev.filter(p => p.solicitacaoId !== solicitacaoId));
-    } catch (error) {
-      Alert.alert("Erro", "Não foi possível sair do jogo.");
+    } catch (error: any) {
+      const backendMessage = error.response?.data?.message;
+      const displayMessage = backendMessage || "Não foi possível sair do jogo.";
+
+      showToast("Erro", displayMessage, "error");
       console.error("Erro ao sair do jogo", error);
     }
   };
@@ -450,6 +546,7 @@ const handleVerSolicitacoes = async (id: number) => {
               onVerSolicitacoes={handleVerSolicitacoes}
               onCancelar={handleCancelarAgendamento}
               isHistoryView={viewType === 'historico'}
+              onGerenciarFixo={handleGerenciarFixo}
             />
           )}
           contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24, gap: 16 }}
@@ -480,6 +577,26 @@ const handleVerSolicitacoes = async (id: number) => {
         onClose={() => setModalSolicitacoesOpen(false)}
         onAccept={handleAcceptSolicitacao}
         onDecline={handleDeclineSolicitacao}
+      />
+
+      <ModalGerenciarFixo
+        isOpen={modalFixoOpen}
+        onClose={() => setModalFixoOpen(false)}
+        loading={filhosLoading}
+        agendamentosFilhos={agendamentosFilhos}
+        onCancelIndividual={handleCancelarIndividualNoModal}
+        onCancelTotal={handleCancelarFixoTotal}
+        agendamentoFixoId={selectedFixoId}
+      />
+
+      <AlertDialogView
+        isOpen={alertConfig.isOpen}
+        onClose={() => !alertConfig.isLoading && setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={alertConfig.onConfirm}
+        title={alertConfig.title}
+        description={alertConfig.description}
+        confirmText={alertConfig.confirmText}
+        isLoading={alertConfig.isLoading}
       />
 
     </SafeAreaView>

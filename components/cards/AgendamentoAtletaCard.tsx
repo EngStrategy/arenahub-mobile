@@ -1,24 +1,26 @@
 import React, { useMemo } from 'react';
-import { View, Text, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Calendar, Clock, DollarSign, MapPin, Star, UserPlus, XCircle, Lock, Trash2 } from 'lucide-react-native';
 import { AgendamentoAtleta } from '@/services/api/entities/atletaAgendamento';
 
 interface Props {
-    data: AgendamentoAtleta;
-    onAvaliar: (id: number) => void;
-    onDispensarAvaliacao: (id: number) => void;
-    onVerSolicitacoes: (id: number) => void;
-    onCancelar: (id: number) => void;
-    isHistoryView: boolean;
+    readonly data: AgendamentoAtleta;
+    readonly onAvaliar: (id: number) => void;
+    readonly onDispensarAvaliacao: (id: number) => void;
+    readonly onVerSolicitacoes: (id: number) => void;
+    readonly onCancelar: (id: number) => void;
+    readonly isHistoryView: boolean;
+    readonly onGerenciarFixo: (fixoId: number) => void;
 }
 
-export function AgendamentoAtletaCard({ 
-    data, 
-    onAvaliar, 
-    onDispensarAvaliacao, 
-    onVerSolicitacoes, 
+export function AgendamentoAtletaCard({
+    data,
+    onAvaliar,
+    onDispensarAvaliacao,
+    onVerSolicitacoes,
     onCancelar,
-    isHistoryView 
+    isHistoryView,
+    onGerenciarFixo
 }: Props) {
 
     const podeCancelar = useMemo(() => {
@@ -26,27 +28,12 @@ export function AgendamentoAtletaCard({
 
         const dataJogo = new Date(`${data.dataAgendamento}T${data.horarioInicio}`);
         const agora = new Date();
-        
+
         const diferencaMs = dataJogo.getTime() - agora.getTime();
-        const minutosRestantes = diferencaMs / (1000 * 60); 
+        const minutosRestantes = diferencaMs / (1000 * 60);
 
         return minutosRestantes >= 30;
     }, [data.dataAgendamento, data.horarioInicio, isHistoryView, data.status]);
-
-    const handleCancelarPress = () => {
-        Alert.alert(
-            "Cancelar Agendamento",
-            "Deseja realmente cancelar este agendamento? Esta ação pode estar sujeita às regras de cancelamento da arena.",
-            [
-                { text: "Não", style: "cancel" },
-                { 
-                    text: "Sim, cancelar", 
-                    style: 'destructive', 
-                    onPress: () => onCancelar(data.id) 
-                }
-            ]
-        );
-    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -58,10 +45,10 @@ export function AgendamentoAtletaCard({
         }
     };
 
-    const showBotoesAvaliacao = isHistoryView && 
-                          data.status === 'PAGO' && 
-                          !data.avaliacao && 
-                          !data.avaliacaoDispensada;
+    const showBotoesAvaliacao = isHistoryView &&
+        data.status === 'PAGO' &&
+        !data.avaliacao &&
+        !data.avaliacaoDispensada;
 
     const showEstrelas = data.avaliacao !== null;
 
@@ -72,8 +59,8 @@ export function AgendamentoAtletaCard({
                     <Star
                         key={star}
                         size={18}
-                        color={star <= nota ? "#EAB308" : "#D1D5DB"} 
-                        fill={star <= nota ? "#EAB308" : "transparent"} 
+                        color={star <= nota ? "#EAB308" : "#D1D5DB"}
+                        fill={star <= nota ? "#EAB308" : "transparent"}
                     />
                 ))}
             </View>
@@ -82,7 +69,7 @@ export function AgendamentoAtletaCard({
 
     return (
         <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 relative">
-            
+
             {/* Cabeçalho: Data e Status */}
             <View className="flex-row justify-between items-start mb-3">
                 <View className="flex-row items-center bg-gray-50 px-2 py-1 rounded-md">
@@ -100,8 +87,8 @@ export function AgendamentoAtletaCard({
 
             {/* Info Principal: Imagem e Nomes */}
             <View className="flex-row items-center mb-4">
-                <Image 
-                    source={{ uri: data.urlFotoArena }} 
+                <Image
+                    source={{ uri: data.urlFotoArena }}
                     className="w-12 h-12 rounded-lg bg-gray-200"
                 />
                 <View className="ml-3 flex-1">
@@ -133,7 +120,7 @@ export function AgendamentoAtletaCard({
             <View className="flex-row gap-2 mb-1">
                 <View className="bg-gray-100 px-2 py-1 rounded-md">
                     <Text className="text-xs text-gray-600 font-medium">
-                         {data.esporte.replace('_', ' ')}
+                        {data.esporte.replace('_', ' ')}
                     </Text>
                 </View>
                 {data.fixo && (
@@ -145,9 +132,19 @@ export function AgendamentoAtletaCard({
 
             {/* ================= AÇÕES (HISTÓRICO) ================= */}
 
+            {data.fixo && (
+                <TouchableOpacity
+                    onPress={() => onGerenciarFixo(data.agendamentoFixoId!)}
+                    className="mt-3 bg-purple-50 border border-purple-100 py-2.5 rounded-lg flex-row justify-center items-center"
+                >
+                    <Calendar size={18} color="#7C3AED" />
+                    <Text className="text-purple-700 font-bold ml-2 text-sm">Gerenciar Recorrência</Text>
+                </TouchableOpacity>
+            )}
+
             {showBotoesAvaliacao && (
                 <View className="flex-row gap-2 mt-2">
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         onPress={() => onAvaliar(data.id)}
                         className="flex-1 bg-green-600 py-2.5 rounded-lg flex-row justify-center items-center"
                     >
@@ -155,7 +152,7 @@ export function AgendamentoAtletaCard({
                         <Text className="text-white font-bold ml-2 text-sm">Avaliar</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         onPress={() => onDispensarAvaliacao(data.id)}
                         className="w-12 bg-red-50 rounded-lg justify-center items-center"
                     >
@@ -164,20 +161,20 @@ export function AgendamentoAtletaCard({
                 </View>
             )}
 
-             {showEstrelas && data.avaliacao && (
+            {showEstrelas && data.avaliacao && (
                 renderEstrelas(data.avaliacao.nota)
             )}
 
             {/* ================= AÇÕES (ATIVOS/PENDENTES) ================= */}
-            
+
             {!isHistoryView && (
                 <View className="mt-2">
                     <View className="flex-row gap-3">
                         {/* Botão Cancelar (Aparece para Publico e Privado se dentro do prazo) */}
                         {podeCancelar && (
-                            <TouchableOpacity 
-                                onPress={handleCancelarPress}
-                                className={`flex-1 bg-white border border-red-200 py-2.5 rounded-lg flex-row justify-center items-center shadow-sm ${!data.publico ? 'flex-1' : ''}`}
+                            <TouchableOpacity
+                                onPress={() => onCancelar(data.id)}
+                                className={`flex-1 bg-white border border-red-200 py-2.5 rounded-lg flex-row justify-center items-center shadow-sm ${!data.publico && 'flex-1'}`}
                             >
                                 <Trash2 size={18} color="#DC2626" />
                                 <Text className="text-red-600 font-bold ml-2 text-sm">Cancelar</Text>
@@ -186,7 +183,7 @@ export function AgendamentoAtletaCard({
 
                         {/* Botão Solicitações (Apenas Público) */}
                         {data.publico && (
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 onPress={() => onVerSolicitacoes(data.id)}
                                 className="flex-1 bg-blue-600 py-2.5 rounded-lg flex-row justify-center items-center shadow-sm"
                             >

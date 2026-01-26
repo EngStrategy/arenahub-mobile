@@ -76,6 +76,13 @@ export const updateStatusAgendamentoArena = async (
   await api.patch(`/arena/agendamentos/${agendamentoId}/status`, { status });
 };
 
+export const atualizarAvaliacao = async (
+    avaliacaoId: number,
+    avaliacao: { nota?: number; comentario?: string }
+): Promise<void> => {
+    await api.put(`/agendamentos/avaliacoes/${avaliacaoId}`, avaliacao);
+};
+
 export async function avaliarAgendamento(
   agendamentoId: number,
   payload: AvaliacaoRequest
