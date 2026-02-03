@@ -1,30 +1,14 @@
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { Edit, Trash2, Umbrella, Zap, Box } from 'lucide-react-native'; 
-import { Quadra, MaterialFornecido } from '@/context/types/Quadra';
-import { formatarEsporte } from '@/context/functions/formatters';
+import { View, Text, Image } from 'react-native';
+import { Umbrella, Zap, Box } from 'lucide-react-native';
+import { Quadra } from '@/types/Quadra';
+import { formatarEsporte, formatarMaterial } from '@/utils/formatters';
 
 interface QuadraCardProps {
     quadra: Quadra;
-    onEdit: (id: number) => void;
-    onDelete: (id: number) => void;
 }
 
-const formatarMaterial = (material: MaterialFornecido): string => {
-    const mapa: Record<MaterialFornecido, string> = {
-        BOLA: 'Bola',
-        COLETE: 'Colete',
-        LUVA: 'Luvas',
-        CONE: 'Cones',
-        APITO: 'Apito',
-        BOMBA: 'Bomba',
-        MARCADOR_PLACAR: 'Placar',
-        BOTAO_GOL: 'Botão/Gol'
-    };
-    return mapa[material] || material;
-};
+export const QuadraCard = ({ quadra }: QuadraCardProps) => {
 
-export const QuadraCard = ({ quadra, onEdit, onDelete }: QuadraCardProps) => {
-  
     const esportesResumo = quadra.tipoQuadra.slice(0, 2).map(formatarEsporte).join(', ');
     const maisEsportes = quadra.tipoQuadra.length > 2 ? '...' : '';
 
@@ -50,7 +34,7 @@ export const QuadraCard = ({ quadra, onEdit, onDelete }: QuadraCardProps) => {
                     <Text className="text-gray-800 font-bold text-base mb-1" numberOfLines={1}>
                         {quadra.nomeQuadra}
                     </Text>
-                    
+
                     {/* Esportes */}
                     <Text className="text-green-600 font-semibold text-xs mb-2">
                         {esportesResumo}{maisEsportes}
@@ -80,26 +64,6 @@ export const QuadraCard = ({ quadra, onEdit, onDelete }: QuadraCardProps) => {
                         </View>
                     )}
                 </View>
-            </View>
-
-            {/* Ações (Direita) */}
-            <View className="flex-col gap-2 ml-2 justify-center">
-                <TouchableOpacity 
-                    onPress={() => onEdit(quadra.id)}
-                    className="bg-blue-50 p-2 rounded-lg items-center justify-center"
-                >
-                    <Edit size={16} color="#3B82F6" />
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                    onPress={() => {
-                        console.log("Clicou na lixeira!"); 
-                        onDelete(quadra.id);
-                    }}
-                    className="bg-red-50 p-2 rounded-lg items-center justify-center"
-                >
-                    <Trash2 size={16} color="#EF4444" />
-                </TouchableOpacity>
             </View>
         </View>
     );

@@ -1,41 +1,32 @@
-import { login } from '@/services/api/auth';
+import { login } from '@/services/api/endpoints/auth';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '@/context/AuthContext';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { InputSenha } from '@/components/forms/formInputs/InputSenha';
 import { InputTexto } from '@/components/forms/formInputs/InputTexto';
-import { validarEmail, validarPassword } from '@/context/functions/validators';
+import { validarEmail, validarPassword } from '@/utils/validators';
 
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   View,
 } from 'react-native';
+import { useToastNotification } from '@/components/layout/useToastNotification';
 
 export default function LoginScreen() {
+  const { signIn } = useAuth();
   const router = useRouter();
+  const { showToast } = useToastNotification();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ email: '', password: '' });
-
-  useEffect(() => {
-    const clearSession = async () => {
-      try {
-        await AsyncStorage.multiRemove(['userToken', 'userData']);
-        console.log('🧹 Sessão limpa automaticamente na tela de login.');
-      } catch (e) {
-        console.log('Erro ao limpar sessão:', e);
-      }
-    };
-    clearSession();
-  }, []);
 
   const handleLogin = async () => {
     setErrors({ email: '', password: '' });
@@ -55,28 +46,23 @@ export default function LoginScreen() {
     try {
       const response = await login({ email, password });
 
-      await AsyncStorage.setItem('userToken', response.accessToken);
+      if (response.role !== 'ATLETA') {
+        showToast("Acesso Negado", 'Este aplicativo é exclusivo para atletas.', 'warning');
+        return;
+      }
 
-      const userData = JSON.stringify({
+      await signIn(response.accessToken, {
         id: response.userId,
         name: response.name,
         role: response.role,
-        imageUrl: response.imageUrl,
-        statusAssinatura: response.statusAssinatura,
+        imageUrl: response.imageUrl || null,
+        expiresIn: response.expiresIn,
       });
 
-      await AsyncStorage.setItem('userData', userData);
-
-      if (response.role === 'ARENA') {
-        console.log('Redirecionando para painel da Arena...');
-        router.replace('/(arena)'); 
-      } else {
-        console.log('Redirecionando para painel do Atleta...');
-        router.replace('/(atleta)');
-      }
+      router.replace('/(atleta)');
 
     } catch (error: any) {
-      Alert.alert('Erro no Login', error.message || 'Ocorreu um erro inesperado');
+      showToast(undefined, error.message || 'Credenciais inválidas', 'error');
     } finally {
       setLoading(false);
     }
@@ -116,28 +102,28 @@ export default function LoginScreen() {
 
         <VStack className='gap-4'>
           <InputTexto
-          label="Email"
-          placeholder="Insira seu email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          onBlur={() => {
-            const emailError = validarEmail(email) ? '' : 'Email inválido.';
-            setErrors(prev => ({ ...prev, email: emailError }));
-          }}
-          error={errors.email}
-        />
+            label="Email"
+            placeholder="Insira seu email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            onBlur={() => {
+              const emailError = validarEmail(email) ? '' : 'Email inválido.';
+              setErrors(prev => ({ ...prev, email: emailError }));
+            }}
+            error={errors.email}
+          />
 
-        <InputSenha
-          label="Senha"
-          value={password}
-          onChangeText={setPassword}
-          onBlur={() => {
-            const passwordError = validarPassword(password);
-            setErrors((prev) => ({ ...prev, password: passwordError }));
-          }}
-          error={errors.password}
-        />
+          <InputSenha
+            label="Senha"
+            value={password}
+            onChangeText={setPassword}
+            onBlur={() => {
+              const passwordError = validarPassword(password);
+              setErrors((prev) => ({ ...prev, password: passwordError }));
+            }}
+            error={errors.password}
+          />
         </VStack>
 
         <Button size="xl" className="justify-end p-0 bg-transparent"
@@ -157,7 +143,7 @@ export default function LoginScreen() {
           android_ripple={{ color: 'transparent' }}
         >
           {loading ? (
-            <ButtonSpinner className="text-white" /> 
+            <ButtonSpinner className="text-white" />
           ) : (
             <ButtonText className="text-base text-white">
               Entrar

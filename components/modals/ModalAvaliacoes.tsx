@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, FlatList, ActivityIndicator, Image } from 'react-native';
 import { X, Star, MessageSquare } from 'lucide-react-native';
-import { Avaliacao } from '@/context/types/Avaliacao';
-import { Quadra } from '@/context/types/Quadra';
-import { getAvaliacoesPorQuadra } from '@/services/api/entities/avaliacao';
-import { formatarData } from '@/context/functions/formatters';
+import { AvaliacaoPorQuadra } from '@/types/Avaliacao';
+import { Quadra } from '@/types/Quadra';
+import { getAvaliacoesPorQuadra } from '@/services/api/endpoints/avaliacao';
+import { formatarData } from '@/utils/formatters';
 
 interface ModalAvaliacoesProps {
     visible: boolean;
@@ -16,8 +16,8 @@ interface ModalAvaliacoesProps {
 const DEFAULT_AVATAR = "https://i.imgur.com/hepj9ZS.png";
 
 export function ModalAvaliacoes({ visible, onClose, quadras, nomeArena }: ModalAvaliacoesProps) {
-    const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
-    
+    const [avaliacoes, setAvaliacoes] = useState<AvaliacaoPorQuadra[]>([]);
+
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -29,11 +29,11 @@ export function ModalAvaliacoes({ visible, onClose, quadras, nomeArena }: ModalA
     }, [visible, quadras]);
 
     const carregarDados = async () => {
-        setLoading(true); 
+        setLoading(true);
 
         if (!quadras || quadras.length === 0) {
             setAvaliacoes([]);
-            setLoading(false); 
+            setLoading(false);
             return;
         }
 
@@ -42,24 +42,24 @@ export function ModalAvaliacoes({ visible, onClose, quadras, nomeArena }: ModalA
             const responses = await Promise.all(promises);
             const todasAvaliacoes = responses.flatMap(r => r.content);
 
-            todasAvaliacoes.sort((a, b) => 
+            todasAvaliacoes.sort((a, b) =>
                 new Date(b.dataAvaliacao).getTime() - new Date(a.dataAvaliacao).getTime()
             );
 
             setAvaliacoes(todasAvaliacoes);
         } catch (error) {
             console.error("Erro ao carregar avaliações:", error);
-            setAvaliacoes([]); 
+            setAvaliacoes([]);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
-    const renderItem = ({ item }: { item: Avaliacao }) => (
+    const renderItem = ({ item }: { item: AvaliacaoPorQuadra }) => (
         <View className="mb-4 border-b border-gray-100 pb-4">
             <View className="flex-row items-center mb-2">
-                <Image 
-                    source={{ uri: item.urlFotoAtleta || DEFAULT_AVATAR }} 
+                <Image
+                    source={{ uri: item.urlFotoAtleta || DEFAULT_AVATAR }}
                     className="w-10 h-10 rounded-full bg-gray-200 mr-3"
                 />
                 <View className="flex-1">

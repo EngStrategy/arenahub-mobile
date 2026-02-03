@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Href } from 'expo-router';
 import { User, LogOut, Lock, ChevronRight, LucideProps } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '@/context/AuthContext';
 import { Heading } from '@/components/ui/heading';
+import { AlertDialogView } from '@/components/layout/AlertDialogView';
 
 type MenuItem = {
     id: string;
@@ -20,49 +21,34 @@ const MENU_ITEMS: MenuItem[] = [
 
 export default function MenuPerfilAtletaScreen() {
     const router = useRouter();
+    const { signOut } = useAuth();
+    const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
     const handleMenuItemPress = async (route: Href | 'logout') => {
         if (route === 'logout') {
-            Alert.alert(
-                "Sair da conta",
-                "Tem certeza que deseja desconectar?",
-                [
-                    {
-                        text: "Cancelar",
-                        style: "cancel"
-                    },
-                    {
-                        text: "Sair",
-                        style: "destructive",
-                        onPress: async () => {
-                            try {
-                                await AsyncStorage.multiRemove(['userToken', 'userData']);
-                                router.replace('/login');
-                            } 
-                            catch (error) {
-                                console.log('Erro ao fazer logout:', error);
-                            }
-                        }
-                    }
-                ]
-            );
+            setShowLogoutDialog(true);
         } else {
             router.push(route);
         }
     };
 
+    const handleLogoutConfirm = async () => {
+        setShowLogoutDialog(false);
+        await signOut();
+    };
+
     return (
         <SafeAreaView className="flex-1 bg-white relative" edges={['top']}>
-            <ScrollView 
+            <ScrollView
                 contentContainerStyle={{
                     flexGrow: 1,
                     paddingBottom: 100,
-                    paddingHorizontal: 24, 
+                    paddingHorizontal: 24,
                 }}
                 showsVerticalScrollIndicator={false}
             >
                 <View className="pt-6 w-full flex-1 gap-2">
-                    
+
                     <Heading className="text-2xl mb-1">Meu Perfil</Heading>
                     <Text className="text-typography-500 mb-4">
                         Gerencie suas informações pessoais e configurações de segurança.
@@ -95,6 +81,17 @@ export default function MenuPerfilAtletaScreen() {
 
                 </View>
             </ScrollView>
+
+            <AlertDialogView
+                isOpen={showLogoutDialog}
+                onClose={() => setShowLogoutDialog(false)}
+                onConfirm={handleLogoutConfirm}
+                title="Sair da conta"
+                description="Tem certeza que deseja desconectar?"
+                confirmText="Sair"
+                cancelText="Cancelar"
+                action="negative"
+            />
         </SafeAreaView>
     );
 }

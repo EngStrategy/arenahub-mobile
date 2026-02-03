@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { 
-    Modal, 
-    View, 
-    Text, 
-    TouchableOpacity, 
-    ScrollView, 
-    ActivityIndicator, 
-    Alert 
+import {
+    Modal,
+    View,
+    Text,
+    TouchableOpacity,
+    ScrollView,
+    ActivityIndicator
 } from 'react-native';
 import { X } from 'lucide-react-native';
 import { StarRating } from "@/components/avaliacoes/starRating";
 import { InputTextArea } from "../forms/formInputs/InputTextArea";
-import { avaliarAgendamento } from "@/services/api/entities/agendamento";
+import { useToastNotification } from "@/components/layout/useToastNotification";
+import { avaliarAgendamento } from "@/services/api/endpoints/avaliacao";
 
 interface ModalAvaliarAgendamentoProps {
-    isOpen: boolean;
-    onClose: () => void;
-    agendamentoId: number;
+    readonly isOpen: boolean;
+    readonly onClose: () => void;
+    readonly agendamentoId: number;
 }
 
 export function ModalAvaliarAgendamento({
@@ -27,6 +27,7 @@ export function ModalAvaliarAgendamento({
     const [nota, setNota] = useState(0);
     const [comentario, setComentario] = useState("");
     const [loading, setLoading] = useState(false);
+    const { showToast } = useToastNotification();
 
     // Reset do estado ao abrir/fechar
     useEffect(() => {
@@ -42,7 +43,7 @@ export function ModalAvaliarAgendamento({
 
     const enviarAvaliacao = async () => {
         if (nota === 0) {
-            Alert.alert("Atenção", "Por favor, selecione uma nota de 1 a 5 estrelas.");
+            showToast("Atenção", "Por favor, selecione uma nota de 1 a 5 estrelas.", "warning");
             return;
         }
 
@@ -53,43 +54,40 @@ export function ModalAvaliarAgendamento({
                 comentario,
             });
 
-            Alert.alert("Sucesso", "Avaliação enviada com sucesso!");
-            
+            showToast("Sucesso", "Avaliação enviada com sucesso!", "success");
+
             // Resetar estado antes de fechar
             setNota(0);
             setComentario("");
-            
+
             // Fechar modal
             onClose();
         } catch (err) {
             console.error("Erro ao avaliar agendamento:", err);
-            Alert.alert(
-                "Erro", 
-                "Não foi possível enviar a avaliação. Tente novamente."
-            );
+            showToast("Erro", "Não foi possível enviar a avaliação. Tente novamente.", "error");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Modal 
-            visible={isOpen} 
-            animationType="slide" 
-            transparent 
+        <Modal
+            visible={isOpen}
+            animationType="slide"
+            transparent
             onRequestClose={onClose}
         >
             {/* Fundo escuro com Pressable para fechar */}
             <View className="flex-1 bg-black/60 justify-end">
-                <TouchableOpacity 
-                    style={{ flex: 1 }} 
-                    activeOpacity={1} 
-                    onPress={onClose} 
+                <TouchableOpacity
+                    style={{ flex: 1 }}
+                    activeOpacity={1}
+                    onPress={onClose}
                 />
-                
+
                 {/* Container do Modal */}
                 <View className="bg-white rounded-t-3xl max-h-[85%] w-full shadow-2xl">
-                    
+
                     {/* Header */}
                     <View className="flex-row justify-between items-center p-6 border-b border-gray-100">
                         <View className="flex-1">
@@ -100,8 +98,8 @@ export function ModalAvaliarAgendamento({
                                 Como foi sua experiência?
                             </Text>
                         </View>
-                        <TouchableOpacity 
-                            onPress={onClose} 
+                        <TouchableOpacity
+                            onPress={onClose}
                             className="p-2 bg-gray-100 rounded-full ml-2"
                         >
                             <X size={24} color="#374151" />
@@ -109,7 +107,7 @@ export function ModalAvaliarAgendamento({
                     </View>
 
                     {/* Body - ScrollView para evitar problemas em telas pequenas */}
-                    <ScrollView 
+                    <ScrollView
                         className="px-6 py-6"
                         showsVerticalScrollIndicator={false}
                         keyboardShouldPersistTaps="handled"
@@ -139,19 +137,17 @@ export function ModalAvaliarAgendamento({
                         <TouchableOpacity
                             onPress={enviarAvaliacao}
                             disabled={nota === 0 || loading}
-                            className={`py-4 rounded-xl items-center ${
-                                nota === 0 || loading 
-                                    ? 'bg-gray-300' 
-                                    : 'bg-green-600'
-                            }`}
+                            className={`py-4 rounded-xl items-center ${nota === 0 || loading
+                                ? 'bg-gray-300'
+                                : 'bg-green-600'
+                                }`}
                             activeOpacity={0.8}
                         >
                             {loading ? (
                                 <ActivityIndicator color="white" size="small" />
                             ) : (
-                                <Text className={`font-bold text-base ${
-                                    nota === 0 ? 'text-gray-500' : 'text-white'
-                                }`}>
+                                <Text className={`font-bold text-base ${nota === 0 ? 'text-gray-500' : 'text-white'
+                                    }`}>
                                     Enviar Avaliação
                                 </Text>
                             )}

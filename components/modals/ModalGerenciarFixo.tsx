@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { FlatList, View } from 'react-native';
 import {
     Modal,
@@ -13,11 +13,11 @@ import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { Heading } from '@/components/ui/heading';
 import { Icon } from '@/components/ui/icon';
-import { Button, ButtonText, ButtonIcon, ButtonSpinner } from '@/components/ui/button';
+import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Box } from '@/components/ui/box';
 import { Clock, Trash2, Info, X, AlertTriangle } from 'lucide-react-native';
-import { AgendamentoAtleta } from '@/services/api/entities/atletaAgendamento';
+import { AgendamentoAtleta } from '@/types/Agendamento';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Alert, AlertIcon, AlertText } from '@/components/ui/alert';
@@ -41,13 +41,9 @@ export function ModalGerenciarFixo({
     onCancelTotal,
     agendamentoFixoId,
 }: Props) {
-    // actionId agora será controlado pelo componente pai através do status de cancelado, 
-    // mas mantemos um local para UI se necessário.
-    const [localActionId, setLocalActionId] = useState<number | null>(null);
-
     const valorTotal = useMemo(() =>
         agendamentosFilhos.reduce((acc, curr) =>
-            curr.status !== 'CANCELADO' ? acc + curr.valorTotal : acc, 0
+            curr.status === 'CANCELADO' ? acc : acc + curr.valorTotal, 0
         ), [agendamentosFilhos]);
 
     const temPagos = useMemo(() =>
@@ -126,7 +122,7 @@ export function ModalGerenciarFixo({
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="lg">
             <ModalBackdrop />
-            <ModalContent className="max-h-[80%]">
+            <ModalContent className="h-[80%] max-h-[90%]">
                 <ModalHeader>
                     <VStack>
                         <Heading size="md">Gerenciar Recorrência</Heading>
@@ -135,7 +131,7 @@ export function ModalGerenciarFixo({
                     <ModalCloseButton><Icon as={X} /></ModalCloseButton>
                 </ModalHeader>
 
-                <View className="flex-shrink-1 overflow-hidden mt-2">
+                <View className="flex-1 mt-2">
                     {loading ? (
                         <VStack className="py-20 items-center justify-center">
                             <Spinner size="large" />
@@ -146,7 +142,7 @@ export function ModalGerenciarFixo({
                             data={agendamentosOrdenados}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={renderItem}
-                            contentContainerStyle={{ flexGrow: 0, paddingBottom: 10 }}
+                            contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
                             scrollEnabled={true}
                             ListHeaderComponent={temPagos ? (
                                 <Alert action="warning" variant="outline" className="m-4">
@@ -157,7 +153,7 @@ export function ModalGerenciarFixo({
                                 </Alert>
                             ) : null}
                             ListEmptyComponent={
-                                <VStack className="py-10 items-center opacity-40">
+                                <VStack className="flex-1 items-center justify-center opacity-40">
                                     <Icon as={Info} size="xl" className="text-typography-400" />
                                     <Text className="mt-2 text-typography-500">Nenhum agendamento futuro.</Text>
                                 </VStack>
@@ -175,14 +171,14 @@ export function ModalGerenciarFixo({
                     </HStack>
 
                     <Button
-                        action="negative"
+                        action="default"
                         variant="solid"
-                        className="w-full bg-red-600 h-12"
+                        className="w-full bg-red-600 h-12 rounded-xl"
                         onPress={() => onCancelTotal(agendamentoFixoId)}
                         isDisabled={loading || agendamentosFilhos.filter(a => a.status !== 'CANCELADO').length === 0}
                     >
-                        <ButtonIcon as={Trash2} className="mr-2" color="white" />
-                        <ButtonText>Cancelar Toda a Recorrência</ButtonText>
+                        <ButtonIcon as={Trash2} className="mr-2" />
+                        <ButtonText className="font-bold text-white">Cancelar Toda a Recorrência</ButtonText>
                     </Button>
                 </ModalFooter>
             </ModalContent>

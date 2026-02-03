@@ -1,41 +1,32 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, FlatList, TouchableOpacity, RefreshControl, Modal, ActivityIndicator
+  View, Text, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Filter, X, Calendar as CalendarIcon, Check } from 'lucide-react-native';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { Filter, Calendar as CalendarIcon } from 'lucide-react-native';
 import { ModalSolicitacoesEntrada } from '@/components/modals/ModalSolicitacoesEntrada';
 import {
   getAllAgendamentosAtleta,
-  getMinhasParticipacoes,
-  sairJogoAberto,
-  dispensarAvaliacao,
   cancelarAgendamento,
-  AgendamentoAtleta,
-  AgendamentoAtletaQueryParams,
-  ParticipacaoJogoAberto,
-  StatusAgendamento,
-  TipoAgendamentoFilter,
-  getSolicitacoesJogo,
-  aceitarSolicitacao,
-  recusarSolicitacao,
-  SolicitacaoJogoAberto,
   listarAgendamentosFixosFilhos,
   cancelarAgendamentoFixo
-} from '@/services/api/entities/atletaAgendamento';
-
+} from '@/services/api/endpoints/atletaAgendamento';
 import { AgendamentoAtletaCard } from '@/components/cards/AgendamentoAtletaCard';
 import { ParticipacaoCard } from '@/components/cards/ParticipacaoCard';
 import { Heading } from '@/components/ui/heading';
 import { ModalAvaliarAgendamento } from '@/components/modals/ModalAvaliarAgendamento';
 import { ModalGerenciarFixo } from '@/components/modals/ModalGerenciarFixo';
-import { showToast } from '@/components/layout/ToastView';
 import { AlertDialogView } from '@/components/layout/AlertDialogView';
+import { useToastNotification } from '@/components/layout/useToastNotification';
+import { ModalFiltroHistorico } from '@/components/modals/ModalFiltroHistorico';
+import { aceitarSolicitacao, getMinhasParticipacoes, getSolicitacoesJogo, recusarSolicitacao, sairJogoAberto } from '@/services/api/endpoints/jogoAberto';
+import { AgendamentoAtleta, AgendamentoAtletaQueryParams, StatusAgendamento, TipoAgendamentoFilter } from '@/types/Agendamento';
+import { ParticipacaoJogoAberto, SolicitacaoJogoAberto } from '@/types/Jogo';
 
 type ViewType = 'ativos' | 'historico' | 'participacoes';
 
 export default function MeusAgendamentosScreen() {
+  const { showToast } = useToastNotification();
   // === Estados de Controle ===
   const [viewType, setViewType] = useState<ViewType>('ativos');
   const [loading, setLoading] = useState(true);
@@ -53,10 +44,6 @@ export default function MeusAgendamentosScreen() {
   const [tipoAgendamento, setTipoAgendamento] = useState<TipoAgendamentoFilter>('AMBOS');
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-
-  // === Pickers de Data ===
-  const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
-  const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
 
   // === Modal Avaliação ===
   const [agendamentoParaAvaliarId, setAgendamentoParaAvaliarId] = useState<number | null>(null);
@@ -111,7 +98,7 @@ export default function MeusAgendamentosScreen() {
     } catch (error) {
       showToast("Erro", "Não foi possível carregar as solicitações.", "error");
       setModalSolicitacoesOpen(false);
-      console.error("Erro ao buscar solicitações", error);
+      console.error("Erro ao buscar solicitações: ", error);
     } finally {
       setSolicitacoesLoading(false);
     }
@@ -230,6 +217,20 @@ export default function MeusAgendamentosScreen() {
     handleRefresh();
   };
 
+  const handleApplyFilters = (tipo: TipoAgendamentoFilter, start?: Date, end?: Date) => {
+    setTipoAgendamento(tipo);
+    setStartDate(start);
+    setEndDate(end);
+    setModalVisible(false);
+  };
+
+  const handleClearFilters = () => {
+    setTipoAgendamento('AMBOS');
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setModalVisible(false);
+  };
+
   const handleDispensarAvaliacao = (id: number) => {
     setAlertConfig({
       isOpen: true,
@@ -244,7 +245,7 @@ export default function MeusAgendamentosScreen() {
   const confirmarDispensar = async (id: number) => {
     setAlertConfig(prev => ({ ...prev, isLoading: true }));
     try {
-      await dispensarAvaliacao(id);
+      await handleDispensarAvaliacao(id);
       setAgendamentos(prev => prev.map(ag => ag.id === id ? { ...ag, avaliacaoDispensada: true } : ag));
       showToast("Sucesso", "Avaliação dispensada.", "success");
       setAlertConfig(prev => ({ ...prev, isOpen: false }));
@@ -311,10 +312,10 @@ export default function MeusAgendamentosScreen() {
       await cancelarAgendamentoFixo(fixoId);
       setModalFixoOpen(false);
       setAgendamentos(prev => prev.filter(ag => ag.agendamentoFixoId !== fixoId));
-      showToast("Sucesso", "Recorrência removida.");
+      showToast(undefined, "Recorrência removida.", "success");
       setAlertConfig(prev => ({ ...prev, isOpen: false }));
-    } catch (error) {
-      showToast("Erro", "Erro ao cancelar recorrência.", "error");
+    } catch (error: any) {
+      showToast(undefined, error.response?.data?.message || "Erro ao cancelar recorrência.", "error");
     } finally {
       setAlertConfig(prev => ({ ...prev, isLoading: false }));
     }
@@ -333,100 +334,6 @@ export default function MeusAgendamentosScreen() {
       console.error("Erro ao sair do jogo", error);
     }
   };
-
-  // === Renderização de Filtros ===
-
-  const clearFilters = () => {
-    setTipoAgendamento('AMBOS');
-    setStartDate(undefined);
-    setEndDate(undefined);
-    setModalVisible(false);
-  };
-
-  const renderFilterModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => setModalVisible(false)}
-    >
-      <View className="flex-1 justify-end bg-black/50">
-        <View className="bg-white rounded-t-3xl p-6 h-[65%]">
-          <View className="flex-row justify-between items-center mb-6">
-            <Text className="text-xl font-bold text-gray-800">Filtrar Histórico</Text>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <X color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Filtro de Tipo */}
-          <Text className="text-gray-600 font-bold mb-3">Tipo de Jogo</Text>
-          <View className="flex-row gap-2 mb-6">
-            {(['AMBOS', 'NORMAL', 'FIXO'] as TipoAgendamentoFilter[]).map((type) => (
-              <TouchableOpacity
-                key={type}
-                onPress={() => setTipoAgendamento(type)}
-                className={`flex-1 py-3 rounded-xl border items-center ${tipoAgendamento === type ? 'bg-green-100 border-green-600' : 'bg-white border-gray-300'
-                  }`}
-              >
-                <Text className={`font-bold ${tipoAgendamento === type ? 'text-green-700' : 'text-gray-500'}`}>
-                  {type === 'AMBOS' ? 'Todos' : type.charAt(0) + type.slice(1).toLowerCase()}
-                </Text>
-                {tipoAgendamento === type && <View className="absolute top-2 right-2"><Check size={12} color="#15803d" /></View>}
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Filtro de Período */}
-          <Text className="text-gray-600 font-bold mb-3">Período</Text>
-          <View className="flex-row gap-4 mb-8">
-            <TouchableOpacity
-              onPress={() => setStartDatePickerVisibility(true)}
-              className="flex-1 p-3 border border-gray-300 rounded-lg flex-row items-center justify-between"
-            >
-              <Text className="text-gray-600">
-                {startDate ? startDate.toLocaleDateString('pt-BR') : 'Data Início'}
-              </Text>
-              <CalendarIcon size={18} color="#9CA3AF" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setEndDatePickerVisibility(true)}
-              className="flex-1 p-3 border border-gray-300 rounded-lg flex-row items-center justify-between"
-            >
-              <Text className="text-gray-600">
-                {endDate ? endDate.toLocaleDateString('pt-BR') : 'Data Fim'}
-              </Text>
-              <CalendarIcon size={18} color="#9CA3AF" />
-            </TouchableOpacity>
-          </View>
-
-          <DateTimePickerModal
-            isVisible={isStartDatePickerVisible}
-            mode="date"
-            onConfirm={(date) => { setStartDate(date); setStartDatePickerVisibility(false); }}
-            onCancel={() => setStartDatePickerVisibility(false)}
-          />
-          <DateTimePickerModal
-            isVisible={isEndDatePickerVisible}
-            mode="date"
-            onConfirm={(date) => { setEndDate(date); setEndDatePickerVisibility(false); }}
-            onCancel={() => setEndDatePickerVisibility(false)}
-          />
-
-          <View className="mt-auto flex-row gap-4">
-            <TouchableOpacity onPress={clearFilters} className="flex-1 py-4 bg-gray-200 rounded-xl items-center">
-              <Text className="text-gray-700 font-bold">Limpar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setModalVisible(false)} className="flex-1 py-4 bg-green-600 rounded-xl items-center">
-              <Text className="text-white font-bold">Aplicar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-
-  // === List Header ===
 
   const ListHeader = () => (
     <View className="gap-4">
@@ -485,8 +392,8 @@ export default function MeusAgendamentosScreen() {
               <Text className="text-green-700 text-xs">Período</Text>
             </View>
           )}
-          <TouchableOpacity onPress={clearFilters} className="ml-auto">
-            <Text className="text-xs text-red-500 font-bold">Limpar</Text>
+          <TouchableOpacity onPress={handleClearFilters} className="ml-auto rounded px-2 py-1">
+            <Text className="text-xs text-red-600 font-bold">Limpar</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -529,7 +436,7 @@ export default function MeusAgendamentosScreen() {
               onSair={handleSairParticipacao}
             />
           )}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100, gap: 16 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 90, gap: 16 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#15A01A']} />}
           ListEmptyComponent={renderEmptyComponent}
         />
@@ -549,7 +456,7 @@ export default function MeusAgendamentosScreen() {
               onGerenciarFixo={handleGerenciarFixo}
             />
           )}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24, gap: 16 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 90, gap: 16 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#15A01A']} />}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.2}
@@ -558,7 +465,15 @@ export default function MeusAgendamentosScreen() {
         />
       )}
 
-      {renderFilterModal()}
+      <ModalFiltroHistorico
+        isOpen={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onApply={handleApplyFilters}
+        onClear={handleClearFilters}
+        initialTipo={tipoAgendamento}
+        initialStart={startDate}
+        initialEnd={endDate}
+      />
 
       {/* Modal de Avaliação */}
       {agendamentoParaAvaliarId && (

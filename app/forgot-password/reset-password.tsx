@@ -5,20 +5,21 @@ import {
   Text,
   ScrollView,
   Platform,
-  Alert,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, ButtonText } from '@/components/ui/button';
-import { resetPassword } from '@/services/api/auth';
+import { resetPassword } from '@/services/api/endpoints/auth';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { PasswordStrengthIndicator } from '@/components/forms/passwordStrengthIndicador';
-import { validarPassword, validarConfirmPassword } from "@/context/functions/validators";
+import { PasswordStrengthIndicator } from '@/components/general/PasswordStrengthIndicator';
+import { validarPassword, validarConfirmPassword } from "@/utils/validators";
 import { VStack } from '@/components/ui/vstack';
 import { FormControl } from '@/components/ui/form-control';
 import { InputSenha } from '@/components/forms/formInputs/InputSenha';
+import { useToastNotification } from '@/components/layout/useToastNotification';
 
 export default function ResetPasswordScreen() {
+  const { showToast } = useToastNotification();
   const { email } = useLocalSearchParams<{ email: string }>();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -67,7 +68,7 @@ export default function ResetPasswordScreen() {
       });
       setIsSuccess(true);
     } catch (error: any) {
-      Alert.alert('Erro', error.message);
+      showToast('Erro', error.message, 'error');
     } finally {
       setLoading(false);
     }

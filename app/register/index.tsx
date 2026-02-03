@@ -1,11 +1,8 @@
-import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform, TextInput } from "react-native";
+import React from "react";
+import { ScrollView, KeyboardAvoidingView, Platform, Text } from "react-native";
 import { RegistroAtleta } from "../../components/forms/RegistroAtleta";
-import { RegistroArena } from "../../components/forms/RegistroArena";
 
 export default function Register() {
-  const [accountType, setAccountType] = useState<"atleta" | "arena">("atleta");
-
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-white pt-12"
@@ -19,32 +16,11 @@ export default function Register() {
       >
         {/* Título */}
         <Text className="text-center text-gray-600 font-medium text-lg mb-4">
-          Cadastre-se abaixo
+          Cadastre-se como Atleta
         </Text>
 
-        {/* Botões Atleta / Arena */}
-        <View className="flex-row mb-4 w-full border-b border-gray-200">
-          <Pressable
-            className={`flex-1 py-3 border-b-2 ${accountType === "atleta" ? "border-green-primary" : "border-transparent"}`}
-            onPress={() => setAccountType("atleta")}
-          >
-            <Text className={`text-center font-semibold text-base ${accountType === "atleta" ? "text-green-primary" : "text-gray-400"}`}>
-              Atleta
-            </Text>
-          </Pressable>
-
-          <Pressable
-            className={`flex-1 py-3 border-b-2 ${accountType === "arena" ? "border-green-primary" : "border-transparent"}`}
-            onPress={() => setAccountType("arena")}
-          >
-            <Text className={`text-center font-semibold text-base ${accountType === "arena" ? "text-green-primary" : "text-gray-400"}`}>
-              Arena
-            </Text>
-          </Pressable>
-        </View>
-
         {/* Formulário */}
-        {accountType === "atleta" ? <RegistroAtleta /> : <RegistroArena />}
+        <RegistroAtleta />
       </ScrollView>
     </KeyboardAvoidingView>
   );

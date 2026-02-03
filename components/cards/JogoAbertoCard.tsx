@@ -1,7 +1,6 @@
-import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Calendar, Clock, MapPin, Users, UserPlus, Phone } from 'lucide-react-native';
-import { JogoAberto } from '@/services/api/entities/atletaAgendamento'
+import { JogoAberto } from '@/types/Jogo'
 
 interface Props {
   jogo: JogoAberto;
@@ -33,13 +32,13 @@ export function JogoAbertoCard({ jogo, onEntrar }: Props) {
 
       {/* Info da Arena */}
       <View className="flex-row items-center mb-3">
-        <Image 
-          source={{ uri: jogo.urlFotoArena }} 
+        <Image
+          source={{ uri: jogo.urlFotoArena }}
           className="w-14 h-14 rounded-lg bg-gray-200"
         />
         <View className="ml-3 flex-1">
           <Text className="text-lg font-bold text-gray-800" numberOfLines={1}>
-            {jogo.nomeArena} 
+            {jogo.nomeArena}
           </Text>
           <View className="flex-row items-center mt-0.5">
             <MapPin size={12} color="#6B7280" />
@@ -55,8 +54,8 @@ export function JogoAbertoCard({ jogo, onEntrar }: Props) {
 
       {/* Info do Organizador */}
       <View className="flex-row items-center mb-3">
-        <Image 
-          source={{ uri: jogo.urlFotoAtleta }} 
+        <Image
+          source={{ uri: jogo.urlFotoAtleta }}
           className="w-10 h-10 rounded-full bg-gray-200"
         />
         <View className="ml-3 flex-1">
@@ -88,12 +87,11 @@ export function JogoAbertoCard({ jogo, onEntrar }: Props) {
       </View>
 
       {/* Botão Entrar / Solicitado */}
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={() => !jogo.jaSolicitado && onEntrar(jogo.agendamentoId)}
-        disabled={jogo.jaSolicitado} 
-        className={`${
-          jogo.jaSolicitado ? 'bg-gray-400' : 'bg-green-600'
-        } py-3 rounded-lg flex-row justify-center items-center shadow-sm`}
+        disabled={jogo.jaSolicitado}
+        className={`${jogo.jaSolicitado ? 'bg-gray-400' : 'bg-green-600'
+          } py-3 rounded-lg flex-row justify-center items-center shadow-sm`}
       >
         <UserPlus size={18} color="white" />
         <Text className="text-white font-bold ml-2">

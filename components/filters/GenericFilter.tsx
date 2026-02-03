@@ -6,7 +6,7 @@ import {
   FlatList,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { InputTexto } from '@/components/forms/formInputs/InputTexto';
+import { CitySearch } from '@/components/forms/CitySearch';
 import { VStack } from '@/components/ui/vstack';
 import { ChevronDown } from 'lucide-react-native';
 
@@ -63,9 +63,9 @@ export const GenericFilter = React.memo(
     const [showSportModal, setShowSportModal] = useState(false);
 
     return (
-      <VStack className="bg-white px-7 pb-3 border-gray-200">
+      <VStack className="bg-white px-7 py-3 border-gray-200">
         {/* Filtro de Cidade */}
-        <InputTexto
+        <CitySearch
           placeholder={cidadePlaceholder}
           value={cidade}
           onChangeText={onCidadeChange}
@@ -113,20 +113,18 @@ export const GenericFilter = React.memo(
                 keyExtractor={(item) => item.value}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    className={`py-3 border-b border-gray-100 ${
-                      esporte === item.value ? 'bg-green-50' : ''
-                    }`}
+                    className={`py-3 border-b border-gray-100 ${esporte === item.value ? 'bg-green-50' : ''
+                      }`}
                     onPress={() => {
                       onEsporteChange(item.value);
                       setShowSportModal(false);
                     }}
                   >
                     <Text
-                      className={`text-center font-medium ${
-                        esporte === item.value
-                          ? 'text-green-600'
-                          : 'text-gray-600'
-                      }`}
+                      className={`text-center font-medium ${esporte === item.value
+                        ? 'text-green-600'
+                        : 'text-gray-600'
+                        }`}
                     >
                       {item.label}
                     </Text>

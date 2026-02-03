@@ -1,4 +1,4 @@
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 
@@ -17,6 +17,8 @@ interface InputNumeroProps {
   editable?: boolean;
   onMaxLengthReached?: (formatted: string) => void;
   className?: string;
+  labelClassName?: string;
+  containerClassName?: string;
 }
 
 export const InputNumero = ({
@@ -34,6 +36,8 @@ export const InputNumero = ({
   editable,
   onMaxLengthReached,
   className,
+  labelClassName,
+  containerClassName,
 }: InputNumeroProps) => {
   const handleChange = (text: string) => {
     const formatted = formatar ? formatar(text) : text;
@@ -50,15 +54,15 @@ export const InputNumero = ({
 
   return (
     <VStack space="xs" className="w-full">
-      <Text>{label}</Text>
+      <Text className={labelClassName}>{label}</Text>
 
       <Input
         size="xl"
-        className="border border-gray-300 rounded-lg"
+        className={`border border-gray-300 rounded-lg ${containerClassName}`}
         isDisabled={isDisabled}
       >
         <InputField
-          className={className ?? "text-base"} 
+          className={className ?? "text-base"}
           type="text"
           placeholder={placeholder}
           value={value}

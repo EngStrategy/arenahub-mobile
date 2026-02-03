@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
-import { EyeIcon, EyeOffIcon, InfoIcon } from '@/components/ui/icon';
+import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
 import { View } from "react-native";
 
 
@@ -15,6 +15,8 @@ interface InputSenhaProps {
   error?: string | null;
   showStrengthIndicator?: boolean;
   StrengthIndicatorComponent?: React.ReactNode;
+  labelClassName?: string;
+  className?: string;
 }
 
 export const InputSenha = ({
@@ -26,6 +28,8 @@ export const InputSenha = ({
   error,
   showStrengthIndicator = false,
   StrengthIndicatorComponent,
+  labelClassName,
+  className,
 }: InputSenhaProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -34,9 +38,9 @@ export const InputSenha = ({
 
   return (
     <VStack space="xs" className="w-full">
-      <Text>{label}</Text>
+      <Text className={labelClassName}>{label}</Text>
 
-      <Input size="xl" className="border border-gray-300 rounded-lg">
+      <Input size="xl" className={`border border-gray-300 rounded-lg ${className}`}>
         <InputField
           className="text-base"
           type={showPassword ? "text" : "password"}

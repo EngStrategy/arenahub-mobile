@@ -1,27 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { getAtletaById, updateAtleta } from "@/services/api/entities/atleta";
-import { useRouter, Stack } from 'expo-router'; 
+import { useState, useEffect } from "react";
+import { getAtletaById, updateAtleta } from "@/services/api/endpoints/atleta";
+import { useRouter, Stack } from 'expo-router';
 import { Upload, Trash2 } from 'lucide-react-native';
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons } from '@expo/vector-icons';
 import { HStack } from "@/components/ui/hstack";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Alert, ScrollView, Pressable } from "react-native"; 
+import { View, ScrollView, Pressable } from "react-native";
+import { useAuth } from "@/context/AuthContext";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { InputTexto } from "@/components/forms/formInputs/InputTexto";
 import { InputNumero } from "@/components/forms/formInputs/InputNumero";
-import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
-import { Image } from '@/components/ui/image';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Image } from 'expo-image';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { formatarTelefone } from "@/context/functions/formatters";
+import { formatarTelefone } from "@/utils/formatters";
 import * as ImagePicker from 'expo-image-picker';
-import { validarNome, validarTelefone } from "@/context/functions/validators";
+import { validarNome, validarTelefone } from "@/utils/validators";
 import { uploadToImgur } from "@/utils/uploadToImgur";
+import { ButtonCancel } from "@/components/buttons/ButtonCancel";
+import { ButtonPrimary } from "@/components/buttons/ButtonPrimary";
+import { useToastNotification } from "@/components/layout/useToastNotification";
 
 const DEFAULT_AVATAR_URL = "https://i.imgur.com/hepj9ZS.png";
 
 export default function InformacoesPessoaisAtleta() {
     const router = useRouter();
+    const { showToast } = useToastNotification();
+    const { user, updateUser } = useAuth();
     const [loading, setLoading] = useState(false);
 
     const [nome, setNome] = useState("");
@@ -35,50 +40,49 @@ export default function InformacoesPessoaisAtleta() {
         urlFoto: DEFAULT_AVATAR_URL as string | null
     });
 
-    const [errors, setErrors] = useState<{nome?: string; telefone?: string}>({});
+    const [errors, setErrors] = useState<{ nome?: string; telefone?: string }>({});
 
     const hasChanges =
         nome !== initialData.nome ||
         telefone !== initialData.telefone ||
         urlFoto !== initialData.urlFoto;
 
-    const getUserId = async () => {
-        const userDataString = await AsyncStorage.getItem('userData');
-        if (!userDataString) throw new Error('Usuário não encontrado');
-        return JSON.parse(userDataString).id;
-    };
-
     useEffect(() => {
         const fetchAtleta = async () => {
+            if (!user?.id) return;
             try {
                 setLoading(true);
-                const id = await getUserId();
-                const data = await getAtletaById(id);
-                const currentPhoto = data.urlFoto || DEFAULT_AVATAR_URL;
+                console.log("[fetchAtleta] Buscando atleta com ID:", user.id);
+                const data = await getAtletaById(user.id);
+                console.log("[fetchAtleta] Dados recebidos:", data);
 
-                setNome(data.nome);
-                setTelefone(data.telefone);
-                setEmail(data.email);
+                const currentPhoto = data.urlFoto || user.imageUrl || DEFAULT_AVATAR_URL;
+                const nomeAtleta = data.nome || user.name || "";
+
+                setNome(nomeAtleta);
+                setTelefone(data.telefone || "");
+                setEmail(data.email || "");
                 setUrlFoto(currentPhoto);
-                setInitialData({ nome: data.nome, telefone: data.telefone, urlFoto: currentPhoto });
+                setInitialData({ nome: nomeAtleta, telefone: data.telefone || "", urlFoto: currentPhoto });
             } catch (error) {
-                Alert.alert("Erro", "Não foi possível carregar os dados.");
+                console.error("[fetchAtleta] Erro:", error);
+                showToast(undefined, "Não foi possível carregar os dados.", "error");
             } finally {
                 setLoading(false);
             }
         };
         fetchAtleta();
-    }, []);
+    }, [user?.id]);
 
     const selectImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert("Erro", "Permissão para galeria é necessária.");
+            showToast(undefined, "Permissão para galeria é necessária.", "error");
             return;
         }
 
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ['images'],
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.7,
@@ -95,28 +99,34 @@ export default function InformacoesPessoaisAtleta() {
         setErrors({ nome: nomeError, telefone: telefoneError });
 
         if (nomeError || telefoneError) return;
+        if (!user?.id) return;
 
         setLoading(true);
         try {
-            const id = await getUserId();
             let finalImageUrl = urlFoto;
 
-            if (urlFoto && urlFoto.startsWith('file://')) {
+            if (urlFoto?.startsWith('file://')) {
                 finalImageUrl = await uploadToImgur(urlFoto);
             } else if (urlFoto === DEFAULT_AVATAR_URL) {
-                finalImageUrl = ""; 
+                finalImageUrl = "";
             }
 
-            await updateAtleta(id, {
+            await updateAtleta(user.id, {
                 nome,
                 telefone,
                 urlFoto: finalImageUrl || ""
             });
 
+            await updateUser({
+                nome,
+                imageUrl: finalImageUrl || null
+            });
+
             setInitialData({ nome, telefone, urlFoto: finalImageUrl });
-            Alert.alert("Sucesso", "Perfil atualizado!");
+            showToast(undefined, "Perfil atualizado!", "success");
+            router.back();
         } catch (error: any) {
-            Alert.alert("Erro", error.message || "Erro ao salvar informações.");
+            showToast(undefined, error.message || "Erro ao salvar informações.", "error");
         } finally {
             setLoading(false);
         }
@@ -146,7 +156,8 @@ export default function InformacoesPessoaisAtleta() {
                             <Image
                                 source={{ uri: urlFoto ?? DEFAULT_AVATAR_URL }}
                                 alt="Perfil"
-                                className="w-20 h-20 rounded-full border border-gray-200"
+                                style={{ width: 80, height: 80, borderRadius: 40, borderWidth: 1, borderColor: '#e5e7eb' }}
+                                contentFit="cover"
                             />
                             <VStack space="xs">
                                 <HStack space="sm">
@@ -161,11 +172,11 @@ export default function InformacoesPessoaisAtleta() {
                                         <ButtonText className="ml-2">Escolher foto</ButtonText>
                                     </Button>
                                     {urlFoto !== DEFAULT_AVATAR_URL && (
-                                        <Button 
-                                            size="sm" 
-                                            variant="outline" 
-                                            action="negative" 
-                                            onPress={() => setUrlFoto(DEFAULT_AVATAR_URL)} 
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            action="negative"
+                                            onPress={() => setUrlFoto(DEFAULT_AVATAR_URL)}
                                             isDisabled={loading}
                                         >
                                             <Trash2 size={16} color="red" />
@@ -178,27 +189,27 @@ export default function InformacoesPessoaisAtleta() {
                     </VStack>
 
                     <InputTexto label="Nome" value={nome} onChangeText={setNome} error={errors.nome} />
-                    
-                    <InputNumero 
-                        label="Telefone" 
+
+                    <InputNumero
+                        label="Telefone"
                         placeholder="(99) 99999-9999"
-                        value={telefone} 
-                        onChangeText={(t) => setTelefone(formatarTelefone(t))} 
+                        value={telefone}
+                        onChangeText={(t) => setTelefone(formatarTelefone(t))}
                         error={errors.telefone}
                         maxLength={15}
                     />
-
-                    <View className="flex-row gap-4 mt-4">
-                        <Button className="flex-1 bg-gray-200" onPress={() => router.back()} isDisabled={loading}>
-                            <ButtonText className="text-black">Cancelar</ButtonText>
-                        </Button>
-                        <Button 
-                            className={`flex-1 bg-green-primary ${(!hasChanges || loading) ? 'opacity-50' : ''}`}
-                            onPress={handleUpdateAtleta}
-                            isDisabled={!hasChanges || loading}
-                        >
-                            {loading ? <ButtonSpinner /> : <ButtonText>Salvar</ButtonText>}
-                        </Button>
+                    <View className="flex-row w-full gap-5 mt-4">
+                        <ButtonCancel
+                            text="Cancelar"
+                            loading={loading}
+                            handleAction={() => router.back()}
+                        />
+                        <ButtonPrimary
+                            text="Salvar"
+                            loading={loading}
+                            handleAction={handleUpdateAtleta}
+                            disabled={!hasChanges}
+                        />
                     </View>
                 </VStack>
             </ScrollView>

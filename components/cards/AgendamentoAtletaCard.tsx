@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Calendar, Clock, DollarSign, MapPin, Star, UserPlus, XCircle, Lock, Trash2 } from 'lucide-react-native';
-import { AgendamentoAtleta } from '@/services/api/entities/atletaAgendamento';
+import { AgendamentoAtleta } from '@/types/Agendamento';
 
 interface Props {
     readonly data: AgendamentoAtleta;

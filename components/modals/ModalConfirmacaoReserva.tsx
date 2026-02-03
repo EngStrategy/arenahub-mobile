@@ -1,23 +1,32 @@
 import { useState, useMemo } from 'react';
-import { Modal, View, Text, TouchableOpacity, ScrollView, Switch, ActivityIndicator } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { format } from 'date-fns';
+import { Image, ScrollView, TouchableOpacity, View } from 'react-native';
+import { format, addMonths, startOfDay, addWeeks, isAfter } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Quadra, HorariosDisponiveis } from '@/context/types/Quadra';
-import { createAgendamento } from '@/services/api/entities/agendamento';
-import { formatarEsporte } from '@/constants/Quadra';
-import { showToast } from '../layout/ToastView'; 
+import { Modal, ModalBackdrop, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter } from '@/components/ui/modal';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
+import { HStack } from '@/components/ui/hstack';
+import { Switch } from '@/components/ui/switch';
+import { Icon, CloseIcon, AddIcon, RemoveIcon, CheckCircleIcon } from '@/components/ui/icon';
+import { Box } from '@/components/ui/box';
+import { Button, ButtonText, ButtonIcon, ButtonSpinner } from '@/components/ui/button';
+import { Quadra, HorariosDisponiveis } from '@/types/Quadra';
+import { createAgendamento } from '@/services/api/endpoints/atletaAgendamento';
+import { formatarEsporte } from '@/utils/formatters';
+import { useToastNotification } from '@/components/layout/useToastNotification';
 
 interface Props {
-  visible: boolean;
-  onClose: () => void;
-  quadra: Quadra;
-  data: Date;
-  slotsSelecionados: HorariosDisponiveis[];
-  onSuccess: () => void;
+  readonly visible: boolean;
+  readonly onClose: () => void;
+  readonly quadra: Quadra;
+  readonly data: Date;
+  readonly slotsSelecionados: HorariosDisponiveis[];
+  readonly onSuccess: () => void;
 }
 
 export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsSelecionados, onSuccess }: Props) {
+  const { showToast } = useToastNotification();
   const [loading, setLoading] = useState(false);
   const [esporte, setEsporte] = useState(quadra.tipoQuadra[0]);
   const [isFixo, setIsFixo] = useState(false);
@@ -26,25 +35,34 @@ export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsS
   const [faltandoGente, setFaltandoGente] = useState(1);
 
   const slotsOrdenados = useMemo(() => {
-    return [...slotsSelecionados].sort((a, b) => 
-      a.horarioInicio.localeCompare(b.horarioInicio)
-    );
+    return [...slotsSelecionados].sort((a, b) => a.horarioInicio.localeCompare(b.horarioInicio));
   }, [slotsSelecionados]);
 
-  const horaInicioExibicao = slotsOrdenados[0]?.horarioInicio;
-  const horaFimExibicao = slotsOrdenados[slotsOrdenados.length - 1]?.horarioFim;
-
   const total = useMemo(() => {
-    const base = slotsSelecionados.reduce((acc, curr) => acc + curr.valor, 0);
-    const multiplicador = isFixo ? (periodoFixo === "UM_MES" ? 4 : periodoFixo === "TRES_MESES" ? 12 : 24) : 1;
-    return base * multiplicador;
-  }, [slotsSelecionados, isFixo, periodoFixo]);
+    const valorBaseSessao = slotsSelecionados.reduce((acc, curr) => acc + curr.valor, 0);
+    if (!isFixo) return valorBaseSessao;
 
-  const getPeriodoLabel = (periodo: "UM_MES" | "TRES_MESES" | "SEIS_MESES"): string => {
-    if (periodo === 'UM_MES') return '1 Mês';
-    if (periodo === 'TRES_MESES') return '3 Meses';
-    return '6 Meses';
-  };
+    const dataInicio = startOfDay(data);
+    let mesesParaAdicionar: number;
+    switch (periodoFixo) {
+      case "UM_MES": mesesParaAdicionar = 1; break;
+      case "TRES_MESES": mesesParaAdicionar = 3; break;
+      case "SEIS_MESES": mesesParaAdicionar = 6; break;
+      default: mesesParaAdicionar = 1;
+    }
+
+    const dataLimite = addMonths(dataInicio, mesesParaAdicionar);
+
+    let totalAgendamentos = 1;
+    let dataAtualParaSimulacao = addWeeks(dataInicio, 1);
+
+    while (!isAfter(dataAtualParaSimulacao, dataLimite)) {
+      totalAgendamentos++;
+      dataAtualParaSimulacao = addWeeks(dataAtualParaSimulacao, 1);
+    }
+
+    return valorBaseSessao * totalAgendamentos;
+  }, [slotsSelecionados, isFixo, periodoFixo, data]);
 
   const handleConfirmar = async () => {
     setLoading(true);
@@ -53,143 +71,192 @@ export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsS
         quadraId: quadra.id,
         dataAgendamento: format(data, 'yyyy-MM-dd'),
         slotHorarioIds: slotsOrdenados.map(s => s.id),
-        esporte: esporte,
-        isFixo: isFixo,
-        isPublico: isPublico,
+        esporte,
+        isFixo,
+        isPublico,
         periodoFixo: isFixo ? periodoFixo : undefined,
         numeroJogadoresNecessarios: isPublico ? faltandoGente : 0,
       };
-
       await createAgendamento(payload);
       showToast("Sucesso", "Reserva realizada com sucesso!", "success");
       onSuccess();
     } catch (error: any) {
-      showToast("Erro", error.response?.data?.message || "Não foi possível realizar a reserva.", "error");
+      showToast("Erro", error.response?.data?.message || "Erro na reserva.", "error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white rounded-t-3xl h-[85%]">
-          <View className="flex-row justify-between items-center p-6 border-b border-gray-100">
-            <Text className="text-xl font-bold text-gray-900">Confirmar Reserva</Text>
-            <TouchableOpacity onPress={onClose} className="p-2 bg-gray-100 rounded-full">
-              <Ionicons name="close" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
+    <Modal isOpen={visible} onClose={onClose} size="lg">
+      <ModalBackdrop />
+      <ModalContent className="rounded-t-3xl h-[80%]">
+        <ModalHeader className="py-3">
+          <Heading size="md">Confirmar Reserva</Heading>
+          <ModalCloseButton>
+            <Icon as={CloseIcon} />
+          </ModalCloseButton>
+        </ModalHeader>
 
-          <ScrollView className="p-6">
-            {/* Resumo da Quadra */}
-            <View className="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <Text className="font-bold text-lg text-gray-800">{quadra.nomeQuadra}</Text>
-              <Text className="text-gray-600 mt-1">
-                {format(data, "dd 'de' MMMM", { locale: ptBR })} • {horaInicioExibicao} às {horaFimExibicao}
-              </Text>
-            </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <ModalBody>
+            <VStack space="3xl">
 
-            {/* Seletor de Esporte */}
-            <Text className="font-bold text-gray-700 mb-3">Selecione o Esporte</Text>
-            <View className="flex-row flex-wrap gap-2 mb-6">
-              {quadra.tipoQuadra.map((item) => (
-                <TouchableOpacity
-                  key={item}
-                  onPress={() => setEsporte(item)}
-                  className={`px-4 py-2 rounded-full border ${esporte === item ? 'bg-green-100 border-green-600' : 'bg-white border-gray-300'}`}
-                >
-                  <Text className={esporte === item ? 'text-green-700 font-bold' : 'text-gray-600'}>
-                    {formatarEsporte(item)}
+              {/* Card da Quadra */}
+              <HStack className="bg-background-50 p-2 rounded-2xl border border-outline-100 items-center" space="md">
+                <Box className="w-24 h-24 rounded-xl overflow-hidden">
+                  <Image
+                    source={{ uri: quadra.urlFotoQuadra || 'https://via.placeholder.com/150' }}
+                    className="w-full h-full"
+                    resizeMode="cover"
+                  />
+                </Box>
+                <VStack className="flex-1" space="xs">
+                  <Heading size="xs" numberOfLines={1}>{quadra.nomeQuadra}</Heading>
+                  <Text size="xs" className="text-typography-600">
+                    {format(data, "EEEE, dd 'de' MMMM", { locale: ptBR }).replace(/^\w/, (c) => c.toUpperCase())}
                   </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                  <Text size="xs" className="font-bold text-green-600">
+                    {slotsOrdenados[0]?.horarioInicio} - {slotsOrdenados.at(-1)?.horarioFim}
+                  </Text>
+                </VStack>
+              </HStack>
 
-            {/* Toggles */}
-            <View className="space-y-4 mb-8">
-              <View className="flex-row justify-between items-center bg-gray-50 p-4 rounded-xl">
-                <View className="flex-1 pr-4">
-                  <Text className="font-bold text-gray-800">Horário Fixo</Text>
-                  <Text className="text-xs text-gray-500">Repetir semanalmente por um período</Text>
-                </View>
-                <Switch 
-                    value={isFixo} 
-                    onValueChange={(v) => { setIsFixo(v); if(v) setIsPublico(false); }}
-                    trackColor={{ false: '#d1d5db', true: '#10b981' }}
-                />
-              </View>
-
-              {isFixo && (
-                <View className="flex-row justify-between mt-2">
-                  {(['UM_MES', 'TRES_MESES', 'SEIS_MESES'] as const).map((p) => (
+              {/* Seletor de Esporte */}
+              <VStack space="xs">
+                <Text size="sm" className="font-bold ml-1">Modalidade</Text>
+                <HStack space="xs" className="flex-wrap">
+                  {quadra.tipoQuadra.map((item) => (
                     <TouchableOpacity
-                      key={p}
-                      onPress={() => setPeriodoFixo(p)}
-                      className={`flex-1 mx-1 p-2 rounded-lg border items-center ${periodoFixo === p ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300'}`}
+                      key={item}
+                      onPress={() => setEsporte(item)}
+                      className={`px-3 py-1.5 rounded-full border ${esporte === item ? 'bg-green-50 border-green-500' : 'bg-white border-outline-300'}`}
                     >
-                      <Text className={`text-xs ${periodoFixo === p ? 'text-white font-bold' : 'text-gray-600'}`}>
-                        {getPeriodoLabel(p)}
+                      <Text size="xs" className={`px-2 py-1 ${esporte === item ? 'text-green-600 font-bold' : 'text-typography-600'}`}>
+                        {formatarEsporte(item)}
                       </Text>
                     </TouchableOpacity>
                   ))}
-                </View>
-              )}
+                </HStack>
+              </VStack>
 
-              <View className="flex-row justify-between items-center bg-gray-50 p-4 rounded-xl mt-4">
-                <View className="flex-1 pr-4">
-                  <Text className="font-bold text-gray-800">Jogo Aberto</Text>
-                  <Text className="text-xs text-gray-500">Tornar reserva pública para outros atletas</Text>
-                </View>
-                <Switch 
-                    value={isPublico} 
-                    onValueChange={(v) => { setIsPublico(v); if(v) setIsFixo(false); }}
-                    trackColor={{ false: '#d1d5db', true: '#10b981' }}
-                />
-              </View>
+              {/* VStack das Configurações Avançadas */}
+              <VStack space="md">
 
-              {isPublico && (
-                <View className="flex-row items-center justify-between bg-white border border-gray-200 p-3 rounded-xl mt-2">
-                  <Text className="text-gray-700">Quantos jogadores faltam?</Text>
-                  <View className="flex-row items-center gap-4">
-                    <TouchableOpacity onPress={() => setFaltandoGente(Math.max(1, faltandoGente - 1))} className="p-1 bg-gray-100 rounded">
-                      <Ionicons name="remove" size={20} color="black" />
-                    </TouchableOpacity>
-                    <Text className="font-bold text-lg">{faltandoGente}</Text>
-                    <TouchableOpacity onPress={() => setFaltandoGente(faltandoGente + 1)} className="p-1 bg-gray-100 rounded">
-                      <Ionicons name="add" size={20} color="black" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-            </View>
-          </ScrollView>
+                {/* SEÇÃO HORÁRIO FIXO */}
+                <View>
+                  <HStack
+                    className={`justify-between items-center bg-background-50 p-3 border border-outline-100 ${isFixo ? 'rounded-t-xl' : 'rounded-xl'
+                      }`}
+                  >
+                    <VStack className="flex-1 pl-2">
+                      <Text size="sm" className="font-bold">Horário Fixo</Text>
+                      <Text size="xs">Repetir semanalmente</Text>
+                    </VStack>
+                    <Switch
+                      value={isFixo}
+                      onValueChange={(v) => { setIsFixo(v); if (v) setIsPublico(false); }}
+                      trackColor={{ false: '#d1d5db', true: '#10b981' }}
+                      thumbColor="white"
+                    />
+                  </HStack>
 
-          {/* Rodapé de Ação */}
-          <View className="p-6 border-t border-gray-100 bg-white">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-gray-500 font-medium">Total</Text>
-              <Text className="text-2xl font-bold text-green-600">
+                  {isFixo && (
+                    <HStack
+                      space="xs"
+                      className="px-2 py-3 bg-background-50 border-x border-b border-outline-100 rounded-b-xl"
+                    >
+                      {[
+                        { id: 'UM_MES', label: '1 Mês' },
+                        { id: 'TRES_MESES', label: '3 Meses' },
+                        { id: 'SEIS_MESES', label: '6 Meses' }
+                      ].map((p) => (
+                        <Button
+                          key={p.id}
+                          onPress={() => setPeriodoFixo(p.id as any)}
+                          variant={periodoFixo === p.id ? 'solid' : 'outline'}
+                          className={`flex-1 h-9 rounded-lg ${periodoFixo === p.id ? 'bg-green-600 border-green-600' : 'border-outline-300'}`}
+                        >
+                          <ButtonText size="xs" className={periodoFixo === p.id ? 'text-white' : 'text-typography-600'}>
+                            {p.label}
+                          </ButtonText>
+                        </Button>
+                      ))}
+                    </HStack>
+                  )}
+                </View>
+
+                {/* SEÇÃO JOGO ABERTO */}
+                <View>
+                  <HStack
+                    className={`justify-between items-center bg-background-50 p-3 border border-outline-100 ${isPublico ? 'rounded-t-xl' : 'rounded-xl'
+                      }`}
+                  >
+                    <VStack className="flex-1 pl-2">
+                      <Text size="sm" className="font-bold">Jogo Aberto</Text>
+                      <Text size="xs">Convidar outros atletas</Text>
+                    </VStack>
+                    <Switch
+                      value={isPublico}
+                      onValueChange={(v) => { setIsPublico(v); if (v) setIsFixo(false); }}
+                      trackColor={{ false: '#d1d5db', true: '#10b981' }}
+                      thumbColor="white"
+                    />
+                  </HStack>
+
+                  {isPublico && (
+                    <HStack
+                      className="justify-between items-center bg-background-50 px-3 py-3 border-x border-b border-outline-100 rounded-b-xl"
+                    >
+                      <Text size="xs" className='pl-2 text-typography-500'>Vagas em aberto</Text>
+                      <HStack space="md" className="items-center">
+                        <TouchableOpacity
+                          onPress={() => setFaltandoGente(Math.max(1, faltandoGente - 1))}
+                          className="p-2 bg-background-200 rounded-md"
+                        >
+                          <Icon as={RemoveIcon} size="xs" />
+                        </TouchableOpacity>
+                        <Text size="sm" className="font-bold w-5 text-center">{faltandoGente}</Text>
+                        <TouchableOpacity
+                          onPress={() => setFaltandoGente(Math.min(21, faltandoGente + 1))}
+                          className="p-2 bg-background-200 rounded-md"
+                        >
+                          <Icon as={AddIcon} size="xs" />
+                        </TouchableOpacity>
+                      </HStack>
+                    </HStack>
+                  )}
+                </View>
+
+              </VStack>
+            </VStack>
+          </ModalBody>
+        </ScrollView>
+
+        <ModalFooter className="flex-col p-4 border-t border-outline-100">
+          <HStack className="w-full justify-between items-center mb-3">
+            <VStack>
+              <Text size="xs" className="uppercase font-bold text-typography-400">Total</Text>
+              <Heading size="lg" className="text-green-600">
                 {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={handleConfirmar}
-              disabled={loading}
-              className="bg-green-600 py-4 rounded-2xl items-center flex-row justify-center"
-            >
-              {loading ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <>
-                  <MaterialCommunityIcons name="check-circle-outline" size={20} color="white" className="mr-2" />
-                  <Text className="text-white font-bold text-lg"> Pagar na Arena</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+              </Heading>
+            </VStack>
+          </HStack>
+
+          <Button
+            onPress={handleConfirmar}
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-green-600"
+          >
+            {loading ? <ButtonSpinner color="white" /> : (
+              <>
+                <ButtonIcon as={CheckCircleIcon} className="text-white mr-2" />
+                <ButtonText className="font-bold text-white">Pagar na Arena</ButtonText>
+              </>
+            )}
+          </Button>
+        </ModalFooter>
+      </ModalContent>
     </Modal>
   );
 }

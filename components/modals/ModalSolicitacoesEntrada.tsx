@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FlatList, Alert, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 import {
     Modal,
     ModalBackdrop,
@@ -18,7 +18,8 @@ import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar'
 import { Spinner } from '@/components/ui/spinner';
 import { Box } from '@/components/ui/box';
 import { Phone, Info, X, Check } from 'lucide-react-native';
-import { SolicitacaoJogoAberto } from '@/services/api/entities/atletaAgendamento';
+import { useToastNotification } from '@/components/layout/useToastNotification';
+import { SolicitacaoJogoAberto } from '@/types/Jogo';
 
 type ModalSolicitacoesProps = {
     isOpen: boolean;
@@ -40,6 +41,7 @@ export function ModalSolicitacoesEntrada({
     onDecline,
 }: Readonly<ModalSolicitacoesProps>) {
     const [actionId, setActionId] = useState<number | null>(null);
+    const { showToast } = useToastNotification();
 
     const handleAction = async (id: number, type: 'ACCEPT' | 'DECLINE') => {
         setActionId(id);
@@ -50,7 +52,7 @@ export function ModalSolicitacoesEntrada({
                 await onDecline(id);
             }
         } catch (error) {
-            Alert.alert("Erro", "Não foi possível processar a ação.");
+            showToast("Erro", "Não foi possível processar a ação.", "error");
             console.error("Erro ao processar ação da solicitação", error);
         } finally {
             setActionId(null);
