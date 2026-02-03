@@ -13,45 +13,46 @@ export const api = axios.create({
   },
 });
 
-/**
- * Algumas rotas podem exigir autenticação.
- * Este interceptor adiciona o token JWT ao cabeçalho Authorization.
- * Descomente se precisar dessa funcionalidade.
- * É preciso melhorar essa lógica para lidar com requisições para rotas públicas.
- */
-
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem('userToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // Lista de endpoints públicos que não precisam de autenticação
+    const publicEndpoints = [
+      '/usuarios/auth',
+      '/verify',
+      '/forgot-password',
+      '/verify-reset-code',
+      '/reset-password',
+      '/resend-verification'
+    ];
 
-    console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
-    console.log('📦 Data:', config.data);
-    console.log('🔑 Token:', token ? 'Presente ✅' : 'Ausente ❌');
+    const isPublicEndpoint = publicEndpoints.some(endpoint =>
+      config.url?.includes(endpoint)
+    );
+
+    if (!isPublicEndpoint) {
+      const token = await AsyncStorage.getItem('userToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
 
     return config;
   },
   (error) => {
-    console.error('❌ Request Error:', error);
     return Promise.reject(error);
   }
 );
 
-// 💬 Interceptor para debug de respostas
+// Interceptor para debug de respostas
 api.interceptors.response.use(
   async (response) => {
     const token = await AsyncStorage.getItem('userToken');
     if (token) {
       response.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('✅ Response:', response.status, response.config.url);
     return response;
   },
   (error) => {
-    console.error('❌ Response Error:', error.response?.status, error.message);
-    console.error('📄 Error Data:', error.response?.data);
     return Promise.reject(error);
   }
 );

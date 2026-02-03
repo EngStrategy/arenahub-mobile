@@ -6,7 +6,7 @@ import {
     AlertDialogBody,
     AlertDialogBackdrop,
 } from '@/components/ui/alert-dialog';
-import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
+import { Button, ButtonText } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Heading } from '@/components/ui/heading';
 
@@ -18,7 +18,7 @@ interface AlertDialogViewProps {
     readonly description: string;
     readonly confirmText?: string;
     readonly cancelText?: string;
-    readonly action?: 'primary' | 'negative';
+    readonly action?: 'primary' | 'negative' | 'positive' | 'default' | 'secondary';
     readonly isLoading?: boolean;
 }
 

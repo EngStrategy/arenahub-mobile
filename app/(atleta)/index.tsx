@@ -6,17 +6,15 @@ import {
 } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { ArenaCard } from '@/components/cards/ArenaCard';
-import {
-  getAllArenas,
-  ArenaQueryParams,
-} from '@/services/api/entities/arena';
+import { getAllArenas } from '@/services/api/endpoints/arena';
+import { ArenaQueryParams } from '@/types/Arena';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { VStack } from '@/components/ui/vstack';
 import { GenericFilter, SportKey } from '@/components/filters/GenericFilter';
-import type { Arena } from '@/context/types/Arena';
+import type { Arena } from '@/types/Arena';
 
 const ArenasListHeader = React.memo(
   ({

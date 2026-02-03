@@ -1,4 +1,4 @@
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 
@@ -9,6 +9,7 @@ interface InputTextoProps {
   onChangeText: (text: string) => void;
   keyboardType?: 'default' | 'email-address' | 'numeric';
   onBlur?: () => void;
+  onFocus?: () => void;
   error?: string;
 }
 
@@ -19,11 +20,12 @@ export function InputTexto({
   onChangeText,
   keyboardType = 'default',
   onBlur,
+  onFocus,
   error,
 }: InputTextoProps) {
   return (
     <VStack space="xs">
-      <Text>{label}</Text>
+      {label && <Text>{label}</Text>}
 
       <Input size="xl" className="border border-gray-300 rounded-lg">
         <InputField
@@ -34,6 +36,7 @@ export function InputTexto({
           onChangeText={onChangeText}
           keyboardType={keyboardType}
           onBlur={onBlur}
+          onFocus={onFocus}
         />
       </Input>
 

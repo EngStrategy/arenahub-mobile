@@ -2,17 +2,17 @@
 import React from 'react';
 import { createToastHook } from '@gluestack-ui/core/toast/creator';
 import { AccessibilityInfo, Text, View, ViewStyle } from 'react-native';
-import { tva } from '@gluestack-ui/utils/nativewind-utils';
+import { tva ,
+  withStyleContext,
+  useStyleContext,
+} from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
 import {
   Motion,
   AnimatePresence,
   MotionComponentProps,
 } from '@legendapp/motion';
-import {
-  withStyleContext,
-  useStyleContext,
-} from '@gluestack-ui/utils/nativewind-utils';
+
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 
 type IMotionViewProps = React.ComponentProps<typeof View> &
@@ -31,7 +31,7 @@ const toastStyle = tva({
     action: {
       error: 'bg-error-800',
       warning: 'bg-warning-700',
-      success: 'bg-success-700',
+      success: 'bg-success-600',
       info: 'bg-info-700',
       muted: 'bg-background-800',
     },

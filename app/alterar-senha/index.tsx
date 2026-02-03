@@ -1,16 +1,17 @@
-import React, { useState } from "react";
-import { updatePassword } from "@/services/api/entities/atleta"; 
-import { updatePasswordArena } from "@/services/api/entities/arena";
-import { useRouter, Stack } from 'expo-router'; 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, KeyboardAvoidingView, Platform, Alert, ScrollView, Pressable } from "react-native"; // Adicionado Pressable
+import { useState } from "react";
+import { updatePassword } from "@/services/api/endpoints/atleta";
+import { useRouter, Stack } from 'expo-router';
+import { useAuth } from '@/context/AuthContext';
+import { View, KeyboardAvoidingView, Platform, ScrollView, Pressable } from "react-native";
 import { InputSenha } from "@/components/forms/formInputs/InputSenha";
 import { FormControl } from '@/components/ui/form-control';
-import { Button, ButtonText } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { SafeAreaView } from 'react-native-safe-area-context'; 
-import { Ionicons } from '@expo/vector-icons'; 
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { ButtonPrimary } from "@/components/buttons/ButtonPrimary";
+import { ButtonCancel } from "@/components/buttons/ButtonCancel";
+import { useToastNotification } from "@/components/layout/useToastNotification";
 
 interface ErrorsState {
     senhaAtual?: string;
@@ -20,35 +21,14 @@ interface ErrorsState {
 
 export default function AlterarSenha() {
     const router = useRouter();
+    const { signOut } = useAuth();
+    const { showToast } = useToastNotification();
     const [loading, setLoading] = useState(false);
     const [senhaAtual, setSenhaAtual] = useState("");
     const [novaSenha, setNovaSenha] = useState("");
     const [confirmarSenha, setConfirmarSenha] = useState("");
-    const [role, setRole] = useState<string | null>(null);
 
     const [errors, setErrors] = useState<ErrorsState>({});
-
-    const getUserRole = async () => {
-        const userDataString = await AsyncStorage.getItem('userData');
-        if (!userDataString) throw new Error('Usuário não encontrado');
-        const userData = JSON.parse(userDataString);
-        return userData.role;
-    };
-
-    React.useEffect(() => {
-        let mounted = true;
-        (async () => {
-          try {
-            const r = await getUserRole();
-            if (mounted) setRole(r);
-          } catch {
-            if (mounted) setRole(null);
-          }
-        })();
-        return () => {
-          mounted = false;
-        };
-      }, []);
 
     const handleAlterarSenha = async () => {
         let hasError = false;
@@ -73,27 +53,21 @@ export default function AlterarSenha() {
         setLoading(true);
 
         try {
-            if (role === 'ATLETA') {
-                await updatePassword(senhaAtual, novaSenha, confirmarSenha);
-            } else if (role === 'ARENA') {
-                await updatePasswordArena(senhaAtual, novaSenha, confirmarSenha);
-            }
+            await updatePassword(senhaAtual, novaSenha, confirmarSenha);
 
-            Alert.alert(
+            showToast(
                 "Sucesso",
-                "Senha alterada com sucesso! Você será desconectado por segurança.",
-                [
-                    {
-                        text: "OK", onPress: async () => {
-                            await AsyncStorage.removeItem('userData'); 
-                            router.replace('/login'); 
-                        }
-                    }
-                ]
+                "Senha alterada com sucesso! Você será desconectado em instantes.",
+                "success"
             );
 
+            // Aguardar 2s para o usuário ler o toast antes de deslogar
+            setTimeout(async () => {
+                await signOut();
+            }, 2000);
+
         } catch (error: any) {
-                Alert.alert('Aviso', error.message);
+            showToast('Aviso', error.message, 'warning');
         } finally {
             setLoading(false);
         }
@@ -122,7 +96,7 @@ export default function AlterarSenha() {
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    
+
                     <FormControl className="pt-4 rounded-lg w-full">
                         <VStack className="w-full gap-4">
                             <Text className="text-typography-500">Use pelo menos 8 caracteres. Não use a senha de outro site ou algo muito óbvio.</Text>
@@ -167,26 +141,16 @@ export default function AlterarSenha() {
                             />
 
                             <View className="flex-row w-full gap-5 mt-4">
-                                <Button
-                                    size="xl"
-                                    className="flex-1 bg-gray-300 rounded-lg py-3"
-                                    onPress={() => router.back()}
-                                    disabled={loading}
-                                >
-                                    <ButtonText className="text-base text-black">
-                                        Cancelar
-                                    </ButtonText>
-                                </Button>
-                                <Button
-                                    size="xl"
-                                    className="flex-1 bg-green-primary rounded-lg py-3"
-                                    onPress={handleAlterarSenha}
-                                    disabled={loading}
-                                >
-                                    <ButtonText className="text-base text-white">
-                                        Alterar senha
-                                    </ButtonText>
-                                </Button>
+                                <ButtonCancel
+                                    text="Cancelar"
+                                    loading={loading}
+                                    handleAction={() => router.back()}
+                                />
+                                <ButtonPrimary
+                                    text="Alterar senha"
+                                    loading={loading}
+                                    handleAction={handleAlterarSenha}
+                                />
                             </View>
                         </VStack>
                     </FormControl>

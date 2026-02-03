@@ -1,22 +1,21 @@
-// app/forgot-password/index.tsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { forgotPassword } from '@/services/api/auth';
+import { forgotPassword } from '@/services/api/endpoints/auth';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { InputTexto } from '@/components/forms/formInputs/InputTexto';
-import { validarEmail } from '@/context/functions/validators';
+import { validarEmail } from '@/utils/validators';
+import { useToastNotification } from '@/components/layout/useToastNotification';
 
 export default function ForgotPasswordScreen() {
+  const { showToast } = useToastNotification();
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,14 +36,14 @@ export default function ForgotPasswordScreen() {
     setLoading(true);
     try {
       await forgotPassword(email);
-      Alert.alert('Sucesso', 'Código enviado para seu email!');
+      showToast('Sucesso', 'Código enviado para seu email!', 'success');
 
       router.push({
         pathname: '/forgot-password/verify-code',
         params: { email },
       });
     } catch (error: any) {
-      Alert.alert('Erro', error.message);
+      showToast('Erro', error.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -99,7 +98,7 @@ export default function ForgotPasswordScreen() {
           disabled={loading}
         >
           {loading ? (
-            <ButtonSpinner className="text-white" /> 
+            <ButtonSpinner className="text-white" />
           ) : (
             <ButtonText className="text-base text-white">
               Enviar código

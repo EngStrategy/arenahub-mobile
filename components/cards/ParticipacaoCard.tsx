@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
-import { View, Text, Image, TouchableOpacity, Alert } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Calendar, Clock, MapPin, LogOut, Phone } from 'lucide-react-native';
-import { ParticipacaoJogoAberto } from '@/services/api/entities/atletaAgendamento';
+import { ParticipacaoJogoAberto } from '@/types/Jogo';
+import { AlertDialogView } from '@/components/layout/AlertDialogView';
 
 interface Props {
     data: ParticipacaoJogoAberto;
@@ -9,13 +10,14 @@ interface Props {
 }
 
 export function ParticipacaoCard({ data, onSair }: Props) {
-    
+    const [showDialog, setShowDialog] = useState(false);
+
     const podeCancelarOuSair = useMemo(() => {
         const dataJogo = new Date(`${data.data}T${data.horarioInicio}`);
         const agora = new Date();
 
         const diferencaMs = dataJogo.getTime() - agora.getTime();
-        
+
         const horasRestantes = diferencaMs / (1000 * 60 * 60);
 
         return horasRestantes >= 2;
@@ -23,19 +25,17 @@ export function ParticipacaoCard({ data, onSair }: Props) {
 
     const labelBotao = data.status === 'PENDENTE' ? 'Cancelar solicitação' : 'Sair do jogo';
     const tituloAlert = data.status === 'PENDENTE' ? 'Cancelar Solicitação' : 'Sair do Jogo';
-    const msgAlert = data.status === 'PENDENTE' 
-        ? "Tem certeza que deseja cancelar sua solicitação pendente?" 
+    const msgAlert = data.status === 'PENDENTE'
+        ? "Tem certeza que deseja cancelar sua solicitação pendente?"
         : "Tem certeza que deseja sair do jogo confirmado?";
 
     const handleActionPress = () => {
-        Alert.alert(
-            tituloAlert,
-            msgAlert,
-            [
-                { text: "Não", style: "cancel" },
-                { text: "Sim", style: 'destructive', onPress: () => onSair(data.solicitacaoId) }
-            ]
-        );
+        setShowDialog(true);
+    };
+
+    const handleConfirm = () => {
+        setShowDialog(false);
+        onSair(data.solicitacaoId);
     };
 
     const getStatusColor = (status: string) => {
@@ -68,8 +68,8 @@ export function ParticipacaoCard({ data, onSair }: Props) {
 
             {/* Info da Arena */}
             <View className="flex-row items-center mb-3">
-                <Image 
-                    source={{ uri: data.urlFotoArena }} 
+                <Image
+                    source={{ uri: data.urlFotoArena }}
                     className="w-12 h-12 rounded-lg bg-gray-200"
                 />
                 <View className="ml-3 flex-1">
@@ -86,8 +86,8 @@ export function ParticipacaoCard({ data, onSair }: Props) {
 
             {/* NOVO: Info do Dono da Reserva (Organizador) */}
             <View className="flex-row items-center mb-3">
-                <Image 
-                    source={{ uri: data.urlFotoDono }} 
+                <Image
+                    source={{ uri: data.urlFotoDono }}
                     className="w-10 h-10 rounded-full bg-gray-200"
                 />
                 <View className="ml-3 flex-1">
@@ -113,14 +113,14 @@ export function ParticipacaoCard({ data, onSair }: Props) {
                 </View>
                 <View className="bg-gray-100 px-2 py-1 rounded-md">
                     <Text className="text-xs text-gray-600 font-medium">
-                         {data.esporte.replace(/_/g, ' ')}
+                        {data.esporte.replace(/_/g, ' ')}
                     </Text>
                 </View>
             </View>
 
             {/* Botão de Sair/Cancelar */}
             {deveExibirOpcao && (
-                <TouchableOpacity 
+                <TouchableOpacity
                     onPress={handleActionPress}
                     className="bg-red-50 py-2 rounded-lg flex-row justify-center items-center mt-4 border border-red-100"
                 >
@@ -128,6 +128,17 @@ export function ParticipacaoCard({ data, onSair }: Props) {
                     <Text className="text-red-600 font-bold ml-2">{labelBotao}</Text>
                 </TouchableOpacity>
             )}
+
+            <AlertDialogView
+                isOpen={showDialog}
+                onClose={() => setShowDialog(false)}
+                onConfirm={handleConfirm}
+                title={tituloAlert}
+                description={msgAlert}
+                confirmText="Sim"
+                cancelText="Não"
+                action="negative"
+            />
         </View>
     );
 }

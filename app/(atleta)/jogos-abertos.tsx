@@ -3,21 +3,18 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
-  Alert,
   Text
 } from 'react-native';
-import { JogoAbertoCard} from '@/components/cards/JogoAbertoCard';
-import { JogoAberto } from '@/services/api/entities/atletaAgendamento'
-import {
-  getAllJogosAbertos,
-  solicitarEntrada,
-  JogosAbertosQueryParams,
-} from '@/services/api/entities/atletaAgendamento';
+import { JogoAbertoCard } from '@/components/cards/JogoAbertoCard';
+import { getAllJogosAbertos, solicitarEntrada } from '@/services/api/endpoints/jogoAberto';
+import { JogosAbertosQueryParams, JogoAberto } from '@/types/Jogo';
 import { useDebounce } from '@/hooks/useDebounce';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { VStack } from '@/components/ui/vstack';
 import { GenericFilter, SportKey } from '@/components/filters/GenericFilter';
 import { Heading } from '@/components/ui/heading';
+import { AlertDialogView } from '@/components/layout/AlertDialogView';
+import { useToastNotification } from '@/components/layout/useToastNotification';
 
 const JogosAbertosListHeader = React.memo(
   ({
@@ -68,6 +65,8 @@ const JogosAbertosListHeader = React.memo(
 );
 
 export default function JogosAbertosScreen() {
+  const { showToast } = useToastNotification();
+
   const [cidade, setCidade] = useState('');
   const [esporte, setEsporte] = useState<SportKey>('');
   const [jogos, setJogos] = useState<JogoAberto[]>([]);
@@ -77,6 +76,9 @@ export default function JogosAbertosScreen() {
   const [hasMore, setHasMore] = useState(true);
   const [totalElements, setTotalElements] = useState(0);
   const [solicitandoEntrada, setSolicitandoEntrada] = useState(false);
+
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [selectedAgendamentoId, setSelectedAgendamentoId] = useState<number | null>(null);
 
   const debouncedCidade = useDebounce(cidade, 500);
 
@@ -115,7 +117,11 @@ export default function JogosAbertosScreen() {
       setHasMore(!response.last);
     } catch (error) {
       console.error('Erro ao buscar jogos abertos:', error);
-      Alert.alert('Erro', 'Não foi possível carregar os jogos abertos.');
+      showToast(
+        'Erro',
+        'Não foi possível carregar os jogos abertos.',
+        'error'
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -140,42 +146,44 @@ export default function JogosAbertosScreen() {
     }
   };
 
-  const handleSolicitarEntrada = async (agendamentoId: number) => {
-    if (solicitandoEntrada) return;
+  // Abre o modal de confirmação
+  const handleSolicitarEntrada = (agendamentoId: number) => {
+    setSelectedAgendamentoId(agendamentoId);
+    setAlertVisible(true);
+  };
 
-    Alert.alert(
-      'Solicitar Entrada',
-      'Deseja solicitar entrada neste jogo?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Confirmar',
-          onPress: async () => {
-            try {
-              setSolicitandoEntrada(true);
-              await solicitarEntrada(agendamentoId);
+  // Executa a ação de fato
+  const confirmSolicitacao = async () => {
+    if (!selectedAgendamentoId) return;
 
-              Alert.alert(
-                'Sucesso!',
-                'Sua solicitação foi enviada.',
-                [
-                  { 
-                    text: 'OK', 
-                    onPress: () => fetchJogos(0) 
-                  }
-                ]
-              );
-            } 
-            catch (error: any) {
-              Alert.alert('Aviso', error.message);
-            } 
-            finally {
-              setSolicitandoEntrada(false);
-            }
-          },
-        },
-      ]
-    );
+    try {
+      setSolicitandoEntrada(true);
+      await solicitarEntrada(selectedAgendamentoId);
+
+      // Fecha o modal antes do alerta de sucesso
+      setAlertVisible(false);
+
+      // Pequeno delay para evitar conflito de modais
+      setTimeout(() => {
+        showToast(
+          'Sucesso!',
+          'Sua solicitação foi enviada.',
+          'success'
+        );
+      }, 300);
+
+    } catch (error: any) {
+      setAlertVisible(false);
+      setTimeout(() => {
+        showToast(
+          undefined,
+          error.message,
+          'warning'
+        );
+      }, 300);
+    } finally {
+      setSolicitandoEntrada(false);
+    }
   };
 
   const renderFooter = () => {
@@ -252,6 +260,18 @@ export default function JogosAbertosScreen() {
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
         keyboardShouldPersistTaps="handled"
+      />
+
+      <AlertDialogView
+        isOpen={alertVisible}
+        onClose={() => !solicitandoEntrada && setAlertVisible(false)}
+        onConfirm={confirmSolicitacao}
+        title="Solicitar Entrada"
+        description="Deseja realmente solicitar entrada neste jogo? O organizador precisará aprovar sua participação."
+        confirmText="Confirmar Solicitação"
+        cancelText="Voltar"
+        action="positive"
+        isLoading={solicitandoEntrada}
       />
     </SafeAreaView>
   );

@@ -5,15 +5,16 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { verifyCode, resendVerificationCode } from '@/services/api/auth';
+import { verifyCode, resendVerificationCode } from '@/services/api/endpoints/auth';
 import { useTimer } from '@/hooks/useTimer';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
+import { useToastNotification } from '@/components/layout/useToastNotification';
 
 export default function VerifyCodeScreen() {
+  const { showToast } = useToastNotification();
   const { email } = useLocalSearchParams<{ email: string }>();
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
@@ -48,18 +49,18 @@ export default function VerifyCodeScreen() {
 
   const handleVerifyCode = async (fullCode: string) => {
     if (fullCode.length !== 6) {
-      Alert.alert('Atenção', 'Por favor, insira o código de 6 dígitos');
+      showToast('Atenção', 'Por favor, insira o código de 6 dígitos', 'warning');
       return;
     }
 
     setLoading(true);
     try {
       await verifyCode({ email: email!, code: fullCode });
-      Alert.alert('Sucesso', 'Código verificado!');
-      
+      showToast('Sucesso', 'Código verificado!', 'success');
+
       router.push('/login');
     } catch (error: any) {
-      Alert.alert('Erro', error.message);
+      showToast('Erro', error.message, 'error');
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {
@@ -69,17 +70,17 @@ export default function VerifyCodeScreen() {
 
   const handleResendCode = async () => {
     if (!email) {
-      Alert.alert('Erro', 'Email não fornecido');
+      showToast('Erro', 'Email não fornecido', 'error');
       return;
     }
     try {
       await resendVerificationCode(email);
-      Alert.alert('Sucesso', 'Novo código enviado!');
+      showToast('Sucesso', 'Novo código enviado!', 'success');
       startTimer(45);
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } catch (error: any) {
-      Alert.alert('Erro', error.message);
+      showToast('Erro', error.message, 'error');
     }
   };
 
@@ -106,10 +107,9 @@ export default function VerifyCodeScreen() {
         {code.map((digit, index) => (
           <TextInput
             key={index}
-            ref={(ref) => {inputRefs.current[index] = ref;}}
-            className={`w-12 h-14 border-2 rounded-lg text-center text-2xl font-semibold bg-white ${
-              digit ? 'border-[#22c55e]' : 'border-gray-300'
-            }`}
+            ref={(ref) => { inputRefs.current[index] = ref; }}
+            className={`w-12 h-14 border-2 rounded-lg text-center text-2xl font-semibold bg-white ${digit ? 'border-[#22c55e]' : 'border-gray-300'
+              }`}
             value={digit}
             onChangeText={(text) => handleCodeChange(text, index)}
             onKeyPress={(e) => handleKeyPress(e, index)}
@@ -133,9 +133,8 @@ export default function VerifyCodeScreen() {
           disabled={timer > 0 || loading}
           activeOpacity={0.7}
         >
-          <Text className={`text-sm font-medium ${
-            timer > 0 || loading ? 'text-gray-400' : 'text-grenn-primary'
-          }`}>
+          <Text className={`text-sm font-medium ${timer > 0 || loading ? 'text-gray-400' : 'text-grenn-primary'
+            }`}>
             Reenviar código
           </Text>
         </TouchableOpacity>

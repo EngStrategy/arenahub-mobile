@@ -9,7 +9,9 @@ import {
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { LogBox } from 'react-native'; 
+import { LogBox } from 'react-native';
+import { OverlayProvider } from '@gluestack-ui/core/overlay/creator';
+import { AuthProvider } from '@/context/AuthContext';
 
 // Desativar alertas visuais (Overlay de Erros/Avisos)
 LogBox.ignoreAllLogs();
@@ -41,19 +43,23 @@ export default function RootLayout() {
   }
 
   return (
-    <GluestackUIProvider>
-      <ThemeProvider value={DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          {/* Rotas de Autenticação */}
-          <Stack.Screen name="login" />
-          <Stack.Screen name="register" />
-          <Stack.Screen name="forgot-password" />
+    <GluestackUIProvider mode='light'>
+      <OverlayProvider>
+        <AuthProvider>
+          <ThemeProvider value={DefaultTheme}>
+            <Stack screenOptions={{ headerShown: false }}>
+              {/* Rotas de Autenticação */}
+              <Stack.Screen name="welcome" />
+              <Stack.Screen name="login" />
+              <Stack.Screen name="register" />
+              <Stack.Screen name="forgot-password" />
 
-          {/* Grupos de Navegação (Tabs) */}
-          <Stack.Screen name="(atleta)" />
-          <Stack.Screen name="(arena)" />
-        </Stack>
-      </ThemeProvider>
+              {/* Grupos de Navegação (Tabs) */}
+              <Stack.Screen name="(atleta)" />
+            </Stack>
+          </ThemeProvider>
+        </AuthProvider>
+      </OverlayProvider>
     </GluestackUIProvider>
   );
 }

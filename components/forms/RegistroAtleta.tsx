@@ -1,36 +1,35 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from 'expo-router';
-import { registerAthlete } from '@/services/api/auth';
+import { registerAthlete } from '@/services/api/endpoints/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FormControl } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
-import { PasswordStrengthIndicator } from "@/components/forms/passwordStrengthIndicador";
-import { Alert, ScrollView } from "react-native";
-import { formatarTelefone } from "@/context/functions/formatters";
+import { PasswordStrengthIndicator } from "@/components/general/PasswordStrengthIndicator";
+import { ScrollView } from "react-native";
+import { formatarTelefone } from "@/utils/formatters";
 import { InputTexto } from "./formInputs/InputTexto";
 import { InputNumero } from "./formInputs/InputNumero";
 import { InputSenha } from "./formInputs/InputSenha";
-import { 
+import {
   validarNome,
   validarTelefone,
   validarConfirmPassword,
   validarEmail,
   validarPassword
-} from "@/context/functions/validators";
+} from "@/utils/validators";
+import { useToastNotification } from "@/components/layout/useToastNotification";
 
 export const RegistroAtleta = ({ className }: { className?: string }) => {
   const router = useRouter();
+  const { showToast } = useToastNotification();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmSenha, setConfirmSenha] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [showPasswordConfirmed, setShowPasswordConfirmed] = React.useState(false);
   const [errors, setErrors] = useState({
     nome: '',
     email: '',
@@ -38,9 +37,6 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
     password: '',
     confirmPassword: '',
   });
-
-  const toggleShowPassword = () => setShowPassword(prev => !prev);
-  const toggleShowPasswordConfirmed = () => setShowPasswordConfirmed(prev => !prev);
 
   const handleRegister = async () => {
     const nomeError = validarNome(nome);
@@ -70,10 +66,10 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
         params: { email },
       });
 
-    } 
+    }
     catch (error: any) {
-        Alert.alert('Aviso', error.message);
-    } 
+      showToast('Aviso', error.message, 'warning');
+    }
     finally {
       setLoading(false);
     }
@@ -147,8 +143,8 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
             error={errors.confirmPassword}
           />
 
-          <Button 
-            size="xl" 
+          <Button
+            size="xl"
             className="bg-green-primary rounded-lg py-3 mt-4"
             onPress={handleRegister}
             disabled={loading}

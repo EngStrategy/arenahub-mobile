@@ -1,4 +1,3 @@
-// hooks/useTimer.ts
 import { useState, useEffect } from 'react';
 
 export const useTimer = (initialTime: number, startImmediately = false) => {

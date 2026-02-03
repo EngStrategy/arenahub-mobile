@@ -1,4 +1,3 @@
-// src/data/estados.ts
 export const estados = [
   { sigla: "AC", nome: "Acre" },
   { sigla: "AL", nome: "Alagoas" },
