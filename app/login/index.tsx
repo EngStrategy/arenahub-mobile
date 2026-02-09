@@ -17,6 +17,7 @@ import {
   View,
 } from 'react-native';
 import { useToastNotification } from '@/components/layout/useToastNotification';
+import { ButtonPrimary } from '@/components/buttons/ButtonPrimary';
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
@@ -137,7 +138,7 @@ export default function LoginScreen() {
         {/* Botão Entrar */}
         <Button
           size="xl"
-          className="bg-green-primary rounded-lg py-3 mt-4"
+          className="bg-green-primary rounded-3xl py-3 mt-4"
           onPress={handleLogin}
           disabled={loading}
           android_ripple={{ color: 'transparent' }}

@@ -15,6 +15,7 @@ import { AppHeader } from '@/components/layout/AppHeader';
 import { VStack } from '@/components/ui/vstack';
 import { GenericFilter, SportKey } from '@/components/filters/GenericFilter';
 import type { Arena } from '@/types/Arena';
+import { useToastNotification } from '@/components/layout/useToastNotification';
 
 const ArenasListHeader = React.memo(
   ({
@@ -60,6 +61,7 @@ const ArenasListHeader = React.memo(
 );
 
 export default function ArenasScreen() {
+  const { showToast } = useToastNotification();
   const router = useRouter();
   const [cidade, setCidade] = useState('');
   const [esporte, setEsporte] = useState<SportKey>('');
@@ -105,8 +107,8 @@ export default function ArenasScreen() {
 
       setTotalElements(response.totalElements);
       setHasMore(!response.last);
-    } catch (error) {
-      console.error('Erro ao buscar arenas:', error);
+    } catch (error: any) {
+      showToast("Erro", error.response?.data?.message || "Não foi possível buscar as arenas.", "error");
     } finally {
       setLoading(false);
       setRefreshing(false);

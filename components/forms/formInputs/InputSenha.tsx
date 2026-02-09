@@ -40,7 +40,7 @@ export const InputSenha = ({
     <VStack space="xs" className="w-full">
       <Text className={labelClassName}>{label}</Text>
 
-      <Input size="xl" className={`border border-gray-300 rounded-lg ${className}`}>
+      <Input size="xl" className={`border border-gray-300 rounded-3xl ${className}`}>
         <InputField
           className="text-base"
           type={showPassword ? "text" : "password"}

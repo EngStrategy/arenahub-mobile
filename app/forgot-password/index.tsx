@@ -93,7 +93,7 @@ export default function ForgotPasswordScreen() {
         {/* Botão Principal */}
         <Button
           size="xl"
-          className="bg-green-primary rounded-lg py-3 mb-4"
+          className="bg-green-primary rounded-3xl py-3 mb-4"
           onPress={handleSendEmail}
           disabled={loading}
         >

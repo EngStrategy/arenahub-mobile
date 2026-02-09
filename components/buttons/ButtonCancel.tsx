@@ -10,7 +10,7 @@ export function ButtonCancel({ text, loading, handleAction }: ButtonCancelProps)
     return (
         <Button
             size="xl"
-            className="flex-1 bg-gray-200 rounded-lg py-3"
+            className="flex-1 bg-gray-200 rounded-3xl py-3"
             onPress={handleAction}
             disabled={loading}
         >

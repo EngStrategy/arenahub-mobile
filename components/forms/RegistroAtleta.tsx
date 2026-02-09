@@ -145,7 +145,7 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
 
           <Button
             size="xl"
-            className="bg-green-primary rounded-lg py-3 mt-4"
+            className="bg-green-primary rounded-3xl py-3 mt-4"
             onPress={handleRegister}
             disabled={loading}
           >

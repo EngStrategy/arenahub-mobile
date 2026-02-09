@@ -98,7 +98,6 @@ export default function MeusAgendamentosScreen() {
     } catch (error) {
       showToast("Erro", "Não foi possível carregar as solicitações.", "error");
       setModalSolicitacoesOpen(false);
-      console.error("Erro ao buscar solicitações: ", error);
     } finally {
       setSolicitacoesLoading(false);
     }
@@ -166,7 +165,6 @@ export default function MeusAgendamentosScreen() {
       }
 
     } catch (error) {
-      console.error("Erro ao buscar dados", error);
       showToast("Erro", "Não foi possível carregar os dados.", "error");
     } finally {
       if (isMountedRef.current) {
@@ -187,7 +185,6 @@ export default function MeusAgendamentosScreen() {
       setAgendamentosFilhos(data);
     } catch (error: any) {
       showToast("Erro", error.response?.data?.message || "Falha ao carregar datas da recorrência.", "error");
-      console.error("Erro ao buscar agendamentos filhos", error);
       setModalFixoOpen(false);
     } finally {
       setFilhosLoading(false);
@@ -331,7 +328,6 @@ export default function MeusAgendamentosScreen() {
       const displayMessage = backendMessage || "Não foi possível sair do jogo.";
 
       showToast("Erro", displayMessage, "error");
-      console.error("Erro ao sair do jogo", error);
     }
   };
 

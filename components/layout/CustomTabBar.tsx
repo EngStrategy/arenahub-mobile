@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 
-export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export function CustomTabBar({ state, descriptors, navigation }: Readonly<BottomTabBarProps>) {
     const translateX = useSharedValue(0);
     const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
 
@@ -112,7 +112,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                             />
                             <Text style={[
                                 styles.label,
-                                { color: isFocused ? '#FFFFFF' : '#6B7280' }
+                                { color: '#6B7280' }
                             ]}>
                                 {label as string}
                             </Text>
@@ -163,14 +163,15 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     greenCircle: {
-        width: '90%',
-        height: '80%',
-        borderRadius: 16,
+        width: 50,
+        height: 26,
+        borderRadius: 15,
         backgroundColor: '#15A01A',
+        marginBottom: 16,
     },
     label: {
         fontSize: 10,
-        marginTop: 2,
+        marginTop: 4,
         fontWeight: '500',
     }
 });

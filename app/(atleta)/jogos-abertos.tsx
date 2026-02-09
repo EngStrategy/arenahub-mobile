@@ -115,11 +115,10 @@ export default function JogosAbertosScreen() {
 
       setTotalElements(response.totalElements);
       setHasMore(!response.last);
-    } catch (error) {
-      console.error('Erro ao buscar jogos abertos:', error);
+    } catch (error: any) {
       showToast(
         'Erro',
-        'Não foi possível carregar os jogos abertos.',
+        error.response?.data?.message || 'Não foi possível carregar os jogos abertos.',
         'error'
       );
     } finally {

@@ -58,7 +58,7 @@ export const InputNumero = ({
 
       <Input
         size="xl"
-        className={`border border-gray-300 rounded-lg ${containerClassName}`}
+        className={`border border-gray-300 rounded-3xl ${containerClassName}`}
         isDisabled={isDisabled}
       >
         <InputField

@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   TouchableOpacity,
-  Modal,
-  View,
-  FlatList,
+  ScrollView,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { CitySearch } from '@/components/forms/CitySearch';
 import { VStack } from '@/components/ui/vstack';
-import { ChevronDown } from 'lucide-react-native';
 
 const sportLabels: Record<string, string> = {
   '': 'Todos os esportes',
@@ -60,7 +57,6 @@ export const GenericFilter = React.memo(
       plural: 'resultados encontrados',
     },
   }: GenericFilterProps) => {
-    const [showSportModal, setShowSportModal] = useState(false);
 
     return (
       <VStack className="bg-white px-7 py-3 border-gray-200">
@@ -71,17 +67,34 @@ export const GenericFilter = React.memo(
           onChangeText={onCidadeChange}
         />
 
-        {/* Seletor de Esporte */}
+        {/* Seletor de Esporte (Pills) */}
         <VStack className="mt-3">
-          <TouchableOpacity
-            onPress={() => setShowSportModal(true)}
-            className="border border-gray-300 rounded-lg h-12 px-3 flex-row items-center justify-between"
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8 }}
           >
-            <Text className="text-gray-700">
-              {sportLabels[esporte]}
-            </Text>
-            <ChevronDown size={20} color="#6b7280" />
-          </TouchableOpacity>
+            {SPORT_OPTIONS.map((item) => {
+              const isSelected = esporte === item.value;
+              return (
+                <TouchableOpacity
+                  key={item.value}
+                  onPress={() => onEsporteChange(item.value)}
+                  className={`px-4 py-2 rounded-full border ${isSelected
+                    ? 'bg-green-primary border-green-600'
+                    : 'bg-white border-gray-300'
+                    }`}
+                >
+                  <Text
+                    className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-gray-600'
+                      }`}
+                  >
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </VStack>
 
         {/* Contador de resultados */}
@@ -91,49 +104,6 @@ export const GenericFilter = React.memo(
             {totalElements === 1 ? resultsLabel.singular : resultsLabel.plural}
           </Text>
         )}
-
-        {/* Modal de seleção de esporte */}
-        <Modal
-          visible={showSportModal}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowSportModal(false)}
-        >
-          <TouchableOpacity
-            className="flex-1 bg-black/30 justify-center items-center"
-            activeOpacity={1}
-            onPress={() => setShowSportModal(false)}
-          >
-            <View className="bg-white w-[80%] rounded-xl p-4 shadow-lg max-h-[70%]">
-              <Text className="text-lg font-bold text-gray-800 mb-4 text-center">
-                Selecionar Esporte
-              </Text>
-              <FlatList
-                data={SPORT_OPTIONS}
-                keyExtractor={(item) => item.value}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    className={`py-3 border-b border-gray-100 ${esporte === item.value ? 'bg-green-50' : ''
-                      }`}
-                    onPress={() => {
-                      onEsporteChange(item.value);
-                      setShowSportModal(false);
-                    }}
-                  >
-                    <Text
-                      className={`text-center font-medium ${esporte === item.value
-                        ? 'text-green-600'
-                        : 'text-gray-600'
-                        }`}
-                    >
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          </TouchableOpacity>
-        </Modal>
       </VStack>
     );
   }

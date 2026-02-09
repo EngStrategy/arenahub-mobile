@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = __DEV__
   ? process.env.EXPO_PUBLIC_ARENAHUB_API_URL
-  : 'https://api.arenahub.app/api/v1';
+  : process.env.EXPO_PUBLIC_ARENAHUB_API_URL_PROD;
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

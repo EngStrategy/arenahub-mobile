@@ -1,5 +1,4 @@
-// app/forgot-password/reset-password.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -98,7 +97,7 @@ export default function ResetPasswordScreen() {
 
           {/* Botão para ir direto ao Login */}
           <View className="w-full mb-3">
-            <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
+            <Button size="xl" className="bg-green-primary rounded-2xl py-3 mt-4"
               onPress={() => router.replace('/login')}
               disabled={loading}
             >
@@ -166,7 +165,7 @@ export default function ResetPasswordScreen() {
 
           {/* Botão Confirmar */}
           <View className="w-full mb-3">
-            <Button size="xl" className="bg-green-primary rounded-lg py-3 mt-4"
+            <Button size="xl" className="bg-green-primary rounded-3xl py-3 mt-4"
               onPress={handleResetPassword}
               disabled={loading}
             >

@@ -52,9 +52,7 @@ export default function InformacoesPessoaisAtleta() {
             if (!user?.id) return;
             try {
                 setLoading(true);
-                console.log("[fetchAtleta] Buscando atleta com ID:", user.id);
                 const data = await getAtletaById(user.id);
-                console.log("[fetchAtleta] Dados recebidos:", data);
 
                 const currentPhoto = data.urlFoto || user.imageUrl || DEFAULT_AVATAR_URL;
                 const nomeAtleta = data.nome || user.name || "";
@@ -64,9 +62,8 @@ export default function InformacoesPessoaisAtleta() {
                 setEmail(data.email || "");
                 setUrlFoto(currentPhoto);
                 setInitialData({ nome: nomeAtleta, telefone: data.telefone || "", urlFoto: currentPhoto });
-            } catch (error) {
-                console.error("[fetchAtleta] Erro:", error);
-                showToast(undefined, "Não foi possível carregar os dados.", "error");
+            } catch (error: any) {
+                showToast(undefined, error.response?.data?.message || "Não foi possível carregar os dados.", "error");
             } finally {
                 setLoading(false);
             }

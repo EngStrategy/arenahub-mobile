@@ -4,7 +4,7 @@ import { InputTexto } from '@/components/forms/formInputs/InputTexto';
 import { Text } from '@/components/ui/text';
 import { getCidadesComArenas } from '@/services/api/endpoints/arena';
 import { useDebounce } from '@/hooks/useDebounce';
-import { MapPin } from 'lucide-react-native';
+import { MapPin, Search } from 'lucide-react-native';
 import { Cidade } from '@/types/Arena';
 
 interface CitySearchProps {
@@ -61,6 +61,7 @@ export const CitySearch = ({ value, onChangeText, placeholder = "Buscar por cida
                 onFocus={() => {
                     if (value.length >= 2) setShowSuggestions(true);
                 }}
+                leftIcon={<Search size={20} color="#9ca3af" />}
             />
 
             {showSuggestions && suggestions.length > 0 && (

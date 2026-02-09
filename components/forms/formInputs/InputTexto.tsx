@@ -1,4 +1,4 @@
-import { Input, InputField } from '@/components/ui/input';
+import { Input, InputField, InputSlot } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 
@@ -22,12 +22,18 @@ export function InputTexto({
   onBlur,
   onFocus,
   error,
-}: InputTextoProps) {
+  leftIcon,
+}: InputTextoProps & { leftIcon?: React.ReactNode }) {
   return (
     <VStack space="xs">
       {label && <Text>{label}</Text>}
 
-      <Input size="xl" className="border border-gray-300 rounded-lg">
+      <Input size="xl" className="border border-gray-300 rounded-3xl">
+        {leftIcon && (
+          <InputSlot className="pl-3">
+            {leftIcon}
+          </InputSlot>
+        )}
         <InputField
           className="text-base"
           type="text"

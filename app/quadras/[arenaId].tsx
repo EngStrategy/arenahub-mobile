@@ -16,6 +16,7 @@ import { addDuration, subDuration, getDuracaoEmMinutos } from '@/utils/time';
 import { formatarEsporte, formatarMaterial } from '@/utils/formatters';
 import { HStack } from '@/components/ui/hstack';
 import { BlurView } from 'expo-blur';
+import { useToastNotification } from '@/components/layout/useToastNotification';
 
 // Componente QuadraCard
 const QuadraCard = ({
@@ -198,6 +199,7 @@ const QuadraCard = ({
 export default function QuadrasScreen() {
   const { arenaId } = useLocalSearchParams<{ arenaId: string }>();
   const router = useRouter();
+  const { showToast } = useToastNotification();
 
   const [arena, setArena] = useState<Arena | null>(null);
   const [quadras, setQuadras] = useState<Quadra[]>([]);
@@ -244,8 +246,8 @@ export default function QuadrasScreen() {
         setArena(arenaData);
         setQuadras(quadrasData);
       }
-      catch (error) {
-        console.error("Erro ao carregar dados:", error);
+      catch (error: any) {
+        showToast("Erro", error.response?.data?.message || "Não foi possível carregar os dados.", "error");
       }
       finally {
         setLoading(false);
@@ -273,8 +275,8 @@ export default function QuadrasScreen() {
 
         setHorarios(novosHorarios);
       }
-      catch (error) {
-        console.error("Erro ao buscar horários:", error);
+      catch (error: any) {
+        showToast("Erro", error.response?.data?.message || "Não foi possível buscar os horários.", "error");
       }
       finally {
         setLoadingHorarios(false);
@@ -366,10 +368,7 @@ export default function QuadrasScreen() {
               showDetailsButton={true}
               showFullAddress={true}
               showEsportes={false}
-              onPressRating={() => {
-                console.log("Clicou nas estrelas!");
-                setShowAvaliacoes(true);
-              }}
+              onPressRating={() => setShowAvaliacoes(true)}
             />
           </View>
         )}

@@ -45,11 +45,11 @@ web-build/
 package-lock.json
 yarn.lock
 
-
+/.idea
+/android
 
 
 ios
-android
 
 # macOS
 .DS_Store
@@ -61,3 +61,6 @@ android
 
 expo-env.d.ts
 # @end expo-cli
+
+# EAS
+eas.json

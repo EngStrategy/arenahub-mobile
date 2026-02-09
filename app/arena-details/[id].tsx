@@ -16,9 +16,11 @@ import { ModalAvaliacoes } from '@/components/modals/ModalAvaliacoes';
 
 import { getArenaById } from '@/services/api/endpoints/arena';
 import { Arena } from '@/types/Arena';
+import { useToastNotification } from '@/components/layout/useToastNotification';
 
 export default function ArenaDetalhesScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
+    const { showToast } = useToastNotification();
     const router = useRouter();
     const insets = useSafeAreaInsets();
 
@@ -34,8 +36,8 @@ export default function ArenaDetalhesScreen() {
                 const data = await getArenaById(id);
 
                 setArena(data);
-            } catch (error) {
-                console.error("Erro ao carregar arena:", error);
+            } catch (error: any) {
+                showToast("Erro", error.response?.data?.message || "Não foi possível carregar a arena.", "error");
             } finally {
                 setLoading(false);
             }
@@ -165,8 +167,6 @@ export default function ArenaDetalhesScreen() {
                                 <MapView
                                     style={{ width: '100%', height: '100%' }}
                                     className="w-full h-full"
-                                    onMapReady={() => console.log("✅ Mapa carregado com sucesso")}
-                                    onMapLoaded={() => console.log("✅ Tiles do mapa renderizadas")}
                                     initialRegion={{
                                         latitude: arena.endereco.latitude,
                                         longitude: arena.endereco.longitude,
