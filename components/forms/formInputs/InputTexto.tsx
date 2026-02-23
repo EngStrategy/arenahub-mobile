@@ -28,7 +28,7 @@ export function InputTexto({
     <VStack space="xs">
       {label && <Text>{label}</Text>}
 
-      <Input size="xl" className="border border-gray-300 rounded-3xl">
+      <Input size="xl" className="border border-gray-300 rounded-2xl bg-white/50">
         {leftIcon && (
           <InputSlot className="pl-3">
             {leftIcon}

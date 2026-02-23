@@ -143,7 +143,7 @@ export default function VerifyCodeScreen() {
       {/* Botão Confirmar */}
       <Button
         size="xl"
-        className="bg-green-primary rounded-3xl py-3"
+        className="bg-green-primary rounded-2xl py-3"
         onPress={() => handleVerifyCode(code.join(''))}
         disabled={loading || code.some((digit) => !digit)}
       >

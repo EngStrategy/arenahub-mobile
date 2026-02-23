@@ -17,6 +17,8 @@ import { FormControl } from '@/components/ui/form-control';
 import { InputSenha } from '@/components/forms/formInputs/InputSenha';
 import { useToastNotification } from '@/components/layout/useToastNotification';
 
+import { AuthBackground } from '@/components/layout/AuthBackground';
+
 export default function ResetPasswordScreen() {
   const { showToast } = useToastNotification();
   const { email } = useLocalSearchParams<{ email: string }>();
@@ -112,70 +114,72 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    <KeyboardAwareScrollView
-      className="flex-1 bg-white" // Estilo do KAV
-      contentContainerClassName="flex-grow p-6 justify-center" // Estilo do ScrollView
-      keyboardShouldPersistTaps="handled"
-      enableOnAndroid={true} // Importante para Android
-      extraScrollHeight={Platform.OS === 'ios' ? 20 : 0} // Um pequeno ajuste fino (opcional)
-    >
-      <FormControl className="pt-5 rounded-lg w-full">
-        <VStack className="w-full gap-4">
-          {/* Ícone */}
-          <View className="items-center mb-6">
-            <View className="w-20 h-20 rounded-full bg-green-primary items-center justify-center">
-              <Ionicons name="lock-closed" size={32} color="#fff" />
+    <AuthBackground>
+      <KeyboardAwareScrollView
+        className="flex-1"
+        contentContainerClassName="flex-grow p-6 justify-center" // Estilo do ScrollView
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true} // Importante para Android
+        extraScrollHeight={Platform.OS === 'ios' ? 20 : 0} // Um pequeno ajuste fino (opcional)
+      >
+        <FormControl className="pt-5 rounded-lg w-full">
+          <VStack className="w-full gap-4">
+            {/* Ícone */}
+            <View className="items-center mb-6">
+              <View className="w-20 h-20 rounded-full bg-green-primary items-center justify-center">
+                <Ionicons name="lock-closed" size={32} color="#fff" />
+              </View>
             </View>
-          </View>
 
-          {/* Título */}
-          <Text className="text-2xl font-semibold text-center mb-2 text-gray-800">
-            Redefinir Senha
-          </Text>
-          <Text className="text-sm text-center text-gray-500 mb-8">
-            Escolha uma nova senha para sua conta.
-          </Text>
+            {/* Título */}
+            <Text className="text-2xl font-semibold text-center mb-2 text-gray-800">
+              Redefinir Senha
+            </Text>
+            <Text className="text-sm text-center text-gray-500 mb-8">
+              Escolha uma nova senha para sua conta.
+            </Text>
 
-          {/* Input Nova Senha */}
-          <InputSenha
-            label="Senha"
-            value={password}
-            onChangeText={setPassword}
-            onBlur={() => {
-              const passwordError = validarPassword(password);
-              setErrors((prev) => ({ ...prev, password: passwordError }));
-            }}
-            error={errors.password}
-            showStrengthIndicator
-            StrengthIndicatorComponent={<PasswordStrengthIndicator password={password} />}
-          />
+            {/* Input Nova Senha */}
+            <InputSenha
+              label="Senha"
+              value={password}
+              onChangeText={setPassword}
+              onBlur={() => {
+                const passwordError = validarPassword(password);
+                setErrors((prev) => ({ ...prev, password: passwordError }));
+              }}
+              error={errors.password}
+              showStrengthIndicator
+              StrengthIndicatorComponent={<PasswordStrengthIndicator password={password} />}
+            />
 
-          {/* Input Confirmar Senha */}
-          <InputSenha
-            label="Confirme sua senha"
-            placeholder="Confirme sua senha"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            onBlur={() => {
-              const confirmPasswordError = validarConfirmPassword(confirmPassword, password);
-              setErrors((prev) => ({ ...prev, confirmPassword: confirmPasswordError }));
-            }}
-            error={errors.confirmPassword}
-          />
+            {/* Input Confirmar Senha */}
+            <InputSenha
+              label="Confirme sua senha"
+              placeholder="Confirme sua senha"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              onBlur={() => {
+                const confirmPasswordError = validarConfirmPassword(confirmPassword, password);
+                setErrors((prev) => ({ ...prev, confirmPassword: confirmPasswordError }));
+              }}
+              error={errors.confirmPassword}
+            />
 
-          {/* Botão Confirmar */}
-          <View className="w-full mb-3">
-            <Button size="xl" className="bg-green-primary rounded-3xl py-3 mt-4"
-              onPress={handleResetPassword}
-              disabled={loading}
-            >
-              <ButtonText className="text-base text-white">
-                Confirmar
-              </ButtonText>
-            </Button>
-          </View>
-        </VStack>
-      </FormControl>
-    </KeyboardAwareScrollView>
+            {/* Botão Confirmar */}
+            <View className="w-full mb-3">
+              <Button size="xl" className="bg-green-primary rounded-2xl py-3 mt-4"
+                onPress={handleResetPassword}
+                disabled={loading}
+              >
+                <ButtonText className="text-base text-white">
+                  Confirmar
+                </ButtonText>
+              </Button>
+            </View>
+          </VStack>
+        </FormControl>
+      </KeyboardAwareScrollView>
+    </AuthBackground>
   );
 }

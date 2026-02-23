@@ -19,7 +19,7 @@ export default function NotFoundScreen() {
         </View>
 
         <VStack space="md" className="items-center">
-          <Text className="text-3xl font-bold text-gray-900 text-center">
+          <Text className="text-2xl font-bold text-gray-900 text-center">
             Ops! Fora de Jogo.
           </Text>
 

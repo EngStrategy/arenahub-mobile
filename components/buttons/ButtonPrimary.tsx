@@ -12,7 +12,7 @@ export function ButtonPrimary({ text, loading, handleAction, className, disabled
     return (
         <Button
             size="xl"
-            className={`flex-1 bg-green-primary rounded-3xl py-3 ${className}`}
+            className={`flex-1 bg-green-primary rounded-2xl py-3 ${className}`}
             onPress={handleAction}
             disabled={loading || disabled}
         >

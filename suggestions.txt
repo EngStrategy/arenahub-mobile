@@ -1,15 +1,4 @@
 # Sugestões de Melhoria - ArenaHub Mobile
 
-## 1. UX/UI (Experiência do Usuário)
-### Filtros de Busca (Home)
--   **Problema**: O filtro de esportes atual usa um Modal que interrompe o fluxo de navegação. O input de cidade é básico.
--   **Sugestão**: Substituir o dropdown/modal de esportes por uma lista horizontal de "Pills" (cápsulas) clicáveis.
-    -   Exemplo: [Todos] [Futebol Society] [Vôlei] ...
-    -   Isso permite filtrar com um único toque, sem abrir/fechar janelas.
-
-### Performance & Feedback
 -   **Skeletons**: Substituir os "Spinners" (ActivityIndicator) por "Skeleton Screens" (telas de esqueleto) durante o carregamento. Isso dá a sensação de que o app é mais rápido.
-
-## 2. Próximos Passos Recomendados
-1.  Implementar o filtro horizontal de esportes.
-2.  Adicionar animações de entrada (FadeIn) nas listas de arenas.
+-   Adicionar animações de entrada (FadeIn) nas listas de arenas.

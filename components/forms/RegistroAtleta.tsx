@@ -7,7 +7,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { PasswordStrengthIndicator } from "@/components/general/PasswordStrengthIndicator";
-import { ScrollView } from "react-native";
+import { View } from "react-native";
 import { formatarTelefone } from "@/utils/formatters";
 import { InputTexto } from "./formInputs/InputTexto";
 import { InputNumero } from "./formInputs/InputNumero";
@@ -21,7 +21,7 @@ import {
 } from "@/utils/validators";
 import { useToastNotification } from "@/components/layout/useToastNotification";
 
-export const RegistroAtleta = ({ className }: { className?: string }) => {
+export const RegistroAtleta = ({ onFocusPassword }: { onFocusPassword?: () => void }) => {
   const router = useRouter();
   const { showToast } = useToastNotification();
   const [nome, setNome] = useState("");
@@ -76,8 +76,8 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
   };
 
   return (
-    <ScrollView className={`flex-1 bg-white ${className ?? ""}`}>
-      <FormControl className="pt-5 rounded-lg w-full">
+    <View>
+      <FormControl className="rounded-lg w-full">
         <VStack className="w-full gap-4">
           <InputTexto
             label="Nome"
@@ -122,6 +122,9 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
             label="Senha"
             value={senha}
             onChangeText={setSenha}
+            onFocus={() => {
+              if (onFocusPassword) onFocusPassword();
+            }}
             onBlur={() => {
               const passwordError = validarPassword(senha);
               setErrors((prev) => ({ ...prev, password: passwordError }));
@@ -136,6 +139,9 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
             placeholder="Confirme sua senha"
             value={confirmSenha}
             onChangeText={setConfirmSenha}
+            onFocus={() => {
+              if (onFocusPassword) onFocusPassword();
+            }}
             onBlur={() => {
               const confirmPasswordError = validarConfirmPassword(confirmSenha, senha);
               setErrors((prev) => ({ ...prev, confirmPassword: confirmPasswordError }));
@@ -145,7 +151,7 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
 
           <Button
             size="xl"
-            className="bg-green-primary rounded-3xl py-3 mt-4"
+            className="bg-green-primary rounded-2xl py-3 mt-4"
             onPress={handleRegister}
             disabled={loading}
           >
@@ -160,15 +166,20 @@ export const RegistroAtleta = ({ className }: { className?: string }) => {
         </VStack>
       </FormControl>
 
-      <Button size="xl" className="justify-start p-0"
-        onPress={() => router.push('/login')}
-      >
-        <Text className="text-sm text-gray-500">Já possui uma conta?</Text>
-        <ButtonText className="text-base text-green-primary p-0 underline"
+      <View className="flex-row items-center mt-4">
+        <Button
+          size="xl"
+          variant="link"
+          action="primary"
+          className="justify-start p-0"
+          onPress={() => router.push('/login')}
         >
-          Entrar
-        </ButtonText>
-      </Button>
-    </ScrollView>
+          <Text className="text-sm text-gray-500">Já possui uma conta?</Text>
+          <ButtonText className="text-base text-green-primary p-0 underline ml-1">
+            Entrar
+          </ButtonText>
+        </Button>
+      </View>
+    </View>
   );
 };

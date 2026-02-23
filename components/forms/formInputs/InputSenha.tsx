@@ -11,7 +11,8 @@ interface InputSenhaProps {
   placeholder?: string;
   value: string;
   onChangeText: (text: string) => void;
-  onBlur?: () => void; // <-- permite lógica customizada
+  onFocus?: () => void;
+  onBlur?: () => void;
   error?: string | null;
   showStrengthIndicator?: boolean;
   StrengthIndicatorComponent?: React.ReactNode;
@@ -24,6 +25,7 @@ export const InputSenha = ({
   placeholder = "Insira sua senha",
   value,
   onChangeText,
+  onFocus,
   onBlur,
   error,
   showStrengthIndicator = false,
@@ -40,7 +42,7 @@ export const InputSenha = ({
     <VStack space="xs" className="w-full">
       <Text className={labelClassName}>{label}</Text>
 
-      <Input size="xl" className={`border border-gray-300 rounded-3xl ${className}`}>
+      <Input size="xl" className={`border border-gray-300 rounded-2xl bg-white/50 ${className}`}>
         <InputField
           className="text-base"
           type={showPassword ? "text" : "password"}
@@ -48,10 +50,13 @@ export const InputSenha = ({
           value={value}
           onChangeText={onChangeText}
           secureTextEntry={!showPassword}
-          onFocus={() => setIsFocused(true)}
+          onFocus={() => {
+            setIsFocused(true);
+            if (onFocus) onFocus();
+          }}
           onBlur={() => {
             setIsFocused(false);
-            if (onBlur) onBlur(); // 👈 executa lógica custom passada
+            if (onBlur) onBlur();
           }}
         />
         <InputSlot className="pr-3" onPress={toggleShowPassword}>

@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { registerLogoutCallback } from '../services/api';
 
 type UserData = {
   id: string;
@@ -21,13 +22,17 @@ type AuthContextData = {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { readonly children: React.ReactNode }) {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadStorageData();
   }, []);
+
+  useEffect(() => {
+    registerLogoutCallback(signOut);
+  });
 
   async function loadStorageData() {
     try {
@@ -46,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function signIn(token: string, userData: UserData) {
+  const signIn = useCallback(async (token: string, userData: UserData) => {
     try {
       await AsyncStorage.multiSet([
         ['userToken', token],
@@ -57,9 +62,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Erro ao salvar dados de login:', error);
       throw error;
     }
-  }
+  }, []);
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     try {
       await AsyncStorage.multiRemove(['userToken', 'userData']);
       setUser(null);
@@ -67,30 +72,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Erro ao realizar logout:', error);
     }
-  }
+  }, []);
 
-  async function updateUser(newUserData: Partial<UserData>) {
+  const updateUser = useCallback(async (newUserData: Partial<UserData>) => {
     try {
       if (!user) return;
-      
+
       const updatedUser = { ...user, ...newUserData };
       await AsyncStorage.setItem('userData', JSON.stringify(updatedUser));
       setUser(updatedUser);
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
     }
-  }
+  }, [user]);
+
+  const value = useMemo(
+    () => ({
+      user,
+      isLoading,
+      signIn,
+      signOut,
+      updateUser,
+    }),
+    [user, isLoading, signIn, signOut, updateUser]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        signIn,
-        signOut,
-        updateUser,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

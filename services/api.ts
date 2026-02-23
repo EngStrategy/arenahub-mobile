@@ -22,7 +22,9 @@ api.interceptors.request.use(
       '/forgot-password',
       '/verify-reset-code',
       '/reset-password',
-      '/resend-verification'
+      '/resend-verification',
+      '/jogos-abertos',
+      '/arenas'
     ];
 
     const isPublicEndpoint = publicEndpoints.some(endpoint =>
@@ -43,6 +45,13 @@ api.interceptors.request.use(
   }
 );
 
+// Callback para logout quando receber 401
+let logoutCallback: (() => void) | null = null;
+
+export const registerLogoutCallback = (callback: () => void) => {
+  logoutCallback = callback;
+};
+
 // Interceptor para debug de respostas
 api.interceptors.response.use(
   async (response) => {
@@ -53,6 +62,12 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Se receber 401 (Unauthorized), desloga o usuário
+    if (error.response && error.response.status === 401) {
+      if (logoutCallback) {
+        logoutCallback();
+      }
+    }
     return Promise.reject(error);
   }
 );
