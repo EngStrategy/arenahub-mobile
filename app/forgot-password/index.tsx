@@ -38,14 +38,14 @@ export default function ForgotPasswordScreen() {
     setLoading(true);
     try {
       await forgotPassword(email);
-      showToast('Sucesso', 'Código enviado para seu email!', 'success');
+      showToast('Código enviado para seu email!', 'success');
 
       router.push({
         pathname: '/forgot-password/verify-code',
         params: { email },
       });
     } catch (error: any) {
-      showToast('Erro', error.message, 'error');
+      showToast(error.response?.data?.message || 'Credenciais inválidas', 'error');
     } finally {
       setLoading(false);
     }

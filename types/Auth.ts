@@ -39,6 +39,7 @@ export interface LoginResponse {
     accessToken: string;
     userId: string;
     name: string;
+    telefone: string;
     role: string;
     imageUrl?: string;
     expiresIn: number;

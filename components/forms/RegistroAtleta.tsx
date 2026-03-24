@@ -68,7 +68,7 @@ export const RegistroAtleta = ({ onFocusPassword }: { onFocusPassword?: () => vo
 
     }
     catch (error: any) {
-      showToast('Aviso', error.message, 'warning');
+      showToast(error.response?.data?.message || 'Erro ao registrar atleta', 'warning');
     }
     finally {
       setLoading(false);

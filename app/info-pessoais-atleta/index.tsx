@@ -63,7 +63,7 @@ export default function InformacoesPessoaisAtleta() {
                 setUrlFoto(currentPhoto);
                 setInitialData({ nome: nomeAtleta, telefone: data.telefone || "", urlFoto: currentPhoto });
             } catch (error: any) {
-                showToast(undefined, error.response?.data?.message || "Não foi possível carregar os dados.", "error");
+                showToast(error.response?.data?.message || "Não foi possível carregar os dados.", "error");
             } finally {
                 setLoading(false);
             }
@@ -74,7 +74,7 @@ export default function InformacoesPessoaisAtleta() {
     const selectImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            showToast(undefined, "Permissão para galeria é necessária.", "error");
+            showToast("Permissão para galeria é necessária.", "error");
             return;
         }
 
@@ -120,10 +120,10 @@ export default function InformacoesPessoaisAtleta() {
             });
 
             setInitialData({ nome, telefone, urlFoto: finalImageUrl });
-            showToast(undefined, "Perfil atualizado!", "success");
+            showToast("Perfil atualizado!", "success");
             router.back();
         } catch (error: any) {
-            showToast(undefined, error.message || "Erro ao salvar informações.", "error");
+            showToast(error.response?.data?.message || "Erro ao salvar informações.", "error");
         } finally {
             setLoading(false);
         }
@@ -195,6 +195,7 @@ export default function InformacoesPessoaisAtleta() {
                         error={errors.telefone}
                         maxLength={15}
                     />
+                    <InputTexto label="Email" value={email} isDisabled={true} />
                     <View className="flex-row w-full gap-5 mt-4">
                         <ButtonCancel
                             text="Cancelar"

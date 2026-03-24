@@ -117,7 +117,6 @@ export default function JogosAbertosScreen() {
       setHasMore(!response.last);
     } catch (error: any) {
       showToast(
-        'Erro',
         error.response?.data?.message || 'Não foi possível carregar os jogos abertos.',
         'error'
       );
@@ -165,7 +164,6 @@ export default function JogosAbertosScreen() {
       // Pequeno delay para evitar conflito de modais
       setTimeout(() => {
         showToast(
-          'Sucesso!',
           'Sua solicitação foi enviada.',
           'success'
         );
@@ -175,8 +173,7 @@ export default function JogosAbertosScreen() {
       setAlertVisible(false);
       setTimeout(() => {
         showToast(
-          undefined,
-          error.message,
+          error.response?.data?.message || 'Erro ao solicitar entrada.',
           'warning'
         );
       }, 300);

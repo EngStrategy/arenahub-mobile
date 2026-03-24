@@ -1,9 +1,17 @@
 import { AvaliacaoPorQuadra } from "./Avaliacao";
 
-export type StatusAgendamento = "PENDENTE" | "AUSENTE" | "CANCELADO" | "PAGO" | "ACEITO" | "RECUSADO" | "FINALIZADO" | "AGUARDANDO_PAGAMENTO";
+export type StatusAgendamento = "PENDENTE" | "AUSENTE" | "CANCELADO" | "PAGO" | "ACEITO" | "RECUSADO" | "FINALIZADO" | "AGUARDANDO_PAGAMENTO" | "AGUARDANDO_CONFIRMACAO";
 export type TipoAgendamentoFilter = "NORMAL" | "FIXO" | "AMBOS";
 export type PeriodoAgendamentoFixo = "UM_MES" | "TRES_MESES" | "SEIS_MESES";
 export type StatusDisponibilidade = "DISPONIVEL" | "INDISPONIVEL" | "MANUTENCAO";
+
+export type PixPagamentoResponse = {
+    agendamentoId: number;
+    statusAgendamento: string;
+    qrCodeData: string;
+    copiaECola: string;
+    expiraEm: string;
+};
 
 export interface AgendamentoAtleta {
     id: number;

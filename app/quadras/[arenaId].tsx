@@ -203,6 +203,7 @@ export default function QuadrasScreen() {
 
   const [arena, setArena] = useState<Arena | null>(null);
   const [quadras, setQuadras] = useState<Quadra[]>([]);
+  const [diasFuncionamentoDaArena, setDiasFuncionamentoDaArena] = useState<string[]>([]);
   const [horarios, setHorarios] = useState<Record<number, HorariosDisponiveis[]>>({});
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -231,7 +232,7 @@ export default function QuadrasScreen() {
     router.push('/(atleta)/agendamentos');
   };
 
-  // 1. Busca Inicial
+  // Busca Inicial
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
@@ -245,9 +246,34 @@ export default function QuadrasScreen() {
 
         setArena(arenaData);
         setQuadras(quadrasData);
+
+        if (quadrasData && quadrasData.length > 0) {
+          const diasUnicos = new Set<string>();
+          quadrasData.forEach((q: Quadra) => {
+            q.horariosFuncionamento?.forEach(h => {
+              if (h.diaDaSemana && h.intervalosDeHorario && h.intervalosDeHorario.length > 0) {
+                diasUnicos.add(h.diaDaSemana);
+              }
+            });
+          });
+
+          const nomeDias: Record<string, string> = {
+            DOMINGO: 'Domingo', SEGUNDA: 'Segunda', TERCA: 'Terça',
+            QUARTA: 'Quarta', QUINTA: 'Quinta', SEXTA: 'Sexta', SABADO: 'Sábado'
+          };
+          const ordemDias = ['DOMINGO', 'SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO'];
+
+          const diasOrdenados = Array.from(diasUnicos).sort((a, b) =>
+            ordemDias.indexOf(a) - ordemDias.indexOf(b)
+          );
+
+          setDiasFuncionamentoDaArena(diasOrdenados.map(d => nomeDias[d] || d));
+        } else {
+          setDiasFuncionamentoDaArena([]);
+        }
       }
       catch (error: any) {
-        showToast("Erro", error.response?.data?.message || "Não foi possível carregar os dados.", "error");
+        showToast(error.response?.data?.message || "Não foi possível carregar os dados.", "error");
       }
       finally {
         setLoading(false);
@@ -256,7 +282,7 @@ export default function QuadrasScreen() {
     fetchInitialData();
   }, [arenaId]);
 
-  // 2. Busca Horários
+  // Busca Horários
   useEffect(() => {
     const fetchHorarios = async () => {
       if (quadras.length === 0) return;
@@ -276,7 +302,7 @@ export default function QuadrasScreen() {
         setHorarios(novosHorarios);
       }
       catch (error: any) {
-        showToast("Erro", error.response?.data?.message || "Não foi possível buscar os horários.", "error");
+        showToast(error.response?.data?.message || "Não foi possível buscar os horários.", "error");
       }
       finally {
         setLoadingHorarios(false);
@@ -285,7 +311,7 @@ export default function QuadrasScreen() {
     fetchHorarios();
   }, [selectedDate, quadras]);
 
-  // 3. Lógica de Seleção
+  // Lógica de Seleção
   const handleSlotPress = (quadra: Quadra, slot: HorariosDisponiveis) => {
     const slotId = `${quadra.id}|${slot.horarioInicio}`;
     const isSelected = selectedSlots.includes(slotId);
@@ -369,6 +395,7 @@ export default function QuadrasScreen() {
               showFullAddress={true}
               showEsportes={false}
               onPressRating={() => setShowAvaliacoes(true)}
+              diasFuncionamento={diasFuncionamentoDaArena}
             />
           </View>
         )}
@@ -483,6 +510,7 @@ export default function QuadrasScreen() {
           quadra={quadras.find(q => q.id === Number.parseInt(selectedSlots[0].split('|')[0]))!}
           slotsSelecionados={selectedSlotsData}
           onSuccess={handleReservaSuccess}
+          arena={arena}
         />
       )}
 

@@ -95,8 +95,8 @@ export default function MeusAgendamentosScreen() {
 
       setVagasAtuais(agendamentoAtual?.numeroJogadoresNecessarios ?? 0);
 
-    } catch (error) {
-      showToast("Erro", "Não foi possível carregar as solicitações.", "error");
+    } catch (error: any) {
+      showToast(error.response?.data?.message || "Não foi possível carregar as solicitações.", "error");
       setModalSolicitacoesOpen(false);
     } finally {
       setSolicitacoesLoading(false);
@@ -135,9 +135,7 @@ export default function MeusAgendamentosScreen() {
       else {
         // Fetch Agendamentos
         const statusParam: StatusAgendamento | undefined =
-          viewType === 'historico' ? 'FINALIZADO' :
-            viewType === 'ativos' ? 'PENDENTE' :
-              undefined;
+          viewType === 'historico' ? 'FINALIZADO' : undefined;
 
         const params: AgendamentoAtletaQueryParams = {
           page: pageNumber,
@@ -164,8 +162,8 @@ export default function MeusAgendamentosScreen() {
         setPage(response.number);
       }
 
-    } catch (error) {
-      showToast("Erro", "Não foi possível carregar os dados.", "error");
+    } catch (error: any) {
+      showToast(error.response?.data?.message || "Não foi possível carregar os dados.", "error");
     } finally {
       if (isMountedRef.current) {
         setLoading(false);
@@ -184,7 +182,7 @@ export default function MeusAgendamentosScreen() {
       const data = await listarAgendamentosFixosFilhos(fixoId);
       setAgendamentosFilhos(data);
     } catch (error: any) {
-      showToast("Erro", error.response?.data?.message || "Falha ao carregar datas da recorrência.", "error");
+      showToast(error.response?.data?.message || "Falha ao carregar datas da recorrência.", "error");
       setModalFixoOpen(false);
     } finally {
       setFilhosLoading(false);
@@ -244,10 +242,10 @@ export default function MeusAgendamentosScreen() {
     try {
       await handleDispensarAvaliacao(id);
       setAgendamentos(prev => prev.map(ag => ag.id === id ? { ...ag, avaliacaoDispensada: true } : ag));
-      showToast("Sucesso", "Avaliação dispensada.", "success");
+      showToast("Avaliação dispensada.", "success");
       setAlertConfig(prev => ({ ...prev, isOpen: false }));
     } catch (error: any) {
-      showToast("Erro", error.response?.data?.message || "Não foi possível dispensar a avaliação.", "error");
+      showToast(error.response?.data?.message || "Não foi possível dispensar a avaliação.", "error");
     } finally {
       setAlertConfig(prev => ({ ...prev, isLoading: false }));
     }
@@ -282,10 +280,10 @@ export default function MeusAgendamentosScreen() {
       await cancelarAgendamento(id);
       setAgendamentosFilhos(prev => prev.map(ag => ag.id === id ? { ...ag, status: 'CANCELADO' } : ag));
       setAgendamentos(prev => prev.map(ag => ag.id === id ? { ...ag, status: 'CANCELADO' } : ag));
-      showToast("Sucesso", "Agendamento cancelado.");
+      showToast("Agendamento cancelado.");
       setAlertConfig(prev => ({ ...prev, isOpen: false }));
     } catch (error: any) {
-      showToast("Erro", error.response?.data?.message || "Erro ao cancelar.", "error");
+      showToast(error.response?.data?.message || "Erro ao cancelar.", "error");
     } finally {
       setAlertConfig(prev => ({ ...prev, isLoading: false }));
     }
@@ -309,10 +307,10 @@ export default function MeusAgendamentosScreen() {
       await cancelarAgendamentoFixo(fixoId);
       setModalFixoOpen(false);
       setAgendamentos(prev => prev.filter(ag => ag.agendamentoFixoId !== fixoId));
-      showToast(undefined, "Recorrência removida.", "success");
+      showToast("Recorrência removida.", "success");
       setAlertConfig(prev => ({ ...prev, isOpen: false }));
     } catch (error: any) {
-      showToast(undefined, error.response?.data?.message || "Erro ao cancelar recorrência.", "error");
+      showToast(error.response?.data?.message || "Erro ao cancelar recorrência.", "error");
     } finally {
       setAlertConfig(prev => ({ ...prev, isLoading: false }));
     }
@@ -321,13 +319,13 @@ export default function MeusAgendamentosScreen() {
   const handleSairParticipacao = async (solicitacaoId: number) => {
     try {
       await sairJogoAberto(solicitacaoId);
-      showToast("Sucesso", "Você saiu do jogo.", "success");
+      showToast("Você saiu do jogo.", "success");
       setParticipacoes(prev => prev.filter(p => p.solicitacaoId !== solicitacaoId));
     } catch (error: any) {
       const backendMessage = error.response?.data?.message;
       const displayMessage = backendMessage || "Não foi possível sair do jogo.";
 
-      showToast("Erro", displayMessage, "error");
+      showToast(displayMessage, "error");
     }
   };
 
@@ -335,7 +333,7 @@ export default function MeusAgendamentosScreen() {
     <View className="gap-4">
       <View className="flex-row justify-between items-start pt-6">
         <View className="flex-1 mr-2 gap-2">
-          <Heading className="text-2xl mb-1">Meus Jogos</Heading>
+          <Heading className="text-2xl mb-1">Meus Agendamentos</Heading>
           <Text className="text-typography-500 mb-2">
             Acompanhe seus agendamentos, histórico e participações em jogos.
           </Text>

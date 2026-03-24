@@ -69,7 +69,7 @@ export default function ResetPasswordScreen() {
       });
       setIsSuccess(true);
     } catch (error: any) {
-      showToast('Erro', error.message, 'error');
+      showToast(error.response?.data?.message || 'Erro ao redefinir senha', 'error');
     } finally {
       setLoading(false);
     }

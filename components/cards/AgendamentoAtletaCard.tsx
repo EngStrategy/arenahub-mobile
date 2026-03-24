@@ -38,10 +38,26 @@ export function AgendamentoAtletaCard({
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'PAGO': return 'text-green-600 bg-green-100';
-            case 'PENDENTE': return 'text-yellow-600 bg-yellow-100';
+            case 'PENDENTE': return 'text-blue-600 bg-blue-100';
+            case 'AGUARDANDO_CONFIRMACAO': return 'text-amber-600 bg-amber-100';
+            case 'AGUARDANDO_PAGAMENTO': return 'text-orange-600 bg-orange-100';
             case 'CANCELADO': return 'text-red-600 bg-red-100';
             case 'FINALIZADO': return 'text-gray-600 bg-gray-100';
             default: return 'text-blue-600 bg-blue-100';
+        }
+    };
+
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case 'PAGO': return "Pago";
+            case 'PENDENTE': return "Pendente";
+            case 'AGUARDANDO_CONFIRMACAO': return "Aguardando Confirmacao";
+            case 'AGUARDANDO_PAGAMENTO': return "Aguardando Pagamento";
+            case 'CANCELADO': return "Cancelado";
+            case 'FINALIZADO': return "Finalizado";
+            case 'RECUSADO': return "Recusado";
+            case 'AUSENTE': return "Ausente";
+            default: return status;
         }
     };
 
@@ -71,16 +87,16 @@ export function AgendamentoAtletaCard({
         <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 relative">
 
             {/* Cabeçalho: Data e Status */}
-            <View className="flex-row justify-between items-start mb-3">
-                <View className="flex-row items-center bg-gray-50 px-2 py-1 rounded-md">
+            <View className="flex-row justify-between items-center mb-3">
+                <View className="flex-row items-center bg-gray-50 px-2 py-1 rounded-md flex-shrink mr-2">
                     <Calendar size={14} color="#4B5563" />
                     <Text className="text-gray-600 text-xs font-medium ml-1">
                         {new Date(data.dataAgendamento + 'T00:00:00').toLocaleDateString('pt-BR')}
                     </Text>
                 </View>
-                <View className={`px-2 py-1 rounded-full ${getStatusColor(data.status).split(' ')[1]}`}>
-                    <Text className={`text-xs font-bold ${getStatusColor(data.status).split(' ')[0]}`}>
-                        {data.status}
+                <View className={`px-2 py-1 flex-shrink-0 rounded-full justify-center items-center ${getStatusColor(data.status).split(' ')[1]}`}>
+                    <Text numberOfLines={1} className={`text-[11px] font-bold text-center ${getStatusColor(data.status).split(' ')[0]}`}>
+                        {getStatusText(data.status)}
                     </Text>
                 </View>
             </View>

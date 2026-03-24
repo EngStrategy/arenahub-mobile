@@ -6,7 +6,7 @@ interface InputTextoProps {
   label?: string;
   placeholder?: string;
   value: string;
-  onChangeText: (text: string) => void;
+  onChangeText?: (text: string) => void;
   keyboardType?: 'default' | 'email-address' | 'numeric';
   onBlur?: () => void;
   onFocus?: () => void;
@@ -23,12 +23,13 @@ export function InputTexto({
   onFocus,
   error,
   leftIcon,
-}: InputTextoProps & { leftIcon?: React.ReactNode }) {
+  isDisabled,
+}: InputTextoProps & { leftIcon?: React.ReactNode, isDisabled?: boolean }) {
   return (
     <VStack space="xs">
       {label && <Text>{label}</Text>}
 
-      <Input size="xl" className="border border-gray-300 rounded-2xl bg-white/50">
+      <Input size="xl" className="border border-gray-300 rounded-2xl bg-white/50" isDisabled={isDisabled}>
         {leftIcon && (
           <InputSlot className="pl-3">
             {leftIcon}

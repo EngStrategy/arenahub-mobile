@@ -37,7 +37,7 @@ export default function ArenaDetalhesScreen() {
 
                 setArena(data);
             } catch (error: any) {
-                showToast("Erro", error.response?.data?.message || "Não foi possível carregar a arena.", "error");
+                showToast(error.response?.data?.message || "Não foi possível carregar a arena.", "error");
             } finally {
                 setLoading(false);
             }

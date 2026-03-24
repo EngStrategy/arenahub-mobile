@@ -38,6 +38,9 @@ export interface Arena {
     quadras?: Quadra[];
     notaMedia?: number;
     horasCancelarAgendamento: number;
+    formaPagamento: "PIX" | "LOCAL" | "AMBOS" | null;
+    tipoChavePix?: "CPF" | "CNPJ" | "EMAIL" | "TELEFONE" | "ALEATORIA" | null;
+    chavePix?: string | null;
     quantidadeAvaliacoes?: number;
     statusAssinatura?: StatusAssinatura;
 }

@@ -9,6 +9,7 @@ type UserData = {
   role: string;
   imageUrl: string | null;
   statusAssinatura?: string;
+  telefone?: string;
   [key: string]: any;
 };
 

@@ -43,7 +43,7 @@ export function ModalAvaliarAgendamento({
 
     const enviarAvaliacao = async () => {
         if (nota === 0) {
-            showToast("Atenção", "Por favor, selecione uma nota de 1 a 5 estrelas.", "warning");
+            showToast("Por favor, selecione uma nota de 1 a 5 estrelas.", "warning");
             return;
         }
 
@@ -54,7 +54,7 @@ export function ModalAvaliarAgendamento({
                 comentario,
             });
 
-            showToast("Sucesso", "Avaliação enviada com sucesso!", "success");
+            showToast("Avaliação enviada com sucesso!", "success");
 
             // Resetar estado antes de fechar
             setNota(0);
@@ -62,9 +62,9 @@ export function ModalAvaliarAgendamento({
 
             // Fechar modal
             onClose();
-        } catch (err) {
-            console.error("Erro ao avaliar agendamento:", err);
-            showToast("Erro", "Não foi possível enviar a avaliação. Tente novamente.", "error");
+        } catch (error: any) {
+            console.error("Erro ao avaliar agendamento:", error);
+            showToast(error.response?.data?.message || "Não foi possível enviar a avaliação. Tente novamente.", "error");
         } finally {
             setLoading(false);
         }

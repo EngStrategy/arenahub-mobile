@@ -12,7 +12,10 @@ import { Icon, CloseIcon, AddIcon, RemoveIcon, CheckCircleIcon } from '@/compone
 import { Box } from '@/components/ui/box';
 import { Button, ButtonText, ButtonIcon, ButtonSpinner } from '@/components/ui/button';
 import { Quadra, HorariosDisponiveis } from '@/types/Quadra';
-import { createAgendamento } from '@/services/api/endpoints/atletaAgendamento';
+import { createAgendamento, criarPagamentoPix } from '@/services/api/endpoints/atletaAgendamento';
+import { Arena } from '@/types/Arena';
+import { PixPagamentoResponse } from '@/types/Agendamento';
+import { ModalPix } from '@/components/modals/ModalPix';
 import { formatarEsporte } from '@/utils/formatters';
 import { useToastNotification } from '@/components/layout/useToastNotification';
 
@@ -23,9 +26,10 @@ interface Props {
   readonly data: Date;
   readonly slotsSelecionados: HorariosDisponiveis[];
   readonly onSuccess: () => void;
+  readonly arena: Arena | null;
 }
 
-export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsSelecionados, onSuccess }: Props) {
+export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsSelecionados, onSuccess, arena }: Props) {
   const { showToast } = useToastNotification();
   const [loading, setLoading] = useState(false);
   const [esporte, setEsporte] = useState(quadra.tipoQuadra[0]);
@@ -33,6 +37,9 @@ export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsS
   const [isPublico, setIsPublico] = useState(false);
   const [periodoFixo, setPeriodoFixo] = useState<"UM_MES" | "TRES_MESES" | "SEIS_MESES">("UM_MES");
   const [faltandoGente, setFaltandoGente] = useState(1);
+  const [pixLoading, setPixLoading] = useState(false);
+  const [pixData, setPixData] = useState<PixPagamentoResponse | null>(null);
+  const [modalPixVisible, setModalPixVisible] = useState(false);
 
   const slotsOrdenados = useMemo(() => {
     return [...slotsSelecionados].sort((a, b) => a.horarioInicio.localeCompare(b.horarioInicio));
@@ -78,13 +85,43 @@ export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsS
         numeroJogadoresNecessarios: isPublico ? faltandoGente : 0,
       };
       await createAgendamento(payload);
-      showToast("Sucesso", "Reserva realizada com sucesso!", "success");
+      showToast("Reserva realizada com sucesso!", "success");
       onSuccess();
     } catch (error: any) {
-      showToast("Erro", error.response?.data?.message || "Erro na reserva.", "error");
+      showToast(error.response?.data?.message || "Erro na reserva.", "error");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePagarComPix = async () => {
+    setPixLoading(true);
+    try {
+      const payload = {
+        quadraId: quadra.id,
+        dataAgendamento: format(data, 'yyyy-MM-dd'),
+        slotHorarioIds: slotsOrdenados.map(s => s.id),
+        esporte,
+        isFixo,
+        isPublico,
+        periodoFixo: isFixo ? periodoFixo : undefined,
+        numeroJogadoresNecessarios: isPublico ? faltandoGente : 0,
+      };
+
+      const pix = await criarPagamentoPix(payload);
+      setPixData(pix);
+      setModalPixVisible(true);
+    } catch (error: any) {
+      showToast(error.response?.data?.message || "Erro na reserva com PIX.", "error");
+    } finally {
+      setPixLoading(false);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    setModalPixVisible(false);
+    showToast("Pagamento confirmado e reserva realizada!", "success");
+    onSuccess();
   };
 
   return (
@@ -104,9 +141,9 @@ export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsS
 
               {/* Card da Quadra */}
               <HStack className="bg-background-50 p-2 rounded-2xl border border-outline-100 items-center" space="md">
-                <Box className="w-24 h-24 rounded-xl overflow-hidden">
+                <Box className="w-24 h-24 rounded-xl overflow-hidden bg-gray-100">
                   <Image
-                    source={{ uri: quadra.urlFotoQuadra || 'https://via.placeholder.com/150' }}
+                    source={quadra.urlFotoQuadra ? { uri: quadra.urlFotoQuadra } : require('@/assets/images/imagem-default.png')}
                     className="w-full h-full"
                     resizeMode="cover"
                   />
@@ -243,20 +280,47 @@ export function ModalConfirmacaoReserva({ visible, onClose, quadra, data, slotsS
             </VStack>
           </HStack>
 
-          <Button
-            onPress={handleConfirmar}
-            disabled={loading}
-            className="w-full h-12 rounded-xl bg-green-600"
-          >
-            {loading ? <ButtonSpinner color="white" /> : (
-              <>
-                <ButtonIcon as={CheckCircleIcon} className="text-white mr-2" />
-                <ButtonText className="font-bold text-white">Pagar na Arena</ButtonText>
-              </>
+          <VStack className="w-full gap-2">
+            {(arena?.formaPagamento === 'PIX' || arena?.formaPagamento === 'AMBOS') && (
+              <Button
+                onPress={handlePagarComPix}
+                disabled={loading || pixLoading}
+                className="w-full h-12 rounded-xl bg-green-600"
+              >
+                {(loading || pixLoading) ? <ButtonSpinner color="white" /> : (
+                  <>
+                    <ButtonIcon as={CheckCircleIcon} className="text-white mr-2" />
+                    <ButtonText className="font-bold text-white">Pagar com Pix</ButtonText>
+                  </>
+                )}
+              </Button>
             )}
-          </Button>
+
+            {(arena?.formaPagamento === 'LOCAL' || arena?.formaPagamento === 'AMBOS' || !arena?.formaPagamento) && (
+              <Button
+                onPress={handleConfirmar}
+                disabled={loading || pixLoading}
+                variant={(arena?.formaPagamento === 'AMBOS') ? "outline" : "solid"}
+                className={`w-full h-12 rounded-xl ${(arena?.formaPagamento === 'AMBOS') ? 'border-green-600' : 'bg-green-600'}`}
+              >
+                {loading ? <ButtonSpinner color={(arena?.formaPagamento === 'AMBOS') ? "#16a34a" : "white"} /> : (
+                  <>
+                    <ButtonIcon as={CheckCircleIcon} className={`${(arena?.formaPagamento === 'AMBOS') ? "text-green-600" : "text-white"} mr-2`} />
+                    <ButtonText className={`font-bold ${(arena?.formaPagamento === 'AMBOS') ? "text-green-600" : "text-white"}`}>Pagar na Arena</ButtonText>
+                  </>
+                )}
+              </Button>
+            )}
+          </VStack>
         </ModalFooter>
       </ModalContent>
+
+      <ModalPix
+        open={modalPixVisible}
+        onClose={() => setModalPixVisible(false)}
+        pixData={pixData}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </Modal>
   );
 }

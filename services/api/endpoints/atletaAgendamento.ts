@@ -1,5 +1,5 @@
 import { api } from '@/services/api';
-import { AgendamentoAtleta, AgendamentoAtletaQueryParams, AgendamentoCreate, StatusAgendamento } from '@/types/Agendamento';
+import { AgendamentoAtleta, AgendamentoAtletaQueryParams, AgendamentoCreate, StatusAgendamento, PixPagamentoResponse } from '@/types/Agendamento';
 import { PaginatedResponse } from '@/types/General';
 
 export const createAgendamento = async (data: AgendamentoCreate): Promise<AgendamentoAtleta> => {
@@ -34,5 +34,15 @@ export const getAgendamentosAvaliacoesPendentes = async (): Promise<AgendamentoA
 
 export const getAgendamentoStatus = async (agendamentoId: number): Promise<{ status: StatusAgendamento }> => {
     const response = await api.get<{ status: StatusAgendamento }>(`/agendamentos/${agendamentoId}/status`);
+    return response.data;
+};
+
+export const criarPagamentoPix = async (data: AgendamentoCreate): Promise<PixPagamentoResponse> => {
+    const response = await api.post<PixPagamentoResponse>(`/agendamentos/bloquear`, data);
+    return response.data;
+};
+
+export const confirmarPagamentoPix = async (agendamentoId: number, data: { nomeCompleto: string, telefone: string }): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>(`/agendamentos/${agendamentoId}/confirmar-pix`, data);
     return response.data;
 };

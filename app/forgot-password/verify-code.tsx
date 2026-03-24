@@ -52,21 +52,21 @@ export default function VerifyCodeScreen() {
 
   const handleVerifyCode = async (fullCode: string) => {
     if (fullCode.length !== 6) {
-      showToast('Atenção', 'Por favor, insira o código de 6 dígitos', 'warning');
+      showToast('Por favor, insira o código de 6 dígitos', 'warning');
       return;
     }
 
     setLoading(true);
     try {
       await verifyResetCode({ email: email!, code: fullCode });
-      showToast('Sucesso', 'Código verificado!', 'success');
+      showToast('Código verificado!', 'success');
 
       router.push({
         pathname: '/forgot-password/reset-password',
         params: { email },
       });
     } catch (error: any) {
-      showToast('Erro', error.message, 'error');
+      showToast(error.response?.data?.message || 'Credenciais inválidas', 'error');
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {
@@ -77,12 +77,12 @@ export default function VerifyCodeScreen() {
   const handleResendCode = async () => {
     try {
       await forgotPassword(email!);
-      showToast('Sucesso', 'Novo código enviado!', 'success');
+      showToast('Novo código enviado!', 'success');
       startTimer(45);
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } catch (error: any) {
-      showToast('Erro', error.message, 'error');
+      showToast(error.response?.data?.message || 'Credenciais inválidas', 'error');
     }
   };
 

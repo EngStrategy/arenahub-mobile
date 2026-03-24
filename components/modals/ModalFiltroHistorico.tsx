@@ -62,7 +62,7 @@ export const ModalFiltroHistorico = ({
             <ModalBackdrop />
             <ModalContent className="rounded-3xl">
                 <ModalHeader>
-                    <Heading size="lg">Filtrar Histórico</Heading>
+                    <Heading size="lg">Filtrar Jogos</Heading>
                     <ModalCloseButton>
                         <Icon as={CloseIcon} />
                     </ModalCloseButton>

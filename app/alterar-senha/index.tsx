@@ -56,7 +56,6 @@ export default function AlterarSenha() {
             await updatePassword(senhaAtual, novaSenha, confirmarSenha);
 
             showToast(
-                "Sucesso",
                 "Senha alterada com sucesso! Você será desconectado em instantes.",
                 "success"
             );
@@ -67,7 +66,7 @@ export default function AlterarSenha() {
             }, 2000);
 
         } catch (error: any) {
-            showToast('Aviso', error.message, 'warning');
+            showToast(error.response?.data?.message || 'Credenciais inválidas', 'warning');
         } finally {
             setLoading(false);
         }

@@ -51,9 +51,8 @@ export function ModalSolicitacoesEntrada({
             } else {
                 await onDecline(id);
             }
-        } catch (error) {
-            showToast("Erro", "Não foi possível processar a ação.", "error");
-            console.error("Erro ao processar ação da solicitação", error);
+        } catch (error: any) {
+            showToast(error.response?.data?.message || "Não foi possível processar a ação.", "error");
         } finally {
             setActionId(null);
         }

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Href } from 'expo-router';
-import { User, LogOut, Lock, ChevronRight, LucideProps } from 'lucide-react-native';
+import { User, LogOut, Lock, ChevronRight, Edit3, LucideProps } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
 import { Heading } from '@/components/ui/heading';
 import { AlertDialogView } from '@/components/layout/AlertDialogView';
@@ -21,7 +21,7 @@ const MENU_ITEMS: MenuItem[] = [
 
 export default function MenuPerfilAtletaScreen() {
     const router = useRouter();
-    const { signOut } = useAuth();
+    const { signOut, user } = useAuth();
     const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
     const handleMenuItemPress = async (route: Href | 'logout') => {
@@ -53,6 +53,27 @@ export default function MenuPerfilAtletaScreen() {
                     <Text className="text-typography-500 mb-4">
                         Gerencie suas informações pessoais e configurações de segurança.
                     </Text>
+
+                    {/* Cabeçalho do Perfil */}
+                    <View className="flex-row justify-between items-center mb-6 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                        <View className="flex-row items-center gap-4 flex-1">
+                            <Image
+                                source={user?.imageUrl ? { uri: user.imageUrl } : require('@/assets/images/imagem-default.png')}
+                                className="w-16 h-16 rounded-full bg-gray-200 border border-gray-100"
+                                resizeMode="cover"
+                            />
+                            <View className="flex-1">
+                                <Heading className="text-xl mb-1">{user?.name || 'Atleta'}</Heading>
+                                <Text className="text-gray-500 text-sm font-medium">{user?.telefone || 'Telefone não cadastrado'}</Text>
+                            </View>
+                        </View>
+                        <TouchableOpacity
+                            onPress={() => handleMenuItemPress('/info-pessoais-atleta')}
+                            className="bg-gray-100 p-2.5 rounded-full ml-3"
+                        >
+                            <Edit3 size={18} color="#4B5563" />
+                        </TouchableOpacity>
+                    </View>
 
                     {/* Lista de Opções */}
                     <View>

@@ -96,7 +96,7 @@ export function ModalGerenciarFixo({
                             </Text>
                         )}
 
-                        {item.status === 'PENDENTE' ? (
+                        {item.status === 'PENDENTE' || item.status === 'AGUARDANDO_PAGAMENTO' || item.status === 'AGUARDANDO_CONFIRMACAO' ? (
                             <Button
                                 variant="outline"
                                 action="negative"

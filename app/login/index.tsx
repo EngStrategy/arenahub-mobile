@@ -10,10 +10,8 @@ import { InputSenha } from '@/components/forms/formInputs/InputSenha';
 import { InputTexto } from '@/components/forms/formInputs/InputTexto';
 import { validarEmail, validarPassword } from '@/utils/validators';
 
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   View,
 } from 'react-native';
 import { useToastNotification } from '@/components/layout/useToastNotification';
@@ -48,7 +46,7 @@ export default function LoginScreen() {
       const response = await login({ email, password });
 
       if (response.role !== 'ATLETA') {
-        showToast("Acesso Negado", 'Este aplicativo é exclusivo para atletas.', 'warning');
+        showToast('Este aplicativo é exclusivo para atletas.', 'warning');
         return;
       }
 
@@ -57,13 +55,14 @@ export default function LoginScreen() {
         name: response.name,
         role: response.role,
         imageUrl: response.imageUrl || null,
+        telefone: response.telefone,
         expiresIn: response.expiresIn,
       });
 
       router.replace('/(atleta)');
 
     } catch (error: any) {
-      showToast(undefined, error.message || 'Credenciais inválidas', 'error');
+      showToast(error.response?.data?.message || 'Credenciais inválidas', 'error');
     } finally {
       setLoading(false);
     }
@@ -71,109 +70,107 @@ export default function LoginScreen() {
 
   return (
     <AuthBackground>
-      <KeyboardAvoidingView
+      <KeyboardAwareScrollView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        contentContainerStyle={{ flexGrow: 1, padding: 24, justifyContent: 'center' }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={40}
       >
-        <ScrollView
-          contentContainerClassName="flex-grow p-6 justify-center"
-          keyboardShouldPersistTaps="handled"
+        {/* Ícone */}
+        <View
+          className="items-center mb-6"
         >
-          {/* Ícone */}
           <View
-            className="items-center mb-6"
+            className="w-20 h-20 rounded-full bg-green-primary items-center justify-center"
           >
-            <View
-              className="w-20 h-20 rounded-full bg-green-primary items-center justify-center"
-            >
-              <Ionicons name="person" size={32} color="#fff" />
-            </View>
+            <Ionicons name="person" size={32} color="#fff" />
           </View>
+        </View>
 
-          {/* Título e Subtítulo */}
-          <Text
-            className="text-2xl font-semibold text-center mb-2 text-gray-800"
-          >
-            Bem-vindo!
-          </Text>
-          <Text
-            className="text-sm text-center text-gray-500 mb-8"
-          >
-            Faça login para continuar.
-          </Text>
+        {/* Título e Subtítulo */}
+        <Text
+          className="text-2xl font-semibold text-center mb-2 text-gray-800"
+        >
+          Bem-vindo!
+        </Text>
+        <Text
+          className="text-sm text-center text-gray-500 mb-8"
+        >
+          Faça login para continuar.
+        </Text>
 
-          <VStack className='gap-4'>
-            <InputTexto
-              label="Email"
-              placeholder="Insira seu email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              onBlur={() => {
-                const emailError = validarEmail(email) ? '' : 'Email inválido.';
-                setErrors(prev => ({ ...prev, email: emailError }));
-              }}
-              error={errors.email}
-            />
+        <VStack className='gap-4'>
+          <InputTexto
+            label="Email"
+            placeholder="Insira seu email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            onBlur={() => {
+              const emailError = validarEmail(email) ? '' : 'Email inválido.';
+              setErrors(prev => ({ ...prev, email: emailError }));
+            }}
+            error={errors.email}
+          />
 
-            <InputSenha
-              label="Senha"
-              value={password}
-              onChangeText={setPassword}
-              onBlur={() => {
-                const passwordError = validarPassword(password);
-                setErrors((prev) => ({ ...prev, password: passwordError }));
-              }}
-              error={errors.password}
-            />
-          </VStack>
+          <InputSenha
+            label="Senha"
+            value={password}
+            onChangeText={setPassword}
+            onBlur={() => {
+              const passwordError = validarPassword(password);
+              setErrors((prev) => ({ ...prev, password: passwordError }));
+            }}
+            error={errors.password}
+          />
+        </VStack>
 
-          <Button size="xl" className="justify-end p-0 bg-transparent"
-            onPress={() => router.push('/forgot-password')}
-          >
-            <ButtonText className="text-base text-green-primary p-0">
-              Esqueceu sua senha?
+        <Button size="xl" className="justify-end p-0 bg-transparent"
+          onPress={() => router.push('/forgot-password')}
+        >
+          <ButtonText className="text-base text-green-primary p-0">
+            Esqueceu sua senha?
+          </ButtonText>
+        </Button>
+
+        {/* Botão Entrar */}
+        <Button
+          size="xl"
+          className="bg-green-primary rounded-2xl py-3 mt-4"
+          onPress={handleLogin}
+          disabled={loading}
+          android_ripple={{ color: 'transparent' }}
+        >
+          {loading ? (
+            <ButtonSpinner className="text-white" />
+          ) : (
+            <ButtonText className="text-base text-white">
+              Entrar
             </ButtonText>
-          </Button>
+          )}
+        </Button>
 
-          {/* Botão Entrar */}
+        {/* Link de Cadastro */}
+        <View
+          className="flex-row items-center mt-4"
+        >
           <Button
             size="xl"
-            className="bg-green-primary rounded-2xl py-3 mt-4"
-            onPress={handleLogin}
-            disabled={loading}
-            android_ripple={{ color: 'transparent' }}
+            variant="link"
+            action="primary"
+            className="justify-start p-0"
+            onPress={() => router.push('/register')}
           >
-            {loading ? (
-              <ButtonSpinner className="text-white" />
-            ) : (
-              <ButtonText className="text-base text-white">
-                Entrar
-              </ButtonText>
-            )}
-          </Button>
-
-          {/* Link de Cadastro */}
-          <View
-            className="flex-row items-center mt-4"
-          >
-            <Button
-              size="xl"
-              variant="link"
-              action="primary"
-              className="justify-start p-0"
-              onPress={() => router.push('/register')}
+            <Text className="text-sm text-gray-500">Não tem uma conta?</Text>
+            <ButtonText className="text-base text-green-primary p-0 underline ml-1"
             >
-              <Text className="text-sm text-gray-500">Não tem uma conta?</Text>
-              <ButtonText className="text-base text-green-primary p-0 underline ml-1"
-              >
-                Cadastre-se
-              </ButtonText>
-            </Button>
-          </View>
+              Cadastre-se
+            </ButtonText>
+          </Button>
+        </View>
 
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </AuthBackground>
   );
 }

@@ -108,7 +108,7 @@ export default function ArenasScreen() {
       setTotalElements(response.totalElements);
       setHasMore(!response.last);
     } catch (error: any) {
-      showToast("Erro", error.response?.data?.message || "Não foi possível buscar as arenas.", "error");
+      showToast(error.response?.data?.message || "Não foi possível buscar as arenas.", "error");
     } finally {
       setLoading(false);
       setRefreshing(false);

@@ -17,7 +17,7 @@ export const getAtletaById = async (id: string): Promise<Atleta> => {
 
 /**
  * Atualizar dados do atleta
- * Endpoint: PATCH /api/v1/atletas/{id}
+ * Endpoint: PUT /api/v1/atletas/{id}
  */
 export const updateAtleta = async (id: string, data: Partial<Atleta>): Promise<Atleta> => {
     const response = await api.put<Atleta>(`/atletas/${id}`, data);

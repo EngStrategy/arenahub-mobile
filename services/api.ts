@@ -23,7 +23,6 @@ api.interceptors.request.use(
       '/verify-reset-code',
       '/reset-password',
       '/resend-verification',
-      '/jogos-abertos',
       '/arenas'
     ];
 
